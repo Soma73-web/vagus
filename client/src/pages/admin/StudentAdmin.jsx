@@ -219,8 +219,12 @@ const StudentAdmin = () => {
     setShowCreateForm(true);
   };
 
-  const handleDelete = async (studentId) => {
-    if (!window.confirm("Are you sure you want to deactivate this student?")) {
+  const handleDeactivate = async (studentId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to deactivate this student? They will not be able to login.",
+      )
+    ) {
       return;
     }
 
@@ -231,10 +235,44 @@ const StudentAdmin = () => {
         { headers: { "Admin-Auth": "admin-authenticated" } },
       );
       toast.success("Student deactivated successfully");
-      fetchStudents();
+      await fetchStudents();
     } catch (error) {
       console.error("Failed to deactivate student:", error);
-      toast.error("Failed to deactivate student");
+      const errorMessage =
+        error.response?.data?.error || "Failed to deactivate student";
+      toast.error(errorMessage);
+    }
+  };
+
+  const handlePermanentDelete = async (studentId, studentName) => {
+    const confirmMessage = `Are you sure you want to PERMANENTLY DELETE ${studentName}? This action cannot be undone and will remove all attendance records and test results.`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    // Double confirmation for permanent deletion
+    if (
+      !window.confirm(
+        "This is permanent deletion. Type 'DELETE' to confirm:",
+      ) ||
+      !window.prompt("Type DELETE to confirm:") === "DELETE"
+    ) {
+      toast.info("Deletion cancelled");
+      return;
+    }
+
+    try {
+      await axios.delete(`${API_BASE}/api/admin/students/${studentId}`, {
+        headers: { "Admin-Auth": "admin-authenticated" },
+      });
+      toast.success("Student permanently deleted");
+      await fetchStudents();
+    } catch (error) {
+      console.error("Failed to delete student:", error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to delete student";
+      toast.error(errorMessage);
     }
   };
 
