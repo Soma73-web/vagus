@@ -115,15 +115,20 @@ const EventAdmin = () => {
 
   const resetForm = () => {
     setFormData({
+      title: "",
       description: "",
+      eventDate: "",
+      category: "general",
       image: null,
     });
     setEditingId(null);
     setPreview(null);
 
-    // Reset form inputs
-    const form = document.querySelector("form");
-    if (form) form.reset();
+    // Reset file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = "";
+    }
   };
 
   return (
