@@ -104,6 +104,7 @@ app.use("/api/admin", adminLimiter, adminStudentRoutes);
 app.use("/api/events", adminLimiter, eventRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/study-materials", adminLimiter, studyMaterialRoutes);
+app.use("/api/popup-announcements", popupAnnouncementRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
