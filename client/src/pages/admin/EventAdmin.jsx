@@ -191,12 +191,18 @@ const EventAdmin = () => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
 
     try {
-      await api.delete(`/api/events/${id}`);
+      await api.delete(`/api/events/${id}`, {
+        headers: {
+          "Admin-Auth": "admin-authenticated",
+        },
+      });
       await fetchEvents();
-      alert("Event deleted successfully!");
+      showSuccess("Event deleted successfully!");
     } catch (error) {
       console.error("Error deleting event:", error);
-      alert("Failed to delete event");
+      const errorMessage =
+        error.response?.data?.error || "Failed to delete event";
+      showError(errorMessage);
     }
   };
 
