@@ -159,10 +159,6 @@ const EventAdmin = () => {
     setFormData({
       title: event.title || "",
       description: event.description || "",
-      eventDate: event.eventDate
-        ? new Date(event.eventDate).toISOString().split("T")[0]
-        : "",
-      category: event.category || "general",
       image: null,
     });
     setEditingId(event.id);
