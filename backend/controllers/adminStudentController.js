@@ -1,6 +1,13 @@
 const { Student, Attendance, TestResult } = require("../models");
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
+const {
+  studentSchema,
+  studentUpdateSchema,
+  attendanceSchema,
+  testResultSchema,
+  idSchema,
+} = require("../validators/schemas");
 
 // Input validation and sanitization helper
 const sanitizeInput = (input) => {
@@ -28,6 +35,15 @@ const validateRequiredFields = (fields, requiredFields) => {
 // Create student account
 const createStudent = async (req, res) => {
   try {
+    // Validate input using Joi schema
+    const { error, value } = studentSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
     const {
       studentId,
       firstName,
@@ -38,24 +54,7 @@ const createStudent = async (req, res) => {
       dateOfBirth,
       course,
       batch,
-    } = req.body;
-
-    // Validate required fields
-    const requiredFields = [
-      "studentId",
-      "firstName",
-      "lastName",
-      "email",
-      "password",
-      "course",
-      "batch",
-    ];
-    const missingFields = validateRequiredFields(req.body, requiredFields);
-    if (missingFields) {
-      return res.status(400).json({
-        error: `Missing required fields: ${missingFields.join(", ")}`,
-      });
-    }
+    } = value;
 
     // Sanitize inputs
     const sanitizedData = {
@@ -155,11 +154,31 @@ const getAllStudents = async (req, res) => {
 // Update student
 const updateStudent = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = { ...req.body };
+    // Validate ID parameter
+    const { error: idError } = idSchema.validate({ id: req.params.id });
+    if (idError) {
+      return res.status(400).json({
+        error: "Invalid ID format",
+        details: idError.details.map((detail) => detail.message),
+      });
+    }
 
-    // Validate student exists
-    const student = await Student.findByPk(id);
+    // Validate update data
+    const { error, value } = studentUpdateSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const { id } = req.params;
+    const updateData = { ...value };
+
+    // Validate student exists using parameterized query
+    const student = await Student.findOne({
+      where: { id: { [Op.eq]: id } },
+    });
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
@@ -266,7 +285,16 @@ const deleteStudent = async (req, res) => {
 // Mark attendance
 const markAttendance = async (req, res) => {
   try {
-    const { studentId, date, status, reason } = req.body;
+    // Validate input using Joi schema
+    const { error, value } = attendanceSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const { studentId, date, status, reason } = value;
     const markedBy = req.admin?.username || "admin";
 
     const attendance = await Attendance.findOne({
@@ -298,6 +326,15 @@ const markAttendance = async (req, res) => {
 // Add test result
 const addTestResult = async (req, res) => {
   try {
+    // Validate input using Joi schema
+    const { error, value } = testResultSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
     const {
       studentId,
       testNumber,
@@ -307,7 +344,7 @@ const addTestResult = async (req, res) => {
       obtainedMarks,
       testDate,
       remarks,
-    } = req.body;
+    } = value;
 
     const addedBy = req.admin?.username || "admin";
     const percentage = ((obtainedMarks / maxMarks) * 100).toFixed(2);
