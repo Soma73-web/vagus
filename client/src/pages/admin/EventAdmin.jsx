@@ -196,8 +196,6 @@ const EventAdmin = () => {
     setFormData({
       title: "",
       description: "",
-      eventDate: "",
-      category: "general",
       image: null,
     });
     setEditingId(null);
