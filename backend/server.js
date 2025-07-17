@@ -1,7 +1,20 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 require("dotenv").config();
 const app = express();
+
+// Import security middleware
+const {
+  xssProtection,
+  generalLimiter,
+  authLimiter,
+  adminLimiter,
+  uploadLimiter,
+  cspMiddleware,
+  securityHeaders,
+  sqlInjectionProtection,
+} = require("./middleware/securityMiddleware");
 
 // Sequelize DB connection
 const sequelize = require("./config/db");
@@ -11,6 +24,22 @@ sequelize
   .authenticate()
   .then(() => console.log("Sequelize connected to MySQL"))
   .catch((err) => console.error("Sequelize connection error:", err));
+
+// Security Middleware
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // We'll use our custom CSP
+    crossOriginEmbedderPolicy: false,
+  }),
+);
+app.use(securityHeaders);
+app.use(cspMiddleware);
+app.use(generalLimiter);
+app.use(xssProtection);
+app.use(sqlInjectionProtection);
+
+// Trust proxy (important for rate limiting in production)
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(express.json({ limit: "10mb" }));
@@ -61,19 +90,19 @@ const eventRoutes = require("./routes/eventRoutes");
 const chatbotRoutes = require("./routes/chatbotRoutes");
 const studyMaterialRoutes = require("./routes/studyMaterialRoutes");
 
-// Route Mounting
-app.use("/api/testimonials", testimonialRoutes);
-app.use("/api/downloads", downloadRoutes);
-app.use("/api/gallery", galleryRoutes);
-app.use("/api/results", resultRoutes);
-app.use("/api/auth", adminRoutes);
-app.use("/api/slider", sliderRoutes);
-app.use("/api/image-gallery", imageGalleryRoutes);
-app.use("/api/students", studentRoutes);
-app.use("/api/admin", adminStudentRoutes);
-app.use("/api/events", eventRoutes);
+// Route Mounting with specific rate limiters
+app.use("/api/testimonials", adminLimiter, testimonialRoutes);
+app.use("/api/downloads", uploadLimiter, downloadRoutes);
+app.use("/api/gallery", uploadLimiter, galleryRoutes);
+app.use("/api/results", adminLimiter, resultRoutes);
+app.use("/api/auth", authLimiter, adminRoutes);
+app.use("/api/slider", uploadLimiter, sliderRoutes);
+app.use("/api/image-gallery", uploadLimiter, imageGalleryRoutes);
+app.use("/api/students", authLimiter, studentRoutes);
+app.use("/api/admin", adminLimiter, adminStudentRoutes);
+app.use("/api/events", adminLimiter, eventRoutes);
 app.use("/api/chatbot", chatbotRoutes);
-app.use("/api/study-materials", studyMaterialRoutes);
+app.use("/api/study-materials", adminLimiter, studyMaterialRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
