@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import AttendanceCalendar from "../components/AttendanceCalendar";
 import TestResults from "../components/TestResults";
 import StudyMaterials from "../components/StudyMaterials";
-
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const StudentDashboard = () => {
   const [student, setStudent] = useState(null);
