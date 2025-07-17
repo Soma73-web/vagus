@@ -13,6 +13,7 @@ export const sanitizeInput = (input) => {
       const entities = {
         "<": "&lt;",
         ">": "&gt;",
+        // eslint-disable-next-line no-useless-escape
         '"': "&quot;",
         "'": "&#x27;",
         "&": "&amp;",
