@@ -147,7 +147,7 @@ const EventAdmin = () => {
         });
         showSuccess("Event updated successfully!");
       } else {
-        response = await api.post("/api/events", form, {
+        await api.post("/api/events", form, {
           headers: {
             "Content-Type": "multipart/form-data",
             "Admin-Auth": "admin-authenticated",
