@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
-import { showSuccess, showError, showWarning } from "../../utils/notifications";
+import { showSuccess, showError } from "../../utils/notifications";
 
 const EventAdmin = () => {
   const [events, setEvents] = useState([]);
