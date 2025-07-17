@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { sanitizeInput, validateEmail, debounce } from "../../utils/security";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
@@ -41,10 +42,71 @@ const StudentAdmin = () => {
   };
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // Sanitize input to prevent XSS
+    const sanitizedValue =
+      typeof value === "string" ? sanitizeInput(value) : value;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: sanitizedValue,
     });
+  };
+
+  const validateForm = () => {
+    const errors = [];
+
+    // Required fields validation
+    if (!formData.studentId.trim()) errors.push("Student ID is required");
+    if (!formData.firstName.trim()) errors.push("First name is required");
+    if (!formData.lastName.trim()) errors.push("Last name is required");
+    if (!formData.email.trim()) errors.push("Email is required");
+    if (!formData.course.trim()) errors.push("Course is required");
+    if (!formData.batch.trim()) errors.push("Batch is required");
+
+    // Password validation for new students
+    if (!editingStudent && !formData.password.trim()) {
+      errors.push("Password is required");
+    }
+    if (formData.password && formData.password.length < 6) {
+      errors.push("Password must be at least 6 characters long");
+    }
+
+    // Email format validation
+    if (formData.email && !validateEmail(formData.email)) {
+      errors.push("Please enter a valid email address");
+    }
+
+    // Student ID format validation
+    if (formData.studentId && !/^[a-zA-Z0-9]+$/.test(formData.studentId)) {
+      errors.push("Student ID must contain only alphanumeric characters");
+    }
+
+    // Name validation
+    if (formData.firstName && !/^[a-zA-Z\s]+$/.test(formData.firstName)) {
+      errors.push("First name must contain only letters and spaces");
+    }
+    if (formData.lastName && !/^[a-zA-Z\s]+$/.test(formData.lastName)) {
+      errors.push("Last name must contain only letters and spaces");
+    }
+
+    // Phone validation
+    if (formData.phone && !/^[+]?[\d\s\-\(\)]{10,15}$/.test(formData.phone)) {
+      errors.push("Please enter a valid phone number");
+    }
+
+    // Date validation
+    if (formData.dateOfBirth && new Date(formData.dateOfBirth) > new Date()) {
+      errors.push("Date of birth cannot be in the future");
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((error) => toast.error(error));
+      return false;
+    }
+
+    return true;
   };
 
   const resetForm = () => {
