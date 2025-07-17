@@ -162,14 +162,10 @@ const StudentAdmin = () => {
         toast.success("Student updated successfully");
       } else {
         // Create new student
-        response = await axios.post(
-          `${API_BASE}/api/admin/students`,
-          cleanedData,
-          {
-            headers: { "Admin-Auth": "admin-authenticated" },
-            timeout: 10000, // 10 second timeout
-          },
-        );
+        await axios.post(`${API_BASE}/api/admin/students`, cleanedData, {
+          headers: { "Admin-Auth": "admin-authenticated" },
+          timeout: 10000, // 10 second timeout
+        });
         toast.success("Student created successfully");
       }
 
