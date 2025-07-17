@@ -127,30 +127,77 @@ const StudentAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Prepare clean data (remove empty strings for optional fields)
+      const cleanedData = { ...formData };
+      Object.keys(cleanedData).forEach((key) => {
+        if (cleanedData[key] === "") {
+          cleanedData[key] = null;
+        }
+      });
+
+      // Remove password from update data if it's empty
+      if (editingStudent && !cleanedData.password) {
+        delete cleanedData.password;
+      }
+
+      let response;
       if (editingStudent) {
         // Update existing student
-        await axios.put(
+        response = await axios.put(
           `${API_BASE}/api/admin/students/${editingStudent.id}`,
-          formData,
-          { headers: { "Admin-Auth": "admin-authenticated" } },
+          cleanedData,
+          {
+            headers: { "Admin-Auth": "admin-authenticated" },
+            timeout: 10000, // 10 second timeout
+          },
         );
         toast.success("Student updated successfully");
       } else {
         // Create new student
-        await axios.post(`${API_BASE}/api/admin/students`, formData, {
-          headers: { "Admin-Auth": "admin-authenticated" },
-        });
+        response = await axios.post(
+          `${API_BASE}/api/admin/students`,
+          cleanedData,
+          {
+            headers: { "Admin-Auth": "admin-authenticated" },
+            timeout: 10000, // 10 second timeout
+          },
+        );
         toast.success("Student created successfully");
       }
+
+      // Reset form and refresh data immediately
       resetForm();
-      fetchStudents();
+      await fetchStudents();
     } catch (error) {
       console.error("Student operation failed:", error);
-      const errorMessage = error.response?.data?.error || "Operation failed";
-      toast.error(errorMessage);
+
+      // Handle different types of errors
+      if (error.response?.status === 400) {
+        const errorData = error.response.data;
+        if (errorData.details && Array.isArray(errorData.details)) {
+          errorData.details.forEach((detail) => toast.error(detail));
+        } else {
+          toast.error(errorData.error || "Invalid input data");
+        }
+      } else if (error.response?.status === 401) {
+        toast.error("Authentication required. Please refresh and try again.");
+      } else if (error.response?.status === 409) {
+        toast.error("Student ID or email already exists");
+      } else if (error.code === "ECONNABORTED") {
+        toast.error("Request timeout. Please try again.");
+      } else {
+        const errorMessage = error.response?.data?.error || "Operation failed";
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
