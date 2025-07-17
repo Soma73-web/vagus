@@ -239,6 +239,7 @@ const StudentAdmin = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handlePermanentDelete = async (studentId, studentName) => {
     const confirmMessage = `Are you sure you want to PERMANENTLY DELETE ${studentName}? This action cannot be undone and will remove all attendance records and test results.`;
 
