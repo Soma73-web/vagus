@@ -25,8 +25,13 @@ router.get("/", getAllEvents);
 router.get("/image/:id", getEventImage);
 
 // Admin routes
-router.post("/", authenticateAdmin, upload.single("image"), createEvent);
-router.put("/:id", authenticateAdmin, upload.single("image"), updateEvent);
+router.post("/", authenticateAdmin, eventsUpload.single("image"), createEvent);
+router.put(
+  "/:id",
+  authenticateAdmin,
+  eventsUpload.single("image"),
+  updateEvent,
+);
 router.delete("/:id", authenticateAdmin, deleteEvent);
 
 module.exports = router;
