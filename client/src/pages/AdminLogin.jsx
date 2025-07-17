@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
-import LoadingSpinner from "../components/LoadingSpinner";
-import { showSuccess, showError } from "../utils/notifications";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { sanitizeInput, validateEmail } from "../../utils/security";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
@@ -41,10 +42,71 @@ const StudentAdmin = () => {
   };
 
   const handleInputChange = (e) => {
+    const { name, value } = e.target;
+
+    // Sanitize input to prevent XSS
+    const sanitizedValue =
+      typeof value === "string" ? sanitizeInput(value) : value;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: sanitizedValue,
     });
+  };
+
+  const validateForm = () => {
+    const errors = [];
+
+    // Required fields validation
+    if (!formData.studentId.trim()) errors.push("Student ID is required");
+    if (!formData.firstName.trim()) errors.push("First name is required");
+    if (!formData.lastName.trim()) errors.push("Last name is required");
+    if (!formData.email.trim()) errors.push("Email is required");
+    if (!formData.course.trim()) errors.push("Course is required");
+    if (!formData.batch.trim()) errors.push("Batch is required");
+
+    // Password validation for new students
+    if (!editingStudent && !formData.password.trim()) {
+      errors.push("Password is required");
+    }
+    if (formData.password && formData.password.length < 6) {
+      errors.push("Password must be at least 6 characters long");
+    }
+
+    // Email format validation
+    if (formData.email && !validateEmail(formData.email)) {
+      errors.push("Please enter a valid email address");
+    }
+
+    // Student ID format validation
+    if (formData.studentId && !/^[a-zA-Z0-9]+$/.test(formData.studentId)) {
+      errors.push("Student ID must contain only alphanumeric characters");
+    }
+
+    // Name validation
+    if (formData.firstName && !/^[a-zA-Z\s]+$/.test(formData.firstName)) {
+      errors.push("First name must contain only letters and spaces");
+    }
+    if (formData.lastName && !/^[a-zA-Z\s]+$/.test(formData.lastName)) {
+      errors.push("Last name must contain only letters and spaces");
+    }
+
+    // Phone validation
+    if (formData.phone && !/^[+]?[\d\s\-()]{10,15}$/.test(formData.phone)) {
+      errors.push("Please enter a valid phone number");
+    }
+
+    // Date validation
+    if (formData.dateOfBirth && new Date(formData.dateOfBirth) > new Date()) {
+      errors.push("Date of birth cannot be in the future");
+    }
+
+    if (errors.length > 0) {
+      errors.forEach((error) => toast.error(error));
+      return false;
+    }
+
+    return true;
   };
 
   const resetForm = () => {
@@ -65,30 +127,72 @@ const StudentAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // Prepare clean data (remove empty strings for optional fields)
+      const cleanedData = { ...formData };
+      Object.keys(cleanedData).forEach((key) => {
+        if (cleanedData[key] === "") {
+          cleanedData[key] = null;
+        }
+      });
+
+      // Remove password from update data if it's empty
+      if (editingStudent && !cleanedData.password) {
+        delete cleanedData.password;
+      }
+
       if (editingStudent) {
         // Update existing student
         await axios.put(
           `${API_BASE}/api/admin/students/${editingStudent.id}`,
-          formData,
-          { headers: { "Admin-Auth": "admin-authenticated" } },
+          cleanedData,
+          {
+            headers: { "Admin-Auth": "admin-authenticated" },
+            timeout: 10000, // 10 second timeout
+          },
         );
         toast.success("Student updated successfully");
       } else {
         // Create new student
-        await axios.post(`${API_BASE}/api/admin/students`, formData, {
+        await axios.post(`${API_BASE}/api/admin/students`, cleanedData, {
           headers: { "Admin-Auth": "admin-authenticated" },
+          timeout: 10000, // 10 second timeout
         });
         toast.success("Student created successfully");
       }
+
+      // Reset form and refresh data immediately
       resetForm();
-      fetchStudents();
+      await fetchStudents();
     } catch (error) {
       console.error("Student operation failed:", error);
-      const errorMessage = error.response?.data?.error || "Operation failed";
-      toast.error(errorMessage);
+
+      // Handle different types of errors
+      if (error.response?.status === 400) {
+        const errorData = error.response.data;
+        if (errorData.details && Array.isArray(errorData.details)) {
+          errorData.details.forEach((detail) => toast.error(detail));
+        } else {
+          toast.error(errorData.error || "Invalid input data");
+        }
+      } else if (error.response?.status === 401) {
+        toast.error("Authentication required. Please refresh and try again.");
+      } else if (error.response?.status === 409) {
+        toast.error("Student ID or email already exists");
+      } else if (error.code === "ECONNABORTED") {
+        toast.error("Request timeout. Please try again.");
+      } else {
+        const errorMessage = error.response?.data?.error || "Operation failed";
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -110,8 +214,12 @@ const StudentAdmin = () => {
     setShowCreateForm(true);
   };
 
-  const handleDelete = async (studentId) => {
-    if (!window.confirm("Are you sure you want to deactivate this student?")) {
+  const handleDeactivate = async (studentId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to deactivate this student? They will not be able to login.",
+      )
+    ) {
       return;
     }
 
@@ -122,10 +230,45 @@ const StudentAdmin = () => {
         { headers: { "Admin-Auth": "admin-authenticated" } },
       );
       toast.success("Student deactivated successfully");
-      fetchStudents();
+      await fetchStudents();
     } catch (error) {
       console.error("Failed to deactivate student:", error);
-      toast.error("Failed to deactivate student");
+      const errorMessage =
+        error.response?.data?.error || "Failed to deactivate student";
+      toast.error(errorMessage);
+    }
+  };
+
+  // eslint-disable-next-line no-unused-vars
+  const handlePermanentDelete = async (studentId, studentName) => {
+    const confirmMessage = `Are you sure you want to PERMANENTLY DELETE ${studentName}? This action cannot be undone and will remove all attendance records and test results.`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    // Double confirmation for permanent deletion
+    if (
+      !window.confirm(
+        "This is permanent deletion. Type 'DELETE' to confirm:",
+      ) ||
+      !window.prompt("Type DELETE to confirm:") === "DELETE"
+    ) {
+      toast.info("Deletion cancelled");
+      return;
+    }
+
+    try {
+      await axios.delete(`${API_BASE}/api/admin/students/${studentId}`, {
+        headers: { "Admin-Auth": "admin-authenticated" },
+      });
+      toast.success("Student permanently deleted");
+      await fetchStudents();
+    } catch (error) {
+      console.error("Failed to delete student:", error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to delete student";
+      toast.error(errorMessage);
     }
   };
 
@@ -382,7 +525,7 @@ const StudentAdmin = () => {
                       </button>
                       {student.isActive && (
                         <button
-                          onClick={() => handleDelete(student.id)}
+                          onClick={() => handleDeactivate(student.id)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Deactivate

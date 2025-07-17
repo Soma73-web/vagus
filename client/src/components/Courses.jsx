@@ -243,9 +243,6 @@ const Courses = () => {
                   >
                     Enquire Now
                   </Link>
-                  <button className="w-full text-center border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300">
-                    Download Brochure
-                  </button>
                 </div>
               </div>
 
@@ -267,16 +264,13 @@ const Courses = () => {
               Get personalized course recommendations based on your goals and
               current academic level
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Link
                 to="/contact"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-300 shadow-lg"
               >
                 Get Free Counseling
               </Link>
-              <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300">
-                Download Prospectus
-              </button>
             </div>
           </div>
         </div>

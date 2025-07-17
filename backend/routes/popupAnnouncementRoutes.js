@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const {
-  createStudent,
-  getAllStudents,
-  updateStudent,
-  deleteStudent,
-  markAttendance,
-  addTestResult,
-  updateTestResult,
-} = require("../controllers/adminStudentController");
+  getActivePopup,
+  getAllPopups,
+  createPopup,
+  updatePopup,
+  deletePopup,
+  togglePopupStatus,
+} = require("../controllers/popupAnnouncementController");
 
 // Enhanced admin auth middleware with rate limiting
 const adminAttempts = new Map();
@@ -46,17 +45,14 @@ const authenticateAdmin = (req, res, next) => {
   }
 };
 
-// Student management routes
-router.post("/students", authenticateAdmin, createStudent);
-router.get("/students", authenticateAdmin, getAllStudents);
-router.put("/students/:id", authenticateAdmin, updateStudent);
-router.delete("/students/:id", authenticateAdmin, deleteStudent);
+// Public route - get active popup for homepage
+router.get("/active", getActivePopup);
 
-// Attendance management
-router.post("/attendance", authenticateAdmin, markAttendance);
-
-// Test results management
-router.post("/test-results", authenticateAdmin, addTestResult);
-router.put("/test-results/:id", authenticateAdmin, updateTestResult);
+// Admin routes
+router.get("/", authenticateAdmin, getAllPopups);
+router.post("/", authenticateAdmin, createPopup);
+router.put("/:id", authenticateAdmin, updatePopup);
+router.delete("/:id", authenticateAdmin, deletePopup);
+router.patch("/:id/toggle", authenticateAdmin, togglePopupStatus);
 
 module.exports = router;

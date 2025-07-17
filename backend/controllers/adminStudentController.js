@@ -1,9 +1,49 @@
 const { Student, Attendance, TestResult } = require("../models");
 const bcrypt = require("bcryptjs");
+const { Op } = require("sequelize");
+const {
+  studentSchema,
+  studentUpdateSchema,
+  attendanceSchema,
+  testResultSchema,
+  idSchema,
+} = require("../validators/schemas");
+
+// Input validation and sanitization helper
+const sanitizeInput = (input) => {
+  if (typeof input !== "string") return input;
+  return input.trim().replace(/[<>"'&]/g, (match) => {
+    const entities = {
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#x27;",
+      "&": "&amp;",
+    };
+    return entities[match];
+  });
+};
+
+// Validate required fields
+const validateRequiredFields = (fields, requiredFields) => {
+  const missing = requiredFields.filter(
+    (field) => !fields[field] || fields[field].toString().trim() === "",
+  );
+  return missing.length ? missing : null;
+};
 
 // Create student account
 const createStudent = async (req, res) => {
   try {
+    // Validate input using Joi schema
+    const { error, value } = studentSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
     const {
       studentId,
       firstName,
@@ -14,33 +54,68 @@ const createStudent = async (req, res) => {
       dateOfBirth,
       course,
       batch,
-    } = req.body;
+    } = value;
+
+    // Sanitize inputs
+    const sanitizedData = {
+      studentId: sanitizeInput(studentId),
+      firstName: sanitizeInput(firstName),
+      lastName: sanitizeInput(lastName),
+      email: sanitizeInput(email.toLowerCase()),
+      password,
+      phone: phone ? sanitizeInput(phone) : null,
+      course: sanitizeInput(course),
+      batch: sanitizeInput(batch),
+      dateOfBirth,
+    };
 
     // Check if student ID already exists
-    const existingStudent = await Student.findOne({ where: { studentId } });
+    const existingStudent = await Student.findOne({
+      where: {
+        studentId: sanitizedData.studentId,
+      },
+    });
     if (existingStudent) {
       return res.status(400).json({ error: "Student ID already exists" });
     }
 
     // Check if email already exists
-    const existingEmail = await Student.findOne({ where: { email } });
+    const existingEmail = await Student.findOne({
+      where: {
+        email: sanitizedData.email,
+      },
+    });
     if (existingEmail) {
       return res.status(400).json({ error: "Email already exists" });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedData.email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters long" });
+    }
+
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(sanitizedData.password, 12);
 
     const student = await Student.create({
-      studentId,
-      firstName,
-      lastName,
-      email,
+      studentId: sanitizedData.studentId,
+      firstName: sanitizedData.firstName,
+      lastName: sanitizedData.lastName,
+      email: sanitizedData.email,
       password: hashedPassword,
-      phone,
-      dateOfBirth,
-      course,
-      batch,
+      phone: sanitizedData.phone,
+      dateOfBirth: sanitizedData.dateOfBirth,
+      course: sanitizedData.course,
+      batch: sanitizedData.batch,
+      isActive: true,
     });
 
     res.status(201).json({
@@ -79,11 +154,83 @@ const getAllStudents = async (req, res) => {
 // Update student
 const updateStudent = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
+    // Validate ID parameter
+    const { error: idError } = idSchema.validate({ id: req.params.id });
+    if (idError) {
+      return res.status(400).json({
+        error: "Invalid ID format",
+        details: idError.details.map((detail) => detail.message),
+      });
+    }
 
+    // Validate update data
+    const { error, value } = studentUpdateSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const { id } = req.params;
+    const updateData = { ...value };
+
+    // Validate student exists using parameterized query
+    const student = await Student.findOne({
+      where: { id: { [Op.eq]: id } },
+    });
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Sanitize inputs
+    Object.keys(updateData).forEach((key) => {
+      if (typeof updateData[key] === "string" && key !== "password") {
+        updateData[key] = sanitizeInput(updateData[key]);
+      }
+    });
+
+    // Hash password if provided
     if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+      if (updateData.password.length < 6) {
+        return res
+          .status(400)
+          .json({ error: "Password must be at least 6 characters long" });
+      }
+      updateData.password = await bcrypt.hash(updateData.password, 12);
+    }
+
+    // Validate email format if email is being updated
+    if (updateData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(updateData.email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+      updateData.email = updateData.email.toLowerCase();
+
+      // Check if email already exists for another student
+      const existingEmail = await Student.findOne({
+        where: {
+          email: updateData.email,
+          id: { [Op.ne]: id },
+        },
+      });
+      if (existingEmail) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+    }
+
+    // Check if studentId already exists for another student
+    if (updateData.studentId) {
+      const existingStudentId = await Student.findOne({
+        where: {
+          studentId: updateData.studentId,
+          id: { [Op.ne]: id },
+        },
+      });
+      if (existingStudentId) {
+        return res.status(400).json({ error: "Student ID already exists" });
+      }
     }
 
     await Student.update(updateData, { where: { id } });
@@ -102,10 +249,52 @@ const updateStudent = async (req, res) => {
   }
 };
 
+// Delete student permanently
+const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate student exists
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Delete related records first (cascade delete)
+    await Attendance.destroy({ where: { studentId: student.studentId } });
+    await TestResult.destroy({ where: { studentId: student.studentId } });
+
+    // Delete student
+    await Student.destroy({ where: { id } });
+
+    res.json({
+      message: "Student deleted successfully",
+      deletedStudent: {
+        id: student.id,
+        studentId: student.studentId,
+        firstName: student.firstName,
+        lastName: student.lastName,
+      },
+    });
+  } catch (error) {
+    console.error("Delete student error:", error);
+    res.status(500).json({ error: "Failed to delete student" });
+  }
+};
+
 // Mark attendance
 const markAttendance = async (req, res) => {
   try {
-    const { studentId, date, status, reason } = req.body;
+    // Validate input using Joi schema
+    const { error, value } = attendanceSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const { studentId, date, status, reason } = value;
     const markedBy = req.admin?.username || "admin";
 
     const attendance = await Attendance.findOne({
@@ -123,12 +312,10 @@ const markAttendance = async (req, res) => {
         reason,
         markedBy,
       });
-      res
-        .status(201)
-        .json({
-          message: "Attendance marked successfully",
-          attendance: newAttendance,
-        });
+      res.status(201).json({
+        message: "Attendance marked successfully",
+        attendance: newAttendance,
+      });
     }
   } catch (error) {
     console.error("Mark attendance error:", error);
@@ -139,6 +326,15 @@ const markAttendance = async (req, res) => {
 // Add test result
 const addTestResult = async (req, res) => {
   try {
+    // Validate input using Joi schema
+    const { error, value } = testResultSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
+    }
+
     const {
       studentId,
       testNumber,
@@ -148,7 +344,7 @@ const addTestResult = async (req, res) => {
       obtainedMarks,
       testDate,
       remarks,
-    } = req.body;
+    } = value;
 
     const addedBy = req.admin?.username || "admin";
     const percentage = ((obtainedMarks / maxMarks) * 100).toFixed(2);
@@ -230,6 +426,7 @@ module.exports = {
   createStudent,
   getAllStudents,
   updateStudent,
+  deleteStudent,
   markAttendance,
   addTestResult,
   updateTestResult,

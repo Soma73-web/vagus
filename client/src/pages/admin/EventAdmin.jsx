@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
+import { showSuccess, showError } from "../../utils/notifications";
 
 const EventAdmin = () => {
   const [events, setEvents] = useState([]);
   const [formData, setFormData] = useState({
+    title: "",
     description: "",
     image: null,
   });
@@ -26,14 +28,66 @@ const EventAdmin = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // Input sanitization
+    const sanitizedValue =
+      typeof value === "string" ? value.replace(/[<>"']/g, "") : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitizedValue,
     }));
+  };
+
+  const validateForm = () => {
+    if (!editingId && !formData.image) {
+      showError("Image is required");
+      return false;
+    }
+    if (formData.description && formData.description.length > 500) {
+      showError("Description must be less than 500 characters");
+      return false;
+    }
+    if (formData.title && formData.title.length > 100) {
+      showError("Title must be less than 100 characters");
+      return false;
+    }
+    return true;
+  };
+
+  const validateFile = (file) => {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      showError(
+        "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.",
+      );
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      showError("File size too large. Maximum size is 5MB.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+
+    if (file && !validateFile(file)) {
+      e.target.value = ""; // Clear the input
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       image: file,
@@ -48,11 +102,23 @@ const EventAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
       const form = new FormData();
-      form.append("description", formData.description);
+
+      if (formData.title && formData.title.trim()) {
+        form.append("title", formData.title.trim());
+      }
+
+      if (formData.description && formData.description.trim()) {
+        form.append("description", formData.description.trim());
+      }
 
       if (formData.image) {
         form.append("image", formData.image);
@@ -60,24 +126,30 @@ const EventAdmin = () => {
 
       if (editingId) {
         await api.put(`/api/events/${editingId}`, form, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Admin-Auth": "admin-authenticated",
+          },
         });
+        showSuccess("Event updated successfully!");
       } else {
         await api.post("/api/events", form, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Admin-Auth": "admin-authenticated",
+          },
         });
+        showSuccess("Event created successfully!");
       }
 
-      // Reset form and fetch updated events
+      // Reset form and fetch updated events immediately
       resetForm();
       await fetchEvents();
-      alert("Event saved successfully!");
     } catch (error) {
       console.error("Error saving event:", error);
-      alert(
-        "Failed to save event: " +
-          (error.response?.data?.error || error.message),
-      );
+      const errorMessage =
+        error.response?.data?.error || error.message || "Failed to save event";
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -85,6 +157,7 @@ const EventAdmin = () => {
 
   const handleEdit = (event) => {
     setFormData({
+      title: event.title || "",
       description: event.description || "",
       image: null,
     });
@@ -100,26 +173,35 @@ const EventAdmin = () => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
 
     try {
-      await api.delete(`/api/events/${id}`);
+      await api.delete(`/api/events/${id}`, {
+        headers: {
+          "Admin-Auth": "admin-authenticated",
+        },
+      });
       await fetchEvents();
-      alert("Event deleted successfully!");
+      showSuccess("Event deleted successfully!");
     } catch (error) {
       console.error("Error deleting event:", error);
-      alert("Failed to delete event");
+      const errorMessage =
+        error.response?.data?.error || "Failed to delete event";
+      showError(errorMessage);
     }
   };
 
   const resetForm = () => {
     setFormData({
+      title: "",
       description: "",
       image: null,
     });
     setEditingId(null);
     setPreview(null);
 
-    // Reset form inputs
-    const form = document.querySelector("form");
-    if (form) form.reset();
+    // Reset file input
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+      fileInput.value = "";
+    }
   };
 
   return (
@@ -154,16 +236,35 @@ const EventAdmin = () => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
+            Event Title (Optional)
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+            placeholder="Enter event title..."
+            maxLength="100"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
             Description (Optional)
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            rows="4"
-            placeholder="Enter event description..."
+            rows="3"
+            placeholder="Enter optional description for the image..."
+            maxLength="500"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <small className="text-gray-500">
+            {formData.description.length}/500 characters
+          </small>
         </div>
 
         <div className="flex gap-2">
