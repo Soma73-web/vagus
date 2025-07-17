@@ -89,6 +89,7 @@ const adminStudentRoutes = require("./routes/adminStudentRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const chatbotRoutes = require("./routes/chatbotRoutes");
 const studyMaterialRoutes = require("./routes/studyMaterialRoutes");
+const popupAnnouncementRoutes = require("./routes/popupAnnouncementRoutes");
 
 // Route Mounting with specific rate limiters
 app.use("/api/testimonials", adminLimiter, testimonialRoutes);
