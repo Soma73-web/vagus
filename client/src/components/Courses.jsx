@@ -270,12 +270,18 @@ const Courses = () => {
               Get personalized course recommendations based on your goals and
               current academic level
             </p>
-            <div className="flex justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/contact"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-colors duration-300 shadow-lg"
               >
                 Get Free Counseling
+              </Link>
+              <Link
+                to="/contact"
+                className="border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-xl font-semibold transition-all duration-300"
+              >
+                Schedule a Call
               </Link>
             </div>
           </div>
