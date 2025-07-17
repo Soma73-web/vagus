@@ -5,7 +5,10 @@ import { showSuccess, showError, showWarning } from "../../utils/notifications";
 const EventAdmin = () => {
   const [events, setEvents] = useState([]);
   const [formData, setFormData] = useState({
+    title: "",
     description: "",
+    eventDate: "",
+    category: "general",
     image: null,
   });
   const [editingId, setEditingId] = useState(null);
