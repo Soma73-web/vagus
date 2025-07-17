@@ -10,29 +10,23 @@ module.exports = (sequelize, DataTypes) => {
       title: {
         type: DataTypes.STRING,
         allowNull: true,
-        defaultValue: "Event",
+        defaultValue: "Event Image",
       },
       description: {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      eventDate: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: DataTypes.NOW,
-      },
       imageUrl: {
-        type: DataTypes.STRING,
-        allowNull: true,
+        type: DataTypes.STRING(500),
+        allowNull: false,
       },
       imagePath: {
-        type: DataTypes.STRING,
-        allowNull: true,
+        type: DataTypes.STRING(500),
+        allowNull: false,
       },
-      category: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: "general",
+      displayOrder: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
       },
       isActive: {
         type: DataTypes.BOOLEAN,
