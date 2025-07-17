@@ -47,7 +47,19 @@ const getAllEvents = async (req, res) => {
   try {
     const events = await Event.findAll({
       where: { isActive: true },
-      order: [["eventDate", "DESC"]],
+      order: [
+        ["displayOrder", "ASC"],
+        ["created_at", "DESC"],
+      ],
+      attributes: [
+        "id",
+        "title",
+        "description",
+        "imageUrl",
+        "displayOrder",
+        "isActive",
+        "created_at",
+      ],
     });
 
     res.json(events);
