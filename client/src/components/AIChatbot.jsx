@@ -1,11 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  FaRobot,
-  FaTimes,
-  FaPaperPlane,
-  FaSpinner,
-  FaComment,
-} from "react-icons/fa";
+import { FaRobot, FaTimes, FaPaperPlane, FaComment } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import api from "../api";
 
