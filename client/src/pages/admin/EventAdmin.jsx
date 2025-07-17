@@ -40,23 +40,17 @@ const EventAdmin = () => {
   };
 
   const validateForm = () => {
-    if (!formData.description.trim()) {
-      showError("Description is required");
+    if (!editingId && !formData.image) {
+      showError("Image is required");
       return false;
     }
-    if (formData.description.length > 500) {
+    if (formData.description && formData.description.length > 500) {
       showError("Description must be less than 500 characters");
       return false;
     }
     if (formData.title && formData.title.length > 100) {
       showError("Title must be less than 100 characters");
       return false;
-    }
-    if (
-      formData.eventDate &&
-      new Date(formData.eventDate) < new Date().setHours(0, 0, 0, 0)
-    ) {
-      showWarning("Event date is in the past");
     }
     return true;
   };
