@@ -149,10 +149,9 @@ const StudentAdmin = () => {
         delete cleanedData.password;
       }
 
-      let response;
       if (editingStudent) {
         // Update existing student
-        response = await axios.put(
+        await axios.put(
           `${API_BASE}/api/admin/students/${editingStudent.id}`,
           cleanedData,
           {
