@@ -137,9 +137,8 @@ const EventAdmin = () => {
         form.append("image", formData.image);
       }
 
-      let response;
       if (editingId) {
-        response = await api.put(`/api/events/${editingId}`, form, {
+        await api.put(`/api/events/${editingId}`, form, {
           headers: {
             "Content-Type": "multipart/form-data",
             "Admin-Auth": "admin-authenticated",
