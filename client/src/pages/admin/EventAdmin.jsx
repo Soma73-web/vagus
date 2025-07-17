@@ -256,7 +256,22 @@ const EventAdmin = () => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
-            Description (Optional)
+            Event Title (Optional)
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
+            placeholder="Enter event title..."
+            maxLength="100"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">
+            Description <span className="text-red-500">*</span>
           </label>
           <textarea
             name="description"
@@ -264,8 +279,44 @@ const EventAdmin = () => {
             onChange={handleInputChange}
             rows="4"
             placeholder="Enter event description..."
+            maxLength="500"
+            required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <small className="text-gray-500">
+            {formData.description.length}/500 characters
+          </small>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Event Date (Optional)
+            </label>
+            <input
+              type="date"
+              name="eventDate"
+              value={formData.eventDate}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Category</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="general">General</option>
+              <option value="academic">Academic</option>
+              <option value="cultural">Cultural</option>
+              <option value="sports">Sports</option>
+              <option value="announcement">Announcement</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex gap-2">
