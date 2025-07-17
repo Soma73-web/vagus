@@ -261,7 +261,7 @@ export const throttle = (func, limit) => {
   };
 };
 
-export default {
+const securityUtils = {
   sanitizeInput,
   sanitizeHTML,
   validateFileUpload,
@@ -273,3 +273,5 @@ export default {
   debounce,
   throttle,
 };
+
+export default securityUtils;
