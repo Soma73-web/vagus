@@ -30,10 +30,62 @@ const EventAdmin = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // Input sanitization
+    const sanitizedValue =
+      typeof value === "string" ? value.replace(/[<>\"']/g, "") : value;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitizedValue,
     }));
+  };
+
+  const validateForm = () => {
+    if (!formData.description.trim()) {
+      showError("Description is required");
+      return false;
+    }
+    if (formData.description.length > 500) {
+      showError("Description must be less than 500 characters");
+      return false;
+    }
+    if (formData.title && formData.title.length > 100) {
+      showError("Title must be less than 100 characters");
+      return false;
+    }
+    if (
+      formData.eventDate &&
+      new Date(formData.eventDate) < new Date().setHours(0, 0, 0, 0)
+    ) {
+      showWarning("Event date is in the past");
+    }
+    return true;
+  };
+
+  const validateFile = (file) => {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(file.type)) {
+      showError(
+        "Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.",
+      );
+      return false;
+    }
+
+    if (file.size > maxSize) {
+      showError("File size too large. Maximum size is 5MB.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleFileChange = (e) => {
