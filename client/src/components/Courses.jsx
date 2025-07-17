@@ -243,6 +243,12 @@ const Courses = () => {
                   >
                     Enquire Now
                   </Link>
+                  <Link
+                    to="/contact"
+                    className="w-full text-center border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300"
+                  >
+                    Get More Info
+                  </Link>
                 </div>
               </div>
 
