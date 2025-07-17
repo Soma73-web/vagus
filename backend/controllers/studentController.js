@@ -1,6 +1,8 @@
 const { Student, Attendance, TestResult } = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { studentLoginSchema } = require("../validators/schemas");
+const { Op } = require("sequelize");
 
 // Rate limiting for login attempts
 const loginAttempts = new Map();
@@ -25,15 +27,17 @@ const sanitizeInput = (input) => {
 // Student login with enhanced security
 const loginStudent = async (req, res) => {
   try {
-    const { studentId, password } = req.body;
-    const clientIp = req.ip || req.connection.remoteAddress;
-
-    // Input validation
-    if (!studentId || !password) {
-      return res
-        .status(400)
-        .json({ error: "Student ID and password are required" });
+    // Validate input using Joi schema
+    const { error, value } = studentLoginSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        error: "Validation error",
+        details: error.details.map((detail) => detail.message),
+      });
     }
+
+    const { studentId, password } = value;
+    const clientIp = req.ip || req.connection.remoteAddress;
 
     // Sanitize inputs
     const sanitizedStudentId = sanitizeInput(studentId);
@@ -59,11 +63,24 @@ const loginStudent = async (req, res) => {
       }
     }
 
-    // Find student with explicit isActive check
+    // Find student with parameterized query to prevent SQL injection
     const student = await Student.findOne({
       where: {
-        studentId: sanitizedStudentId,
+        studentId: {
+          [Op.eq]: sanitizedStudentId,
+        },
       },
+      attributes: [
+        "id",
+        "studentId",
+        "firstName",
+        "lastName",
+        "email",
+        "password",
+        "course",
+        "batch",
+        "isActive",
+      ],
     });
 
     // Check if student exists
