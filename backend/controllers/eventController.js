@@ -75,62 +75,51 @@ const createEvent = async (req, res) => {
     const { description, title, eventDate, category } = req.body;
     const addedBy = req.admin?.username || "admin";
 
-    // Input validation
-    if (!description || description.trim() === "") {
-      return res.status(400).json({ error: "Description is required" });
+    // Validate required file upload
+    if (!req.file) {
+      return res.status(400).json({ error: "Image is required" });
+    }
+
+    try {
+      validateImageFile(req.file);
+    } catch (fileError) {
+      // Clean up uploaded file if validation fails
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(400).json({ error: fileError.message });
     }
 
     // Sanitize inputs
     const sanitizedData = {
-      title: sanitizeInput(title) || "Event",
-      description: sanitizeInput(description),
-      category: sanitizeInput(category) || "general",
-      eventDate: eventDate ? new Date(eventDate) : new Date(),
+      title: title ? sanitizeInput(title) : "Event Image",
+      description: description ? sanitizeInput(description) : null,
     };
 
-    // Validate date
-    if (isNaN(sanitizedData.eventDate.getTime())) {
-      return res.status(400).json({ error: "Invalid event date" });
-    }
+    const imagePath = req.file.path;
+    const imageUrl = `/uploads/events/${req.file.filename}`;
 
-    let imagePath = null;
-    let imageUrl = null;
-
-    // Handle file upload with validation
-    if (req.file) {
-      try {
-        validateImageFile(req.file);
-        imagePath = req.file.path;
-        imageUrl = `/uploads/${req.file.filename}`;
-      } catch (fileError) {
-        // Clean up uploaded file if validation fails
-        if (fs.existsSync(req.file.path)) {
-          fs.unlinkSync(req.file.path);
-        }
-        return res.status(400).json({ error: fileError.message });
-      }
-    }
+    // Get the next display order
+    const maxOrder = (await Event.max("displayOrder")) || 0;
 
     const event = await Event.create({
       title: sanitizedData.title,
       description: sanitizedData.description,
-      eventDate: sanitizedData.eventDate,
       imageUrl,
       imagePath,
-      category: sanitizedData.category,
+      displayOrder: maxOrder + 1,
       addedBy,
       isActive: true,
     });
 
     res.status(201).json({
-      message: "Event created successfully",
+      message: "Event image uploaded successfully",
       event: {
         id: event.id,
         title: event.title,
         description: event.description,
-        eventDate: event.eventDate,
-        category: event.category,
         imageUrl: event.imageUrl,
+        displayOrder: event.displayOrder,
         addedBy: event.addedBy,
         isActive: event.isActive,
       },
