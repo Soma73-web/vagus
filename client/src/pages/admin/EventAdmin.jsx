@@ -33,7 +33,7 @@ const EventAdmin = () => {
 
     // Input sanitization
     const sanitizedValue =
-      typeof value === "string" ? value.replace(/[<>\"']/g, "") : value;
+      typeof value === "string" ? value.replace(/[<>"']/g, "") : value;
 
     setFormData((prev) => ({
       ...prev,
