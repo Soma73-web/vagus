@@ -90,6 +90,12 @@ const EventAdmin = () => {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
+
+    if (file && !validateFile(file)) {
+      e.target.value = ""; // Clear the input
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       image: file,
