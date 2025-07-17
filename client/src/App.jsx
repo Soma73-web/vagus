@@ -12,6 +12,7 @@ import ScrollToHash from "./components/ScrollToHash";
 import WhatsAppButton from "./components/WhatsAppButton";
 import AIChatbot from "./components/AIChatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AnnouncementPopup from "./components/AnnouncementPopup";
 
 // Homepage Components
 import HomeSlider from "./components/HomeSlider";
