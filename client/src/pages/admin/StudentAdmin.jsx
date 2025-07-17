@@ -529,7 +529,7 @@ const StudentAdmin = () => {
                       </button>
                       {student.isActive && (
                         <button
-                          onClick={() => handleDelete(student.id)}
+                          onClick={() => handleDeactivate(student.id)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Deactivate
