@@ -110,36 +110,60 @@ const EventAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
       const form = new FormData();
-      form.append("description", formData.description);
+      form.append("description", formData.description.trim());
+
+      if (formData.title.trim()) {
+        form.append("title", formData.title.trim());
+      }
+
+      if (formData.eventDate) {
+        form.append("eventDate", formData.eventDate);
+      }
+
+      if (formData.category) {
+        form.append("category", formData.category);
+      }
 
       if (formData.image) {
         form.append("image", formData.image);
       }
 
+      let response;
       if (editingId) {
-        await api.put(`/api/events/${editingId}`, form, {
-          headers: { "Content-Type": "multipart/form-data" },
+        response = await api.put(`/api/events/${editingId}`, form, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Admin-Auth": "admin-authenticated",
+          },
         });
+        showSuccess("Event updated successfully!");
       } else {
-        await api.post("/api/events", form, {
-          headers: { "Content-Type": "multipart/form-data" },
+        response = await api.post("/api/events", form, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Admin-Auth": "admin-authenticated",
+          },
         });
+        showSuccess("Event created successfully!");
       }
 
-      // Reset form and fetch updated events
+      // Reset form and fetch updated events immediately
       resetForm();
       await fetchEvents();
-      alert("Event saved successfully!");
     } catch (error) {
       console.error("Error saving event:", error);
-      alert(
-        "Failed to save event: " +
-          (error.response?.data?.error || error.message),
-      );
+      const errorMessage =
+        error.response?.data?.error || error.message || "Failed to save event";
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
