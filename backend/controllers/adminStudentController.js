@@ -1,5 +1,29 @@
 const { Student, Attendance, TestResult } = require("../models");
 const bcrypt = require("bcryptjs");
+const { Op } = require("sequelize");
+
+// Input validation and sanitization helper
+const sanitizeInput = (input) => {
+  if (typeof input !== "string") return input;
+  return input.trim().replace(/[<>"'&]/g, (match) => {
+    const entities = {
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#x27;",
+      "&": "&amp;",
+    };
+    return entities[match];
+  });
+};
+
+// Validate required fields
+const validateRequiredFields = (fields, requiredFields) => {
+  const missing = requiredFields.filter(
+    (field) => !fields[field] || fields[field].toString().trim() === "",
+  );
+  return missing.length ? missing : null;
+};
 
 // Create student account
 const createStudent = async (req, res) => {
@@ -16,31 +40,83 @@ const createStudent = async (req, res) => {
       batch,
     } = req.body;
 
+    // Validate required fields
+    const requiredFields = [
+      "studentId",
+      "firstName",
+      "lastName",
+      "email",
+      "password",
+      "course",
+      "batch",
+    ];
+    const missingFields = validateRequiredFields(req.body, requiredFields);
+    if (missingFields) {
+      return res.status(400).json({
+        error: `Missing required fields: ${missingFields.join(", ")}`,
+      });
+    }
+
+    // Sanitize inputs
+    const sanitizedData = {
+      studentId: sanitizeInput(studentId),
+      firstName: sanitizeInput(firstName),
+      lastName: sanitizeInput(lastName),
+      email: sanitizeInput(email.toLowerCase()),
+      password,
+      phone: phone ? sanitizeInput(phone) : null,
+      course: sanitizeInput(course),
+      batch: sanitizeInput(batch),
+      dateOfBirth,
+    };
+
     // Check if student ID already exists
-    const existingStudent = await Student.findOne({ where: { studentId } });
+    const existingStudent = await Student.findOne({
+      where: {
+        studentId: sanitizedData.studentId,
+      },
+    });
     if (existingStudent) {
       return res.status(400).json({ error: "Student ID already exists" });
     }
 
     // Check if email already exists
-    const existingEmail = await Student.findOne({ where: { email } });
+    const existingEmail = await Student.findOne({
+      where: {
+        email: sanitizedData.email,
+      },
+    });
     if (existingEmail) {
       return res.status(400).json({ error: "Email already exists" });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedData.email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters long" });
+    }
+
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(sanitizedData.password, 12);
 
     const student = await Student.create({
-      studentId,
-      firstName,
-      lastName,
-      email,
+      studentId: sanitizedData.studentId,
+      firstName: sanitizedData.firstName,
+      lastName: sanitizedData.lastName,
+      email: sanitizedData.email,
       password: hashedPassword,
-      phone,
-      dateOfBirth,
-      course,
-      batch,
+      phone: sanitizedData.phone,
+      dateOfBirth: sanitizedData.dateOfBirth,
+      course: sanitizedData.course,
+      batch: sanitizedData.batch,
+      isActive: true,
     });
 
     res.status(201).json({
@@ -80,10 +156,62 @@ const getAllStudents = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData = { ...req.body };
 
+    // Validate student exists
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Sanitize inputs
+    Object.keys(updateData).forEach((key) => {
+      if (typeof updateData[key] === "string" && key !== "password") {
+        updateData[key] = sanitizeInput(updateData[key]);
+      }
+    });
+
+    // Hash password if provided
     if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+      if (updateData.password.length < 6) {
+        return res
+          .status(400)
+          .json({ error: "Password must be at least 6 characters long" });
+      }
+      updateData.password = await bcrypt.hash(updateData.password, 12);
+    }
+
+    // Validate email format if email is being updated
+    if (updateData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(updateData.email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+      updateData.email = updateData.email.toLowerCase();
+
+      // Check if email already exists for another student
+      const existingEmail = await Student.findOne({
+        where: {
+          email: updateData.email,
+          id: { [Op.ne]: id },
+        },
+      });
+      if (existingEmail) {
+        return res.status(400).json({ error: "Email already exists" });
+      }
+    }
+
+    // Check if studentId already exists for another student
+    if (updateData.studentId) {
+      const existingStudentId = await Student.findOne({
+        where: {
+          studentId: updateData.studentId,
+          id: { [Op.ne]: id },
+        },
+      });
+      if (existingStudentId) {
+        return res.status(400).json({ error: "Student ID already exists" });
+      }
     }
 
     await Student.update(updateData, { where: { id } });
@@ -99,6 +227,39 @@ const updateStudent = async (req, res) => {
   } catch (error) {
     console.error("Update student error:", error);
     res.status(500).json({ error: "Failed to update student" });
+  }
+};
+
+// Delete student permanently
+const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate student exists
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Delete related records first (cascade delete)
+    await Attendance.destroy({ where: { studentId: student.studentId } });
+    await TestResult.destroy({ where: { studentId: student.studentId } });
+
+    // Delete student
+    await Student.destroy({ where: { id } });
+
+    res.json({
+      message: "Student deleted successfully",
+      deletedStudent: {
+        id: student.id,
+        studentId: student.studentId,
+        firstName: student.firstName,
+        lastName: student.lastName,
+      },
+    });
+  } catch (error) {
+    console.error("Delete student error:", error);
+    res.status(500).json({ error: "Failed to delete student" });
   }
 };
 
@@ -123,12 +284,10 @@ const markAttendance = async (req, res) => {
         reason,
         markedBy,
       });
-      res
-        .status(201)
-        .json({
-          message: "Attendance marked successfully",
-          attendance: newAttendance,
-        });
+      res.status(201).json({
+        message: "Attendance marked successfully",
+        attendance: newAttendance,
+      });
     }
   } catch (error) {
     console.error("Mark attendance error:", error);
@@ -230,6 +389,7 @@ module.exports = {
   createStudent,
   getAllStudents,
   updateStudent,
+  deleteStudent,
   markAttendance,
   addTestResult,
   updateTestResult,
