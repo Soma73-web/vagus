@@ -92,7 +92,7 @@ const StudentAdmin = () => {
     }
 
     // Phone validation
-    if (formData.phone && !/^[+]?[\d\s\-\(\)]{10,15}$/.test(formData.phone)) {
+    if (formData.phone && !/^[+]?[\d\s\-()]{10,15}$/.test(formData.phone)) {
       errors.push("Please enter a valid phone number");
     }
 
