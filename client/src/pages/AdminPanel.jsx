@@ -20,6 +20,7 @@ const TABS = [
   { id: "attendance", label: "Attendance", component: <AttendanceAdmin /> },
   { id: "test-results", label: "Test Results", component: <TestResultAdmin /> },
   { id: "events", label: "Events", component: <EventAdmin /> },
+  { id: "popups", label: "Popup Announcements", component: <PopupAdmin /> },
   {
     id: "study-materials",
     label: "Study Materials",
