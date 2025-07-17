@@ -51,75 +51,147 @@ const Events = () => {
     setCurrentSlide((prev) => (prev - 1 + events.length) % events.length);
   };
 
-  return (
-    <section className="py-20 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Institute Events
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Stay updated with our latest events, activities, and milestones at
-            the institute
-          </p>
+  if (loading) {
+    return (
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <LoadingSpinner message="Loading latest events..." />
         </div>
+      </section>
+    );
+  }
 
-        {loading ? (
-          <LoadingSpinner message="Our team is preparing exciting events for you..." />
-        ) : events.length === 0 ? (
+  if (events.length === 0) {
+    return (
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
           <EmptyState
             icon="🎉"
             title="Events Coming Soon"
-            message="Stay tuned for exciting events and activities. Our team is planning something amazing!"
+            message="Stay tuned for exciting events and activities!"
           />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.map((event) => (
-              <div
-                key={event.id}
-                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
-              >
-                {/* Clean Image Display */}
-                <div className="relative h-64 md:h-72 lg:h-80 overflow-hidden">
-                  <img
-                    src={`${API_BASE}/api/events/image/${event.id}`}
-                    alt="Event"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+        </div>
+      </section>
+    );
+  }
 
-                  {/* Subtle gradient overlay for depth */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+  return (
+    <section
+      className="relative w-full h-[70vh] md:h-[80vh] overflow-hidden"
+      id="events"
+    >
+      {/* Full-width image slider */}
+      <div className="relative w-full h-full">
+        {events.map((event, index) => (
+          <div
+            key={event.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <img
+              src={`${API_BASE}/api/events/image/${event.id}`}
+              alt={event.title || "Event"}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error("Image failed to load:", e.target.src);
+              }}
+            />
+            {/* Overlay for better text readability */}
+            <div className="absolute inset-0 bg-black bg-opacity-30"></div>
 
-                  {/* Elegant corner accent */}
-                  <div className="absolute top-4 right-4 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <svg
-                      className="w-6 h-6 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
+            {/* Content overlay */}
+            {(event.title || event.description) && (
+              <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                <div className="container mx-auto">
+                  <div className="max-w-3xl">
+                    {event.title && (
+                      <h3 className="text-2xl md:text-4xl font-bold mb-4">
+                        {event.title}
+                      </h3>
+                    )}
+                    {event.description && (
+                      <p className="text-lg md:text-xl opacity-90">
+                        {event.description}
+                      </p>
+                    )}
                   </div>
                 </div>
-
-                {/* Minimal border accent */}
-                <div className="absolute inset-0 border-2 border-transparent group-hover:border-white/30 rounded-2xl transition-colors duration-300"></div>
               </div>
-            ))}
+            )}
           </div>
-        )}
+        ))}
+      </div>
+
+      {/* Navigation arrows */}
+      {events.length > 1 && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-3 rounded-full transition-all duration-300 z-10"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-3 rounded-full transition-all duration-300 z-10"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/* Slide indicators */}
+      {events.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          {events.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentSlide
+                  ? "bg-white"
+                  : "bg-white bg-opacity-50 hover:bg-opacity-75"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Title section below slider */}
+      <div className="bg-gray-50 py-8">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+            Latest Events & Updates
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Stay updated with our latest announcements, events, and achievements
+          </p>
+        </div>
       </div>
     </section>
   );
