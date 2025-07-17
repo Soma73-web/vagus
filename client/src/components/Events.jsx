@@ -8,6 +8,7 @@ const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -26,6 +27,29 @@ const Events = () => {
     };
     fetchEvents();
   }, []);
+
+  // Auto-slide effect - change slide every 30 seconds
+  useEffect(() => {
+    if (events.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % events.length);
+      }, 30000); // 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [events.length]);
+
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % events.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + events.length) % events.length);
+  };
 
   return (
     <section className="py-20 bg-gray-50">
