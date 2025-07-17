@@ -9,7 +9,7 @@ export const sanitizeInput = (input) => {
   if (typeof input !== "string") return input;
 
   return input
-    .replace(/[<>\"'&]/g, (match) => {
+    .replace(/[<>"'&]/g, (match) => {
       const entities = {
         "<": "&lt;",
         ">": "&gt;",
