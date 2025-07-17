@@ -111,18 +111,13 @@ const EventAdmin = () => {
 
     try {
       const form = new FormData();
-      form.append("description", formData.description.trim());
 
-      if (formData.title.trim()) {
+      if (formData.title && formData.title.trim()) {
         form.append("title", formData.title.trim());
       }
 
-      if (formData.eventDate) {
-        form.append("eventDate", formData.eventDate);
-      }
-
-      if (formData.category) {
-        form.append("category", formData.category);
+      if (formData.description && formData.description.trim()) {
+        form.append("description", formData.description.trim());
       }
 
       if (formData.image) {
