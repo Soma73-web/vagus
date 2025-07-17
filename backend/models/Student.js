@@ -53,6 +53,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
       },
+      lastLoginAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      lastLoginIp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
     },
     {
       tableName: "students",
