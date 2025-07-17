@@ -7,8 +7,6 @@ const EventAdmin = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    eventDate: "",
-    category: "general",
     image: null,
   });
   const [editingId, setEditingId] = useState(null);
