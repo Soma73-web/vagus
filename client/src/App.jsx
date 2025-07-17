@@ -130,6 +130,9 @@ function App() {
           pauseOnHover
           theme="light"
         />
+
+        {/* Announcement Popup */}
+        <AnnouncementPopup />
       </Router>
     </ErrorBoundary>
   );
