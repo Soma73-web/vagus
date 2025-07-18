@@ -45,10 +45,7 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Serve static files from uploads directory with CORS
-app.use("/uploads", cors(), express.static("uploads"));
-
-// CORS Configuration
+// CORS Configuration - Apply globally first
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -76,6 +73,9 @@ app.use(
   }),
 );
 
+// Serve static files from uploads directory
+app.use("/uploads", express.static("uploads"));
+
 // Route Imports
 const testimonialRoutes = require("./routes/testimonialRoutes");
 const downloadRoutes = require("./routes/downloadRoutes");
@@ -91,17 +91,17 @@ const chatbotRoutes = require("./routes/chatbotRoutes");
 const studyMaterialRoutes = require("./routes/studyMaterialRoutes");
 const popupAnnouncementRoutes = require("./routes/popupAnnouncementRoutes");
 
-// Route Mounting with specific rate limiters
+// Route Mounting with specific rate limiters (removed duplicate CORS)
 app.use("/api/testimonials", adminLimiter, testimonialRoutes);
 app.use("/api/downloads", uploadLimiter, downloadRoutes);
-app.use("/api/gallery", cors(), uploadLimiter, galleryRoutes);
+app.use("/api/gallery", uploadLimiter, galleryRoutes);
 app.use("/api/results", adminLimiter, resultRoutes);
 app.use("/api/auth", authLimiter, adminRoutes);
 app.use("/api/slider", uploadLimiter, sliderRoutes);
 app.use("/api/image-gallery", uploadLimiter, imageGalleryRoutes);
 app.use("/api/students", authLimiter, studentRoutes);
 app.use("/api/admin", adminLimiter, adminStudentRoutes);
-app.use("/api/events", cors(), adminLimiter, eventRoutes);
+app.use("/api/events", adminLimiter, eventRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/study-materials", adminLimiter, studyMaterialRoutes);
 app.use("/api/popup-announcements", popupAnnouncementRoutes);
