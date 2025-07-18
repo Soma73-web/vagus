@@ -18,31 +18,38 @@ module.exports = (sequelize, DataTypes) => {
       imageUrl: {
         type: DataTypes.STRING(500),
         allowNull: false,
+        field: 'image_url',
       },
       announcementType: {
         type: DataTypes.ENUM("admission", "achievement", "general"),
         defaultValue: "general",
+        field: 'announcement_type',
       },
       isEnabled: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+        field: 'is_enabled',
       },
       showOnHomepage: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
+        field: 'show_on_homepage',
       },
       startDate: {
         type: DataTypes.DATE,
         allowNull: true,
+        field: 'startDate', // Your DB column is actually camelCase here!
       },
       endDate: {
         type: DataTypes.DATE,
         allowNull: true,
+        field: 'end_date',
       },
       createdBy: {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: "admin",
+        field: 'created_by',
       },
     },
     {
