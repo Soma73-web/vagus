@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       imagePath: {
         type: DataTypes.STRING(500),
         allowNull: false,
-        field: 'imagePath', // Your DB column is camelCase here!
+        field: 'imagePath', // If your DB column is camelCase, otherwise use 'image_path'
       },
       displayOrder: {
         type: DataTypes.INTEGER,
@@ -45,6 +45,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       tableName: "events",
       timestamps: true,
+      createdAt: "created_at", // <-- This is the fix!
+      updatedAt: "updated_at", // <-- This is the fix!
     },
   );
 
