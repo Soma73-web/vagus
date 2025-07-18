@@ -113,9 +113,9 @@ const cspMiddleware = (req, res, next) => {
     "default-src 'self'; " +
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
       "style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data: blob: *; " +
+      "img-src 'self' data: blob: https: http: *; " +
       "font-src 'self' data:; " +
-      "connect-src 'self'; " +
+      "connect-src 'self' https: http:; " +
       "frame-ancestors 'none';",
   );
   next();

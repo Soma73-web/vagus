@@ -39,15 +39,15 @@ module.exports = (sequelize, DataTypes) => {
       },
       enrollmentDate: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
+        allowNull: true,
       },
       course: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       batch: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       isActive: {
         type: DataTypes.BOOLEAN,
@@ -59,17 +59,6 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: true,
     },
   );
-
-  Student.associate = (models) => {
-    Student.hasMany(models.Attendance, {
-      foreignKey: "studentId",
-      as: "attendances",
-    });
-    Student.hasMany(models.TestResult, {
-      foreignKey: "studentId",
-      as: "testResults",
-    });
-  };
 
   return Student;
 };
