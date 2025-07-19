@@ -19,27 +19,37 @@ module.exports = (sequelize, DataTypes) => {
       imageUrl: {
         type: DataTypes.STRING(500),
         allowNull: false,
-        field: 'image_url',
+        field: "image_url",
       },
       imagePath: {
         type: DataTypes.STRING(500),
-        allowNull: false,
-        field: 'imagePath', // If your DB column is camelCase, otherwise use 'image_path'
+        allowNull: true,
+        field: "imagePath", // If your DB column is camelCase, otherwise use 'image_path'
+      },
+      imageData: {
+        type: DataTypes.BLOB("long"),
+        allowNull: true,
+        field: "image_data",
+      },
+      mimeType: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+        field: "mime_type",
       },
       displayOrder: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
-        field: 'display_order',
+        field: "display_order",
       },
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
-        field: 'is_active',
+        field: "is_active",
       },
       addedBy: {
         type: DataTypes.STRING,
         allowNull: false,
-        field: 'added_by',
+        field: "added_by",
       },
     },
     {
