@@ -96,12 +96,20 @@ const Events = () => {
               src={`${API_BASE}${event.imageUrl}`}
               alt={event.title || "Event"}
               className="w-full h-full object-cover"
+              onLoad={() => {
+                // Track successfully loaded images
+                setValidImages((prev) => new Set([...prev, event.id]));
+              }}
               onError={(e) => {
                 console.error("Image failed to load:", e.target.src);
-                // Hide the broken image and show placeholder
+                // Remove from valid images if it was there
+                setValidImages((prev) => {
+                  const newSet = new Set([...prev]);
+                  newSet.delete(event.id);
+                  return newSet;
+                });
+                // Hide the broken image
                 e.target.style.display = "none";
-                // You could also set a fallback image:
-                // e.target.src = '/placeholder-event.jpg';
               }}
             />
             {/* Overlay for better text readability */}
