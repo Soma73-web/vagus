@@ -184,8 +184,14 @@ const updateEvent = async (req, res) => {
           fs.unlinkSync(existingEvent.imagePath);
         }
 
+        // Read image data for database storage
+        const imageData = fs.readFileSync(req.file.path);
+        const mimeType = req.file.mimetype;
+
         updateData.imagePath = req.file.path;
         updateData.imageUrl = `/uploads/${req.file.filename}`;
+        updateData.imageData = imageData;
+        updateData.mimeType = mimeType;
       } catch (fileError) {
         // Clean up uploaded file if validation fails
         if (fs.existsSync(req.file.path)) {
