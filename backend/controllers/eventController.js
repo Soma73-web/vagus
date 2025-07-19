@@ -278,23 +278,35 @@ const permanentDeleteEvent = async (req, res) => {
   }
 };
 
-// Serve event image
+// Serve event image from database
 const getEventImage = async (req, res) => {
   try {
     const { id } = req.params;
     const event = await Event.findByPk(id);
 
-    if (!event || !event.imagePath) {
-      return res.status(404).json({ error: "Image not found" });
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
     }
 
-    const imagePath = path.resolve(event.imagePath);
-
-    if (!fs.existsSync(imagePath)) {
-      return res.status(404).json({ error: "Image file not found" });
+    // First try to serve from database
+    if (event.imageData && event.mimeType) {
+      res.set({
+        "Content-Type": event.mimeType,
+        "Content-Length": event.imageData.length,
+        "Cache-Control": "public, max-age=86400", // Cache for 1 day
+      });
+      return res.send(event.imageData);
     }
 
-    res.sendFile(imagePath);
+    // Fallback to file system if no database image
+    if (event.imagePath) {
+      const imagePath = path.resolve(event.imagePath);
+      if (fs.existsSync(imagePath)) {
+        return res.sendFile(imagePath);
+      }
+    }
+
+    return res.status(404).json({ error: "Image not found" });
   } catch (error) {
     console.error("Get event image error:", error);
     res.status(500).json({ error: "Failed to get image" });
