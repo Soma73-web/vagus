@@ -39,19 +39,27 @@ module.exports = (sequelize, DataTypes) => {
       },
       enrollmentDate: {
         type: DataTypes.DATE,
-        allowNull: true,
+        defaultValue: DataTypes.NOW,
       },
       course: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       batch: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
+      },
+      lastLoginAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      lastLoginIp: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     {
@@ -59,6 +67,17 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: true,
     },
   );
+
+  Student.associate = (models) => {
+    Student.hasMany(models.Attendance, {
+      foreignKey: "studentId",
+      as: "attendances",
+    });
+    Student.hasMany(models.TestResult, {
+      foreignKey: "studentId",
+      as: "testResults",
+    });
+  };
 
   return Student;
 };

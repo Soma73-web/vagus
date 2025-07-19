@@ -42,7 +42,7 @@ const validateImageFile = (file) => {
   return true;
 };
 
-// Get all events
+// Get all events with base64 images
 const getAllEvents = async (req, res) => {
   try {
     const events = await Event.findAll({
@@ -56,13 +56,32 @@ const getAllEvents = async (req, res) => {
         "title",
         "description",
         "imageUrl",
+        "imagePath",
         "displayOrder",
         "isActive",
         "created_at",
       ],
     });
 
-    res.json(events);
+    // Convert file images to base64
+    const eventsWithBase64 = await Promise.all(events.map(async (event) => {
+      const eventData = event.toJSON();
+      
+      if (eventData.imagePath && fs.existsSync(eventData.imagePath)) {
+        try {
+          const imageBuffer = fs.readFileSync(eventData.imagePath);
+          const base64Image = imageBuffer.toString('base64');
+          const mimeType = path.extname(eventData.imagePath).toLowerCase() === '.png' ? 'image/png' : 'image/jpeg';
+          eventData.imageUrl = `data:${mimeType};base64,${base64Image}`;
+        } catch (err) {
+          console.error(`Error reading image file for event ${eventData.id}:`, err);
+        }
+      }
+      
+      return eventData;
+    }));
+
+    res.json(eventsWithBase64);
   } catch (error) {
     console.error("Get events error:", error);
     res.status(500).json({ error: "Failed to fetch events" });
@@ -287,6 +306,14 @@ const getEventImage = async (req, res) => {
     if (!fs.existsSync(imagePath)) {
       return res.status(404).json({ error: "Image file not found" });
     }
+
+    // Set CORS headers for image responses
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
+    });
 
     res.sendFile(imagePath);
   } catch (error) {

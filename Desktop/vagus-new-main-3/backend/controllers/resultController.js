@@ -1,14 +1,27 @@
 const { Result } = require('../models'); // ✅ Correct import from initialized models
 
-// Get all results (excluding image blob)
+// Get all results (including base64 image data)
 exports.getAllResults = async (req, res) => {
   try {
+    console.log('🔍 Fetching all results...');
     const results = await Result.findAll({
-      attributes: ['id', 'name', 'college', 'rank', 'year']
+      attributes: ['id', 'name', 'college', 'rank', 'year', 'image', 'image_type']
     });
-    res.json(results);
+    
+    // Convert blob images to base64
+    const resultsWithBase64 = results.map(result => {
+      const resultData = result.toJSON();
+      if (resultData.image) {
+        const base64Image = resultData.image.toString('base64');
+        resultData.image = `data:${resultData.image_type || 'image/jpeg'};base64,${base64Image}`;
+      }
+      return resultData;
+    });
+    
+    console.log(`✅ Found ${results.length} results with base64 images`);
+    res.json(resultsWithBase64);
   } catch (err) {
-    console.error('Failed to fetch results:', err);
+    console.error('❌ Failed to fetch results:', err);
     res.status(500).json({ error: 'Server error while fetching results' });
   }
 };
@@ -16,15 +29,26 @@ exports.getAllResults = async (req, res) => {
 // Get image by ID
 exports.getResultImage = async (req, res) => {
   try {
+    console.log(`🖼️ Fetching image for result ID: ${req.params.id}`);
     const result = await Result.findByPk(req.params.id);
     if (!result || !result.image) {
+      console.log(`❌ Image not found for ID: ${req.params.id}`);
       return res.status(404).json({ error: 'Image not found' });
     }
 
-    res.set('Content-Type', result.image_type || 'image/jpeg');
+    // Set CORS headers for image responses
+    res.set({
+      'Content-Type': result.image_type || 'image/jpeg',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
+    });
+    
+    console.log(`✅ Sending image for result ID: ${req.params.id}, type: ${result.image_type || 'image/jpeg'}`);
     res.send(result.image);
   } catch (err) {
-    console.error('Error fetching result image:', err);
+    console.error('❌ Error fetching result image:', err);
     res.status(500).json({ error: 'Failed to fetch result image' });
   }
 };

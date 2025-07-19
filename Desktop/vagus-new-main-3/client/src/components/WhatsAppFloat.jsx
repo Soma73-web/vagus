@@ -19,7 +19,7 @@ const HomeSlider = () => {
 
         const formatted = data.map((img) => ({
           ...img,
-          url: `${API_BASE.replace(/\/$/, '')}/api/slider/image/${img.id}`,
+          url: img.photo, // Use base64 image directly
         }));
 
         setImages(formatted);

@@ -1,11 +1,24 @@
 const path = require('path');
 const { GalleryImage } = require('../models'); // ✅ Correct import from initialized models
 
-// GET all gallery items
+// GET all gallery items with base64 images
 exports.getAllGalleryItems = async (_req, res) => {
   try {
-    const items = await GalleryImage.findAll({ attributes: ['id', 'title'] });
-    res.json(items);
+    const items = await GalleryImage.findAll({ 
+      attributes: ['id', 'title', 'image', 'image_type'] 
+    });
+    
+    // Convert blob images to base64
+    const itemsWithBase64 = items.map(item => {
+      const itemData = item.toJSON();
+      if (itemData.image) {
+        const base64Image = itemData.image.toString('base64');
+        itemData.image = `data:${itemData.image_type || 'image/jpeg'};base64,${base64Image}`;
+      }
+      return itemData;
+    });
+    
+    res.json(itemsWithBase64);
   } catch (err) {
     console.error('Error fetching gallery items:', err);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -20,7 +33,15 @@ exports.getGalleryImage = async (req, res) => {
 
     if (!item) return res.status(404).send('Not found');
 
-    res.setHeader('Content-Type', item.image_type);
+    // Set CORS headers for image responses
+    res.set({
+      'Content-Type': item.image_type,
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
+    });
+    
     res.send(item.image);
   } catch (err) {
     console.error('Error serving image:', err);

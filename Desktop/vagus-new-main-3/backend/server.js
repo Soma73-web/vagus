@@ -14,6 +14,7 @@ const {
   cspMiddleware,
   securityHeaders,
   sqlInjectionProtection,
+  imageCorsMiddleware,
 } = require("./middleware/securityMiddleware");
 
 // Sequelize DB connection
@@ -25,13 +26,33 @@ sequelize
   .then(() => console.log("Sequelize connected to MySQL"))
   .catch((err) => console.error("Sequelize connection error:", err));
 
-// Security Middleware
+// Security Middleware - More permissive for image serving
 app.use(
   helmet({
     contentSecurityPolicy: false, // We'll use our custom CSP
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false, // Allow cross-origin resource loading
+    crossOriginOpenerPolicy: false, // Allow cross-origin opener
   }),
 );
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`📥 ${req.method} ${req.path} - Origin: ${req.headers.origin || 'No origin'}`);
+  next();
+});
+
+// Apply security middleware in order, with image routes bypass
+app.use(imageCorsMiddleware); // Global CORS for image routes - MUST BE FIRST
+
+// Bypass all security middleware for image routes
+app.use((req, res, next) => {
+  if (req.path.includes('/image')) {
+    console.log(`🚫 Bypassing security middleware for ${req.path}`);
+    return next();
+  }
+  next();
+});
+
 app.use(securityHeaders);
 app.use(cspMiddleware);
 app.use(generalLimiter);
@@ -60,6 +81,7 @@ if (process.env.FRONTEND_URL) {
   allowedOrigins.push(process.env.FRONTEND_URL);
 }
 
+// Enhanced CORS configuration for all routes
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -79,8 +101,9 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Admin-Auth"],
+    allowedHeaders: ["Content-Type", "Authorization", "Admin-Auth", "X-Requested-With"],
     exposedHeaders: ["Content-Disposition"],
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
   }),
 );
 
@@ -105,14 +128,14 @@ const popupAnnouncementRoutes = require("./routes/popupAnnouncementRoutes");
 // Route Mounting with specific rate limiters (removed duplicate CORS)
 app.use("/api/testimonials", adminLimiter, testimonialRoutes);
 app.use("/api/downloads", uploadLimiter, downloadRoutes);
-app.use("/api/gallery", uploadLimiter, galleryRoutes);
-app.use("/api/results", adminLimiter, resultRoutes);
+app.use("/api/gallery", galleryRoutes);
+app.use("/api/results", resultRoutes);
 app.use("/api/auth", authLimiter, adminRoutes);
-app.use("/api/slider", uploadLimiter, sliderRoutes);
-app.use("/api/image-gallery", uploadLimiter, imageGalleryRoutes);
+app.use("/api/slider", sliderRoutes);
+app.use("/api/image-gallery", imageGalleryRoutes);
 app.use("/api/students", authLimiter, studentRoutes);
 app.use("/api/admin", adminLimiter, adminStudentRoutes);
-app.use("/api/events", adminLimiter, eventRoutes);
+app.use("/api/events", eventRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/study-materials", adminLimiter, studyMaterialRoutes);
 app.use("/api/popup-announcements", popupAnnouncementRoutes);
@@ -125,6 +148,95 @@ app.get("/", (req, res) => {
     timestamp: new Date().toISOString(),
     version: "1.0.0",
   });
+});
+
+// CORS test route
+app.get("/cors-test", (req, res) => {
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  });
+  res.json({
+    message: "CORS test successful",
+    timestamp: new Date().toISOString(),
+    headers: req.headers,
+  });
+});
+
+// Image CORS test route
+app.get("/image-cors-test", (req, res) => {
+  console.log(`🧪 Image CORS test for ${req.method} ${req.path}`);
+  console.log(`🌐 Origin: ${req.headers.origin || 'No origin'}`);
+  
+  res.set({
+    'Content-Type': 'image/svg+xml',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Cache-Control': 'public, max-age=31536000',
+    'Cross-Origin-Embedder-Policy': 'unsafe-none',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Cross-Origin-Opener-Policy': 'unsafe-none',
+  });
+  
+  // Return a simple SVG test image
+  const svgImage = `<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="blue"/>
+    <text x="50" y="50" text-anchor="middle" fill="white" font-size="12">CORS OK</text>
+  </svg>`;
+  
+  res.send(svgImage);
+});
+
+// Simple image test route
+app.get("/simple-image-test", (req, res) => {
+  console.log(`🧪 Simple image test for ${req.method} ${req.path}`);
+  
+  // Set comprehensive CORS headers
+  res.set({
+    'Content-Type': 'image/png',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Max-Age': '86400',
+    'Cross-Origin-Embedder-Policy': 'unsafe-none',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Cross-Origin-Opener-Policy': 'unsafe-none',
+    'Cache-Control': 'public, max-age=31536000',
+  });
+  
+  // Return a simple 1x1 transparent PNG
+  const pngBuffer = Buffer.from([
+    0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+    0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+    0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+    0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+    0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
+    0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82
+  ]);
+  
+  res.send(pngBuffer);
+});
+
+// Test route that mimics image serving behavior
+app.get("/test-image/:id", (req, res) => {
+  console.log(`🧪 Test image route for ID: ${req.params.id}`);
+  
+  // Set the same headers as our image routes
+  res.set({
+    'Content-Type': 'image/jpeg',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Cache-Control': 'public, max-age=31536000',
+    'Cross-Origin-Embedder-Policy': 'unsafe-none',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Cross-Origin-Opener-Policy': 'unsafe-none',
+  });
+  
+  // Return a simple test image
+  res.send(Buffer.from('fake-image-data'));
 });
 
 app.get("/health", (req, res) => {

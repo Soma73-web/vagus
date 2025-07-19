@@ -6,12 +6,12 @@ module.exports = (sequelize, DataTypes) => {
       categoryId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "gallery_categories", key: "id" },
+        references: { model: "gallery_categories", key: "id" }, // ✅ Ensure table name is correct
       },
       image: { type: DataTypes.TEXT("long"), allowNull: false },
     },
     {
-      tableName: "gallery_images",
+      tableName: "gallery_images", // ✅ Confirm your actual table name spelling in DB
       timestamps: false,
     },
   );

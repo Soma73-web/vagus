@@ -21,7 +21,7 @@ const Results = () => {
         const res = await api.get("/api/results");
         const data = res.data.map((r) => ({
           ...r,
-          photoUrl: `${API_BASE}/api/results/${r.id}/image`,
+          photoUrl: r.image, // Use base64 image directly
         }));
         setItems(data);
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
@@ -90,7 +90,7 @@ const Events = () => {
             }`}
           >
             <img
-              src={`${API_BASE}/api/events/image/${event.id}`}
+              src={event.imageUrl}
               alt={event.title || "Event"}
               className="w-full h-full object-cover"
               onError={(e) => {

@@ -108,6 +108,11 @@ const uploadLimiter = createRateLimiter(
 
 // Content Security Policy
 const cspMiddleware = (req, res, next) => {
+  // Skip CSP for image routes to avoid conflicts
+  if (req.path.includes('/image')) {
+    return next();
+  }
+  
   res.setHeader(
     "Content-Security-Policy",
     "default-src 'self'; " +
@@ -123,6 +128,14 @@ const cspMiddleware = (req, res, next) => {
 
 // Security headers
 const securityHeaders = (req, res, next) => {
+  // Skip restrictive headers for image routes
+  if (req.path.includes('/image')) {
+    // For image routes, only set minimal security headers
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.removeHeader("X-Powered-By");
+    return next();
+  }
+
   // Prevent clickjacking
   res.setHeader("X-Frame-Options", "DENY");
 
@@ -198,6 +211,35 @@ const sqlInjectionProtection = (req, res, next) => {
   next();
 };
 
+// Global CORS middleware for image routes
+const imageCorsMiddleware = (req, res, next) => {
+  // Check if this is an image route
+  if (req.path.includes('/image')) {
+    console.log(`🖼️ Global CORS middleware for ${req.method} ${req.path}`);
+    console.log(`🌐 Origin: ${req.headers.origin || 'No origin'}`);
+    console.log(`🔗 Referer: ${req.headers.referer || 'No referer'}`);
+    
+    // COMPREHENSIVE CORS headers for image responses
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400', // 24 hours
+      'Cross-Origin-Embedder-Policy': 'unsafe-none', // Explicitly disable COEP
+      'Cross-Origin-Resource-Policy': 'cross-origin', // Allow cross-origin resources
+      'Cross-Origin-Opener-Policy': 'unsafe-none', // Allow cross-origin opener
+    });
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      console.log(`✅ Preflight request handled for ${req.path}`);
+      return res.status(200).end();
+    }
+  }
+  
+  next();
+};
+
 module.exports = {
   xssProtection,
   generalLimiter,
@@ -208,4 +250,5 @@ module.exports = {
   securityHeaders,
   validateInput,
   sqlInjectionProtection,
+  imageCorsMiddleware,
 };
