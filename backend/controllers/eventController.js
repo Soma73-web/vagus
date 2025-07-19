@@ -99,6 +99,10 @@ const createEvent = async (req, res) => {
     const imagePath = req.file.path;
     const imageUrl = `/uploads/events/${req.file.filename}`;
 
+    // Read image data for database storage
+    const imageData = fs.readFileSync(req.file.path);
+    const mimeType = req.file.mimetype;
+
     // Get the next display order
     const maxOrder = (await Event.max("displayOrder")) || 0;
 
@@ -107,6 +111,8 @@ const createEvent = async (req, res) => {
       description: sanitizedData.description,
       imageUrl,
       imagePath,
+      imageData,
+      mimeType,
       displayOrder: maxOrder + 1,
       addedBy,
       isActive: true,
