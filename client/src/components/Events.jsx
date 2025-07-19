@@ -14,10 +14,12 @@ const Events = () => {
     const fetchEvents = async () => {
       try {
         const response = await axios.get(`${API_BASE}/api/events`);
-        // Filter events that have images only
+        // Filter events that have images only and validate them
         const eventsWithImages = response.data.filter(
           (event) => event.imageUrl,
         );
+
+        // For now, include all events with imageUrl - the onError handler will manage broken images
         setEvents(eventsWithImages);
       } catch (error) {
         console.error("Failed to load events:", error);
