@@ -17,11 +17,14 @@ const EventAdmin = () => {
     return response.data || [];
   };
 
-  const { data: events = [], loading, error, lastUpdated, refresh } = useAutoRefresh(
+  const { data: events, loading, error, lastUpdated, refresh } = useAutoRefresh(
     fetchEvents,
     'EventAdmin',
     180000 // 3 minutes
   );
+
+  // Ensure events is always an array
+  const eventsArray = events || [];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -130,7 +133,7 @@ const EventAdmin = () => {
         loading={loading}
         error={error}
         onRefresh={refresh}
-        dataCount={events.length}
+        dataCount={eventsArray.length}
         title="Events"
       />
 
@@ -197,13 +200,13 @@ const EventAdmin = () => {
       <div className="space-y-4">
         <h4 className="text-lg font-medium">Existing Events</h4>
 
-        {events.length === 0 ? (
+        {eventsArray.length === 0 ? (
           <p className="text-gray-500 text-center py-8">
             No events found. Add your first event above.
           </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {events.map((event) => (
+            {eventsArray.map((event) => (
               <div
                 key={event.id}
                 className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition"

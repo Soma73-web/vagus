@@ -29,11 +29,14 @@ const StudentAdmin = () => {
     return response.data;
   };
 
-  const { data: students = [], loading, error, lastUpdated, refresh } = useAutoRefresh(
+  const { data: students, loading, error, lastUpdated, refresh } = useAutoRefresh(
     fetchStudents,
     'StudentAdmin',
     180000 // 3 minutes
   );
+
+  // Ensure students is always an array
+  const studentsArray = students || [];
 
   const handleInputChange = (e) => {
     setFormData({
@@ -109,11 +112,11 @@ const StudentAdmin = () => {
 
     try {
       // Optimistic update - remove from UI immediately
-      const studentToDelete = students.find(s => s.id === studentId);
-      const originalStudents = [...students];
+      const studentToDelete = studentsArray.find(s => s.id === studentId);
+      const originalStudents = [...studentsArray];
       
       // Remove from local state immediately for better UX
-      const updatedStudents = students.filter(s => s.id !== studentId);
+      const updatedStudents = studentsArray.filter(s => s.id !== studentId);
       
       // Make API call to actually delete
       await axios.delete(`${API_BASE}/api/admin/students/${studentId}`, {
@@ -310,7 +313,7 @@ const StudentAdmin = () => {
         loading={loading}
         error={error}
         onRefresh={refresh}
-        dataCount={students.length}
+        dataCount={studentsArray.length}
         title="Students"
       />
 
@@ -341,7 +344,7 @@ const StudentAdmin = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {students.map((student) => (
+                {studentsArray.map((student) => (
                   <tr key={student.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>

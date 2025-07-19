@@ -13,7 +13,7 @@ const DataStatusBar = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div className="flex items-center gap-4">
           <div className="text-sm text-gray-600">
-            <span className="font-medium">{title}:</span> {dataCount} items
+            <span className="font-medium">{title}:</span> {dataCount || 0} items
           </div>
           
           {lastUpdated && (
