@@ -284,7 +284,7 @@ const permanentDeleteEvent = async (req, res) => {
   }
 };
 
-// Serve event image from database
+// Serve event image from database or file system
 const getEventImage = async (req, res) => {
   try {
     const { id } = req.params;
@@ -294,7 +294,7 @@ const getEventImage = async (req, res) => {
       return res.status(404).json({ error: "Event not found" });
     }
 
-    // First try to serve from database
+    // First try to serve from database if imageData exists
     if (event.imageData && event.mimeType) {
       res.set({
         "Content-Type": event.mimeType,
@@ -304,11 +304,19 @@ const getEventImage = async (req, res) => {
       return res.send(event.imageData);
     }
 
-    // Fallback to file system if no database image
+    // Fallback to file system
     if (event.imagePath) {
       const imagePath = path.resolve(event.imagePath);
       if (fs.existsSync(imagePath)) {
         return res.sendFile(imagePath);
+      }
+    }
+
+    // Last resort: try to read from imageUrl if it exists
+    if (event.imageUrl) {
+      const uploadsPath = path.join(__dirname, "..", event.imageUrl);
+      if (fs.existsSync(uploadsPath)) {
+        return res.sendFile(uploadsPath);
       }
     }
 
