@@ -96,7 +96,7 @@ const Events = () => {
             }`}
           >
             <img
-              src={`${API_BASE}${event.imageUrl}`}
+              src={`${API_BASE}/api/events/image/${event.id}`}
               alt={event.title || "Event"}
               className="w-full h-full object-cover"
               onLoad={() => {
