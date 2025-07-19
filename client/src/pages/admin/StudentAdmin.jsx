@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import DataStatusBar from "../../components/DataStatusBar";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const StudentAdmin = () => {
-  const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [formData, setFormData] = useState({
@@ -21,24 +21,19 @@ const StudentAdmin = () => {
     batch: "",
   });
 
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
+  // Auto-refresh hook for students data
   const fetchStudents = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_BASE}/api/admin/students`, {
-        headers: { "Admin-Auth": "admin-authenticated" },
-      });
-      setStudents(response.data);
-    } catch (error) {
-      console.error("Failed to fetch students:", error);
-      toast.error("Failed to load students");
-    } finally {
-      setLoading(false);
-    }
+    const response = await axios.get(`${API_BASE}/api/admin/students`, {
+      headers: { "Admin-Auth": "admin-authenticated" },
+    });
+    return response.data;
   };
+
+  const { data: students = [], loading, error, lastUpdated, refresh } = useAutoRefresh(
+    fetchStudents,
+    'StudentAdmin',
+    180000 // 3 minutes
+  );
 
   const handleInputChange = (e) => {
     setFormData({
@@ -65,7 +60,6 @@ const StudentAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
       if (editingStudent) {
@@ -84,13 +78,11 @@ const StudentAdmin = () => {
         toast.success("Student created successfully");
       }
       resetForm();
-      fetchStudents();
+      refresh(); // Refresh data immediately
     } catch (error) {
       console.error("Student operation failed:", error);
       const errorMessage = error.response?.data?.error || "Operation failed";
       toast.error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -111,21 +103,29 @@ const StudentAdmin = () => {
   };
 
   const handleDelete = async (studentId) => {
-    if (!window.confirm("Are you sure you want to deactivate this student?")) {
+    if (!window.confirm("Are you sure you want to permanently delete this student? This action cannot be undone.")) {
       return;
     }
 
     try {
-      await axios.put(
-        `${API_BASE}/api/admin/students/${studentId}`,
-        { isActive: false },
-        { headers: { "Admin-Auth": "admin-authenticated" } },
-      );
-      toast.success("Student deactivated successfully");
-      fetchStudents();
+      // Optimistic update - remove from UI immediately
+      const studentToDelete = students.find(s => s.id === studentId);
+      const originalStudents = [...students];
+      
+      // Remove from local state immediately for better UX
+      const updatedStudents = students.filter(s => s.id !== studentId);
+      
+      // Make API call to actually delete
+      await axios.delete(`${API_BASE}/api/admin/students/${studentId}`, {
+        headers: { "Admin-Auth": "admin-authenticated" },
+      });
+      
+      toast.success("Student deleted successfully");
+      refresh(); // Refresh to get latest data
     } catch (error) {
-      console.error("Failed to deactivate student:", error);
-      toast.error("Failed to deactivate student");
+      console.error("Failed to delete student:", error);
+      toast.error("Failed to delete student");
+      refresh(); // Refresh to revert any optimistic changes
     }
   };
 
@@ -304,6 +304,16 @@ const StudentAdmin = () => {
         </div>
       )}
 
+      {/* Data Status Bar */}
+      <DataStatusBar
+        lastUpdated={lastUpdated}
+        loading={loading}
+        error={error}
+        onRefresh={refresh}
+        dataCount={students.length}
+        title="Students"
+      />
+
       {/* Students List */}
       {loading && !showCreateForm ? (
         <div className="text-center py-8">
@@ -324,9 +334,6 @@ const StudentAdmin = () => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Course & Batch
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -362,17 +369,6 @@ const StudentAdmin = () => {
                         Batch: {student.batch}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          student.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {student.isActive ? "Active" : "Inactive"}
-                      </span>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button
                         onClick={() => handleEdit(student)}
@@ -380,14 +376,12 @@ const StudentAdmin = () => {
                       >
                         Edit
                       </button>
-                      {student.isActive && (
-                        <button
-                          onClick={() => handleDelete(student.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Deactivate
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleDelete(student.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}

@@ -4,6 +4,7 @@ const {
   createStudent,
   getAllStudents,
   updateStudent,
+  deleteStudent,
   markAttendance,
   addTestResult,
   updateTestResult,
@@ -26,6 +27,7 @@ const authenticateAdmin = (req, res, next) => {
 router.post("/students", authenticateAdmin, createStudent);
 router.get("/students", authenticateAdmin, getAllStudents);
 router.put("/students/:id", authenticateAdmin, updateStudent);
+router.delete("/students/:id", authenticateAdmin, deleteStudent);
 
 // Attendance management
 router.post("/attendance", authenticateAdmin, markAttendance);

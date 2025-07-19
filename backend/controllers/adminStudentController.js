@@ -226,10 +226,36 @@ const updateTestResult = async (req, res) => {
   }
 };
 
+// Delete student permanently
+const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if student exists
+    const student = await Student.findByPk(id);
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Delete related data first (cascade delete)
+    await Attendance.destroy({ where: { studentId: id } });
+    await TestResult.destroy({ where: { studentId: id } });
+    
+    // Delete the student
+    await Student.destroy({ where: { id } });
+
+    res.json({ message: "Student deleted successfully" });
+  } catch (error) {
+    console.error("Delete student error:", error);
+    res.status(500).json({ error: "Failed to delete student" });
+  }
+};
+
 module.exports = {
   createStudent,
   getAllStudents,
   updateStudent,
+  deleteStudent,
   markAttendance,
   addTestResult,
   updateTestResult,

@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import DataStatusBar from "../../components/DataStatusBar";
 
 const EventAdmin = () => {
-  const [events, setEvents] = useState([]);
   const [formData, setFormData] = useState({
     description: "",
     image: null,
   });
   const [editingId, setEditingId] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
+  // Auto-refresh hook for events data
   const fetchEvents = async () => {
-    try {
-      const response = await api.get("/api/events");
-      setEvents(response.data || []);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
+    const response = await api.get("/api/events");
+    return response.data || [];
   };
+
+  const { data: events = [], loading, error, lastUpdated, refresh } = useAutoRefresh(
+    fetchEvents,
+    'EventAdmin',
+    180000 // 3 minutes
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -48,7 +47,6 @@ const EventAdmin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
       const form = new FormData();
@@ -68,9 +66,9 @@ const EventAdmin = () => {
         });
       }
 
-      // Reset form and fetch updated events
+      // Reset form and refresh data
       resetForm();
-      await fetchEvents();
+      refresh();
       alert("Event saved successfully!");
     } catch (error) {
       console.error("Error saving event:", error);
@@ -78,8 +76,6 @@ const EventAdmin = () => {
         "Failed to save event: " +
           (error.response?.data?.error || error.message),
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -101,7 +97,7 @@ const EventAdmin = () => {
 
     try {
       await api.delete(`/api/events/${id}`);
-      await fetchEvents();
+      refresh();
       alert("Event deleted successfully!");
     } catch (error) {
       console.error("Error deleting event:", error);
@@ -127,6 +123,16 @@ const EventAdmin = () => {
       <h3 className="text-xl font-semibold mb-6 text-blue-800">
         Manage Events
       </h3>
+
+      {/* Data Status Bar */}
+      <DataStatusBar
+        lastUpdated={lastUpdated}
+        loading={loading}
+        error={error}
+        onRefresh={refresh}
+        dataCount={events.length}
+        title="Events"
+      />
 
       {/* Event Form */}
       <form onSubmit={handleSubmit} className="mb-8 bg-gray-50 p-4 rounded-lg">
