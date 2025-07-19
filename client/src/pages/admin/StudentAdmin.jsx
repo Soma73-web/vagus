@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
@@ -21,19 +21,42 @@ const StudentAdmin = () => {
     batch: "",
   });
 
-  // Auto-refresh hook for students data
-  const fetchStudents = async () => {
-    const response = await axios.get(`${API_BASE}/api/admin/students`, {
-      headers: { "Admin-Auth": "admin-authenticated" },
-    });
-    return response.data;
-  };
 
-  const { data: students, loading, error, lastUpdated, refresh } = useAutoRefresh(
-    fetchStudents,
-    'StudentAdmin',
-    180000 // 3 minutes
-  );
+
+  // Temporary: Use simple state instead of auto-refresh for debugging
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  // Simple fetch function
+  const fetchStudentsData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(`${API_BASE}/api/admin/students`, {
+        headers: { "Admin-Auth": "admin-authenticated" },
+      });
+      setStudents(response.data || []);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error("Error fetching students:", err);
+      setError(err.message || "Failed to fetch students");
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchStudentsData();
+  }, [fetchStudentsData]);
+
+  // Manual refresh function
+  const refresh = useCallback(() => {
+    fetchStudentsData();
+  }, [fetchStudentsData]);
 
   // Ensure students is always an array
   const studentsArray = students || [];

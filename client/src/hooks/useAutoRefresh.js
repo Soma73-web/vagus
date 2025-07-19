@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import autoRefreshManager from '../utils/autoRefresh';
 
 export const useAutoRefresh = (fetchFunction, componentId, intervalMs = 180000) => {
@@ -6,12 +6,16 @@ export const useAutoRefresh = (fetchFunction, componentId, intervalMs = 180000) 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  
+  // Use ref to store the latest fetchFunction to avoid dependency issues
+  const fetchFunctionRef = useRef(fetchFunction);
+  fetchFunctionRef.current = fetchFunction;
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await fetchFunction();
+      const result = await fetchFunctionRef.current();
       setData(result || []); // Ensure result is never null
       setLastUpdated(new Date());
     } catch (err) {
@@ -21,7 +25,7 @@ export const useAutoRefresh = (fetchFunction, componentId, intervalMs = 180000) 
     } finally {
       setLoading(false);
     }
-  }, [fetchFunction, componentId]);
+  }, [componentId]);
 
   // Initial fetch
   useEffect(() => {
@@ -34,6 +38,11 @@ export const useAutoRefresh = (fetchFunction, componentId, intervalMs = 180000) 
     
     return cleanup;
   }, [componentId, fetchData, intervalMs]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log(`${componentId} - Loading: ${loading}, Error: ${error}, Data length: ${data?.length || 0}`);
+  }, [componentId, loading, error, data]);
 
   // Manual refresh function
   const refresh = useCallback(() => {
