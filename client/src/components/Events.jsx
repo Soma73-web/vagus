@@ -90,11 +90,12 @@ const Events = () => {
             }`}
           >
             <img
-              src={`${API_BASE}/api/events/image/${event.id}`}
+              src={`${API_BASE}${event.imageUrl}`}
               alt={event.title || "Event"}
               className="w-full h-full object-cover"
               onError={(e) => {
                 console.error("Image failed to load:", e.target.src);
+                e.target.style.display = "none";
               }}
             />
             {/* Overlay for better text readability */}
