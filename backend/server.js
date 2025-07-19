@@ -1,7 +1,32 @@
 const express = require("express");
 const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
 require("dotenv").config();
 const app = express();
+
+// Create upload directories if they don't exist
+const createUploadDirectories = () => {
+  const uploadDirs = [
+    'uploads',
+    'uploads/events',
+    'uploads/gallery',
+    'uploads/testimonials',
+    'uploads/slider',
+    'uploads/study-materials',
+    'uploads/results'
+  ];
+  
+  uploadDirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+      console.log(`Created directory: ${dir}`);
+    }
+  });
+};
+
+// Create directories on startup
+createUploadDirectories();
 
 // Sequelize DB connection
 const sequelize = require("./config/db");

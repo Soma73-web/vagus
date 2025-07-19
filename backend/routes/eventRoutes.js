@@ -10,16 +10,8 @@ const {
   getEventImage,
 } = require("../controllers/eventController");
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/events/");
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, "event-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
+// Configure multer for memory storage (BLOB)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,

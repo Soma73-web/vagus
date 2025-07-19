@@ -8,6 +8,7 @@ const getAllEvents = async (req, res) => {
     const events = await Event.findAll({
       where: { isActive: true },
       order: [["eventDate", "DESC"]],
+      attributes: { exclude: ['imageData'] } // Exclude BLOB data from response
     });
 
     res.json(events);
@@ -23,13 +24,15 @@ const createEvent = async (req, res) => {
     const { description } = req.body;
     const addedBy = req.admin?.username || "admin";
 
-    let imagePath = null;
+    let imageData = null;
+    let imageMimeType = null;
     let imageUrl = null;
 
-    // Handle file upload
+    // Handle file upload - store as BLOB
     if (req.file) {
-      imagePath = req.file.path;
-      imageUrl = `/uploads/${req.file.filename}`;
+      imageData = req.file.buffer;
+      imageMimeType = req.file.mimetype;
+      imageUrl = `/api/events/image/${Date.now()}`; // URL for serving the image
     }
 
     const event = await Event.create({
@@ -37,14 +40,18 @@ const createEvent = async (req, res) => {
       description: description || "",
       eventDate: new Date(),
       imageUrl,
-      imagePath,
+      imageData,
+      imageMimeType,
       category: "general",
       addedBy,
     });
 
     res.status(201).json({
       message: "Event created successfully",
-      event,
+      event: {
+        ...event.toJSON(),
+        imageData: undefined // Don't send BLOB data in response
+      },
     });
   } catch (error) {
     console.error("Create event error:", error);
@@ -60,10 +67,11 @@ const updateEvent = async (req, res) => {
 
     let updateData = { description };
 
-    // Handle file upload
+    // Handle file upload - store as BLOB
     if (req.file) {
-      updateData.imagePath = req.file.path;
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+      updateData.imageData = req.file.buffer;
+      updateData.imageMimeType = req.file.mimetype;
+      updateData.imageUrl = `/api/events/image/${Date.now()}`;
     }
 
     await Event.update(updateData, { where: { id } });
@@ -72,7 +80,10 @@ const updateEvent = async (req, res) => {
 
     res.json({
       message: "Event updated successfully",
-      event: updatedEvent,
+      event: {
+        ...updatedEvent.toJSON(),
+        imageData: undefined // Don't send BLOB data in response
+      },
     });
   } catch (error) {
     console.error("Update event error:", error);
@@ -94,23 +105,22 @@ const deleteEvent = async (req, res) => {
   }
 };
 
-// Serve event image
+// Serve event image from BLOB
 const getEventImage = async (req, res) => {
   try {
     const { id } = req.params;
     const event = await Event.findByPk(id);
 
-    if (!event || !event.imagePath) {
+    if (!event || !event.imageData) {
       return res.status(404).json({ error: "Image not found" });
     }
 
-    const imagePath = path.resolve(event.imagePath);
+    // Set appropriate headers
+    res.setHeader('Content-Type', event.imageMimeType || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
 
-    if (!fs.existsSync(imagePath)) {
-      return res.status(404).json({ error: "Image file not found" });
-    }
-
-    res.sendFile(imagePath);
+    // Send the BLOB data
+    res.send(event.imageData);
   } catch (error) {
     console.error("Get event image error:", error);
     res.status(500).json({ error: "Failed to get image" });
