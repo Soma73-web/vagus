@@ -8,17 +8,28 @@ exports.getAllResults = async (req, res) => {
       attributes: ['id', 'name', 'college', 'rank', 'year', 'image', 'image_type']
     });
     
+    console.log(`📊 Found ${results.length} results`);
+    
     // Convert blob images to base64
     const resultsWithBase64 = results.map(result => {
       const resultData = result.toJSON();
+      console.log(`🖼️ Processing result ${resultData.id}: image exists = ${!!resultData.image}`);
+      
       if (resultData.image) {
-        const base64Image = resultData.image.toString('base64');
-        resultData.image = `data:${resultData.image_type || 'image/jpeg'};base64,${base64Image}`;
+        try {
+          const base64Image = resultData.image.toString('base64');
+          resultData.image = `data:${resultData.image_type || 'image/jpeg'};base64,${base64Image}`;
+          console.log(`✅ Converted result ${resultData.id} to base64 (${base64Image.length} chars)`);
+        } catch (err) {
+          console.error(`❌ Error converting result ${resultData.id}:`, err);
+        }
+      } else {
+        console.log(`⚠️ Result ${resultData.id} has no image data`);
       }
       return resultData;
     });
     
-    console.log(`✅ Found ${results.length} results with base64 images`);
+    console.log(`🎉 Returning ${resultsWithBase64.length} results with base64 images`);
     res.json(resultsWithBase64);
   } catch (err) {
     console.error('❌ Failed to fetch results:', err);

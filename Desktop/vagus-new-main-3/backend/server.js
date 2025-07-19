@@ -239,6 +239,31 @@ app.get("/test-image/:id", (req, res) => {
   res.send(Buffer.from('fake-image-data'));
 });
 
+// Test base64 conversion
+app.get("/test-base64", async (req, res) => {
+  try {
+    console.log('🧪 Testing base64 conversion...');
+    
+    // Test with a simple base64 image
+    const testImage = Buffer.from('test-image-data');
+    const base64Image = testImage.toString('base64');
+    const dataUrl = `data:image/jpeg;base64,${base64Image}`;
+    
+    console.log(`✅ Base64 conversion test: ${base64Image.length} chars`);
+    
+    res.json({
+      success: true,
+      originalSize: testImage.length,
+      base64Size: base64Image.length,
+      dataUrl: dataUrl,
+      message: 'Base64 conversion is working'
+    });
+  } catch (error) {
+    console.error('❌ Base64 test error:', error);
+    res.status(500).json({ error: 'Base64 test failed' });
+  }
+});
+
 app.get("/health", (req, res) => {
   res.json({
     status: "OK",

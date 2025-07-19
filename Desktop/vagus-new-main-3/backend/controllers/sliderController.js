@@ -22,24 +22,37 @@ exports.uploadImage = async (req, res) => {
 // Get all slider images with base64 data
 exports.getAllImageIds = async (req, res) => {
   try {
+    console.log('🔍 Fetching slider images...');
     const sliders = await Slider.findAll({
       attributes: ['id', 'photo', 'mimeType'],
       order: [['id', 'ASC']],
     });
     
+    console.log(`📊 Found ${sliders.length} slider images`);
+    
     // Convert blob images to base64
     const slidersWithBase64 = sliders.map(slider => {
       const sliderData = slider.toJSON();
+      console.log(`🖼️ Processing slider ${sliderData.id}: photo exists = ${!!sliderData.photo}`);
+      
       if (sliderData.photo) {
-        const base64Image = sliderData.photo.toString('base64');
-        sliderData.photo = `data:${sliderData.mimeType || 'image/jpeg'};base64,${base64Image}`;
+        try {
+          const base64Image = sliderData.photo.toString('base64');
+          sliderData.photo = `data:${sliderData.mimeType || 'image/jpeg'};base64,${base64Image}`;
+          console.log(`✅ Converted slider ${sliderData.id} to base64 (${base64Image.length} chars)`);
+        } catch (err) {
+          console.error(`❌ Error converting slider ${sliderData.id}:`, err);
+        }
+      } else {
+        console.log(`⚠️ Slider ${sliderData.id} has no photo data`);
       }
       return sliderData;
     });
     
+    console.log(`🎉 Returning ${slidersWithBase64.length} slider images with base64`);
     res.json(slidersWithBase64);
   } catch (error) {
-    console.error('Fetch slider images error:', error);
+    console.error('❌ Fetch slider images error:', error);
     res.status(500).json({ error: 'Failed to fetch images' });
   }
 };
