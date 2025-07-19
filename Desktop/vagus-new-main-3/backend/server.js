@@ -110,6 +110,48 @@ app.use(
 // Serve static files from uploads directory
 app.use("/uploads", express.static("uploads"));
 
+// Test uploads directory
+app.get("/test-uploads", (req, res) => {
+  const fs = require('fs');
+  const path = require('path');
+  
+  try {
+    const uploadsDir = path.join(__dirname, 'uploads');
+    const eventsDir = path.join(uploadsDir, 'events');
+    
+    console.log(`📁 Checking uploads directory: ${uploadsDir}`);
+    console.log(`📁 Checking events directory: ${eventsDir}`);
+    
+    const uploadsExists = fs.existsSync(uploadsDir);
+    const eventsExists = fs.existsSync(eventsDir);
+    
+    let uploadsFiles = [];
+    let eventsFiles = [];
+    
+    if (uploadsExists) {
+      uploadsFiles = fs.readdirSync(uploadsDir);
+      console.log(`📂 Uploads directory contents: ${uploadsFiles.join(', ')}`);
+    }
+    
+    if (eventsExists) {
+      eventsFiles = fs.readdirSync(eventsDir);
+      console.log(`📂 Events directory contents: ${eventsFiles.join(', ')}`);
+    }
+    
+    res.json({
+      uploadsDir,
+      eventsDir,
+      uploadsExists,
+      eventsExists,
+      uploadsFiles,
+      eventsFiles
+    });
+  } catch (error) {
+    console.error('❌ Error checking uploads directory:', error);
+    res.status(500).json({ error: 'Failed to check uploads directory' });
+  }
+});
+
 // Route Imports
 const testimonialRoutes = require("./routes/testimonialRoutes");
 const downloadRoutes = require("./routes/downloadRoutes");

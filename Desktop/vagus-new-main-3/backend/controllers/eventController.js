@@ -42,9 +42,10 @@ const validateImageFile = (file) => {
   return true;
 };
 
-// Get all events with base64 images
+// Get all events with base64 images from database
 const getAllEvents = async (req, res) => {
   try {
+    console.log('🔍 Fetching all events from database...');
     const events = await Event.findAll({
       where: { isActive: true },
       order: [
@@ -56,39 +57,37 @@ const getAllEvents = async (req, res) => {
         "title",
         "description",
         "imageUrl",
-        "imagePath",
         "displayOrder",
         "isActive",
         "created_at",
       ],
     });
 
-    // Convert file images to base64
-    const eventsWithBase64 = await Promise.all(events.map(async (event) => {
+    console.log(`📊 Found ${events.length} events in database`);
+
+    // Process events - imageUrl should already be base64 data from database
+    const processedEvents = events.map((event) => {
       const eventData = event.toJSON();
+      console.log(`🖼️ Processing event ${eventData.id}: imageUrl type = ${eventData.imageUrl ? (eventData.imageUrl.startsWith('data:') ? 'base64' : 'url') : 'none'}`);
       
-      if (eventData.imagePath && fs.existsSync(eventData.imagePath)) {
-        try {
-          const imageBuffer = fs.readFileSync(eventData.imagePath);
-          const base64Image = imageBuffer.toString('base64');
-          const mimeType = path.extname(eventData.imagePath).toLowerCase() === '.png' ? 'image/png' : 'image/jpeg';
-          eventData.imageUrl = `data:${mimeType};base64,${base64Image}`;
-        } catch (err) {
-          console.error(`Error reading image file for event ${eventData.id}:`, err);
-        }
+      // If imageUrl is not base64, it might be a URL that needs to be converted
+      if (eventData.imageUrl && !eventData.imageUrl.startsWith('data:')) {
+        console.log(`⚠️ Event ${eventData.id} has non-base64 imageUrl: ${eventData.imageUrl.substring(0, 50)}...`);
+        // For now, keep the URL as is - it will be handled by frontend
       }
       
       return eventData;
-    }));
+    });
 
-    res.json(eventsWithBase64);
+    console.log(`🎉 Returning ${processedEvents.length} events from database`);
+    res.json(processedEvents);
   } catch (error) {
-    console.error("Get events error:", error);
+    console.error("❌ Get events error:", error);
     res.status(500).json({ error: "Failed to fetch events" });
   }
 };
 
-// Create event (admin only)
+// Create event (admin only) - Store image as base64 in database
 const createEvent = async (req, res) => {
   try {
     const { description, title, eventDate, category } = req.body;
@@ -115,8 +114,13 @@ const createEvent = async (req, res) => {
       description: description ? sanitizeInput(description) : null,
     };
 
-    const imagePath = req.file.path;
-    const imageUrl = `/uploads/events/${req.file.filename}`;
+    // Convert uploaded file to base64 and store in database
+    const imageBuffer = fs.readFileSync(req.file.path);
+    const base64Image = imageBuffer.toString('base64');
+    const mimeType = req.file.mimetype;
+    const base64ImageUrl = `data:${mimeType};base64,${base64Image}`;
+
+    console.log(`✅ Converting uploaded image to base64 (${base64Image.length} chars)`);
 
     // Get the next display order
     const maxOrder = (await Event.max("displayOrder")) || 0;
@@ -124,15 +128,20 @@ const createEvent = async (req, res) => {
     const event = await Event.create({
       title: sanitizedData.title,
       description: sanitizedData.description,
-      imageUrl,
-      imagePath,
+      imageUrl: base64ImageUrl, // Store base64 data directly
       displayOrder: maxOrder + 1,
       addedBy,
       isActive: true,
     });
 
+    // Clean up the uploaded file since we've stored it as base64
+    if (fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+      console.log(`🗑️ Cleaned up uploaded file: ${req.file.path}`);
+    }
+
     res.status(201).json({
-      message: "Event image uploaded successfully",
+      message: "Event created successfully with base64 image",
       event: {
         id: event.id,
         title: event.title,
@@ -187,18 +196,26 @@ const updateEvent = async (req, res) => {
       updateData.eventDate = parsedDate;
     }
 
-    // Handle file upload with validation
+    // Handle file upload with validation - Convert to base64
     if (req.file) {
       try {
         validateImageFile(req.file);
 
-        // Delete old image if exists
-        if (existingEvent.imagePath && fs.existsSync(existingEvent.imagePath)) {
-          fs.unlinkSync(existingEvent.imagePath);
-        }
+        // Convert uploaded file to base64
+        const imageBuffer = fs.readFileSync(req.file.path);
+        const base64Image = imageBuffer.toString('base64');
+        const mimeType = req.file.mimetype;
+        const base64ImageUrl = `data:${mimeType};base64,${base64Image}`;
 
-        updateData.imagePath = req.file.path;
-        updateData.imageUrl = `/uploads/${req.file.filename}`;
+        console.log(`✅ Converting updated image to base64 (${base64Image.length} chars)`);
+
+        updateData.imageUrl = base64ImageUrl; // Store base64 data directly
+
+        // Clean up the uploaded file since we've stored it as base64
+        if (fs.existsSync(req.file.path)) {
+          fs.unlinkSync(req.file.path);
+          console.log(`🗑️ Cleaned up uploaded file: ${req.file.path}`);
+        }
       } catch (fileError) {
         // Clean up uploaded file if validation fails
         if (fs.existsSync(req.file.path)) {
@@ -258,7 +275,7 @@ const deleteEvent = async (req, res) => {
   }
 };
 
-// Permanently delete event (admin only)
+// Permanently delete event (admin only) - No file system dependencies
 const permanentDeleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -269,16 +286,13 @@ const permanentDeleteEvent = async (req, res) => {
       return res.status(404).json({ error: "Event not found" });
     }
 
-    // Delete associated image file
-    if (event.imagePath && fs.existsSync(event.imagePath)) {
-      fs.unlinkSync(event.imagePath);
-    }
-
-    // Permanently delete from database
+    // Permanently delete from database (no file cleanup needed since images are stored as base64)
     await Event.destroy({ where: { id } });
 
+    console.log(`🗑️ Permanently deleted event ${id} from database`);
+
     res.json({
-      message: "Event permanently deleted",
+      message: "Event permanently deleted from database",
       deletedEvent: {
         id: event.id,
         title: event.title,
@@ -291,42 +305,10 @@ const permanentDeleteEvent = async (req, res) => {
   }
 };
 
-// Serve event image
-const getEventImage = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const event = await Event.findByPk(id);
-
-    if (!event || !event.imagePath) {
-      return res.status(404).json({ error: "Image not found" });
-    }
-
-    const imagePath = path.resolve(event.imagePath);
-
-    if (!fs.existsSync(imagePath)) {
-      return res.status(404).json({ error: "Image file not found" });
-    }
-
-    // Set CORS headers for image responses
-    res.set({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Cache-Control': 'public, max-age=31536000', // Cache for 1 year
-    });
-
-    res.sendFile(imagePath);
-  } catch (error) {
-    console.error("Get event image error:", error);
-    res.status(500).json({ error: "Failed to get image" });
-  }
-};
-
 module.exports = {
   getAllEvents,
   createEvent,
   updateEvent,
   deleteEvent,
   permanentDeleteEvent,
-  getEventImage,
 };

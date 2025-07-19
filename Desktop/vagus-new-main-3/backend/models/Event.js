@@ -17,14 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       imageUrl: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.TEXT, // Changed to TEXT to store large base64 data
         allowNull: false,
         field: 'image_url',
-      },
-      imagePath: {
-        type: DataTypes.STRING(500),
-        allowNull: false,
-        field: 'imagePath',
       },
       displayOrder: {
         type: DataTypes.INTEGER,

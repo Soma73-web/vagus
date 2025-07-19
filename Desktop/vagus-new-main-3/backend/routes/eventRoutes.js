@@ -6,16 +6,7 @@ const {
   createEvent,
   updateEvent,
   deleteEvent,
-  getEventImage,
 } = require("../controllers/eventController");
-
-// CORS middleware for image routes
-const imageCors = (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-};
 
 // Simple admin auth middleware
 const authenticateAdmin = (req, res, next) => {
@@ -30,13 +21,6 @@ const authenticateAdmin = (req, res, next) => {
 
 // Public routes
 router.get("/", getAllEvents);
-
-// Handle preflight requests for image routes
-router.options("/image/:id", imageCors, (req, res) => {
-  res.status(200).end();
-});
-
-router.get("/image/:id", imageCors, getEventImage);
 
 // Admin routes
 router.post("/", authenticateAdmin, eventsUpload.single("image"), createEvent);

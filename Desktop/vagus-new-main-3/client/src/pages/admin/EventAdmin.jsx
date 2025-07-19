@@ -162,11 +162,7 @@ const EventAdmin = () => {
       image: null,
     });
     setEditingId(event.id);
-    setPreview(
-      event.imageUrl
-        ? `${api.defaults.baseURL}/api/events/image/${event.id}`
-        : null,
-    );
+    setPreview(event.imageUrl || null); // Use base64 image directly
   };
 
   const handleDelete = async (id) => {
@@ -305,7 +301,7 @@ const EventAdmin = () => {
               >
                 {event.imageUrl && (
                   <img
-                    src={`${api.defaults.baseURL}/api/events/image/${event.id}`}
+                    src={event.imageUrl}
                     alt="Event"
                     className="w-full h-48 object-cover"
                   />
