@@ -1,0 +1,383 @@
+/* Enhanced Typography and Design System */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+
+/* Tailwind base */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+/* Base styles and typography */
+@layer base {
+  html {
+    /* Remove global smooth scroll - handle it programmatically */
+    scroll-behavior: auto;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body {
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #1f2937;
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+  }
+
+  h2 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 600;
+  }
+
+  p {
+    font-size: clamp(0.875rem, 2vw, 1.125rem);
+    line-height: 1.7;
+  }
+}
+
+/* Enhanced component styles */
+@layer components {
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 xl:px-12;
+  }
+
+  .container-responsive {
+    @apply max-w-7xl mx-auto section-padding;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-indigo-600 border-2 border-indigo-600 font-semibold px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:-translate-y-2;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent;
+  }
+
+  .section-divider {
+    @apply w-20 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 mx-auto rounded-full;
+  }
+
+  /* Header specific styles for layout stability */
+  .navbar-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .navbar-content {
+    @apply flex items-center justify-between h-24;
+  }
+
+  .navbar-logo {
+    @apply flex-shrink-0;
+  }
+
+  .navbar-nav {
+    @apply hidden lg:flex items-center justify-center flex-1 mx-8;
+  }
+
+  .navbar-actions {
+    @apply flex items-center space-x-4 flex-shrink-0;
+  }
+
+  /* Ensure proper spacing and prevent overlap */
+  @media (min-width: 1024px) {
+    .navbar-nav {
+      min-width: 0; /* Allow flex item to shrink */
+      max-width: calc(100vw - 32rem); /* Reserve space for logo and buttons */
+    }
+  }
+
+  /* Defensive styles to prevent navbar overlap */
+  header {
+    min-height: 96px !important;
+  }
+
+  header .flex {
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  header .flex-shrink-0 {
+    flex-shrink: 0 !important;
+  }
+
+  header .flex-1 {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+  }
+
+  /* Ensure navigation doesn't wrap */
+  header nav {
+    white-space: nowrap !important;
+  }
+
+  header nav > div {
+    flex-wrap: nowrap !important;
+  }
+
+  /* Responsive header spacing */
+  @media (min-width: 1024px) and (max-width: 1280px) {
+    /* Tighter spacing on smaller desktop screens */
+    header nav > div {
+      gap: 0.25rem !important;
+    }
+
+    header nav button {
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+      font-size: 0.75rem !important;
+    }
+
+    .btn-primary {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+      font-size: 0.75rem !important;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    /* Normal spacing on larger screens */
+    header nav > div {
+      gap: 0.75rem !important;
+    }
+  }
+}
+
+/* Animation utilities */
+@layer utilities {
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  .animate-divine-glow {
+    animation: divineGlow 2s ease-in-out infinite;
+  }
+
+  .animate-petal-float {
+    animation: petalFloat 3s ease-in-out infinite;
+  }
+
+  .animate-sacred-pulse {
+    animation: sacredPulse 2s ease-in-out infinite;
+  }
+}
+
+/* Keyframe animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes divineGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(251, 146, 60, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(244, 114, 182, 0.5);
+  }
+}
+
+@keyframes petalFloat {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+    opacity: 0.8;
+  }
+}
+
+@keyframes sacredPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Enhanced carousel styles */
+.slick-arrow {
+  z-index: 10 !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+  background: rgba(67, 56, 202, 0.9) !important;
+  transition: all 0.3s ease !important;
+}
+
+.slick-arrow:hover {
+  background: rgba(67, 56, 202, 1) !important;
+  transform: scale(1.1) !important;
+}
+
+.slick-arrow:before {
+  font-size: 20px !important;
+  color: white !important;
+}
+
+.slick-dots {
+  bottom: -50px !important;
+}
+
+.slick-dots li {
+  margin: 0 5px !important;
+}
+
+.slick-dots li button:before {
+  color: #6366f1 !important;
+  font-size: 14px !important;
+  opacity: 0.5 !important;
+  transition: all 0.3s ease !important;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #4338ca !important;
+  opacity: 1 !important;
+  transform: scale(1.2) !important;
+}
+
+/* Responsive breakpoint improvements */
+@media (max-width: 640px) {
+  .section-padding {
+    @apply px-4;
+  }
+
+  .slick-arrow {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .slick-arrow:before {
+    font-size: 16px !important;
+  }
+}
+
+/* Scroll padding for hash navigation */
+html {
+  scroll-padding-top: 96px; /* Match header height exactly */
+}
+
+/* Prevent unwanted scroll behaviors */
+* {
+  scroll-margin-top: 96px;
+}
+
+/* Ensure sections don't auto-scroll */
+section {
+  scroll-margin-top: 96px;
+}
+
+/* Focus states for accessibility */
+button:focus,
+a:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

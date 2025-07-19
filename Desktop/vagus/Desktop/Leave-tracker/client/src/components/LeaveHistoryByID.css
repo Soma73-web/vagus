@@ -1,0 +1,60 @@
+.leave-history {
+    padding: 20px;
+}
+
+.leave-history h2 {
+    margin-bottom: 20px;
+}
+
+.leave-history form {
+    margin-bottom: 20px;
+}
+
+.leave-history form label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.leave-history form input {
+    margin-left: 10px;
+    padding: 5px;
+}
+
+.leave-history button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.leave-history button:hover {
+    background-color: #0056b3;
+}
+
+.leave-history .error {
+    color: red;
+    margin-bottom: 10px;
+}
+
+.leave-history table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.leave-history table, th, td {
+    border: 1px solid #ddd;
+}
+
+.leave-history th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+.leave-history .planned {
+    background-color: lightgreen;
+}
+
+.leave-history .unplanned {
+    background-color: lightcoral;
+}
