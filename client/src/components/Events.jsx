@@ -64,7 +64,10 @@ const Events = () => {
     );
   }
 
-  if (events.length === 0) {
+  if (
+    events.length === 0 ||
+    (!loading && validImages.size === 0 && events.length > 0)
+  ) {
     return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
