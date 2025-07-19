@@ -44,6 +44,10 @@ const GalleryAdminn = () => {
       toast.success('Image uploaded successfully');
       setFile(null);
 
+      // Reset file input
+      const fileInput = document.getElementById('image-upload');
+      if (fileInput) fileInput.value = '';
+
       // Refresh categories after upload to show new image
       const res = await api.get('/api/image-gallery');
       setCategories(res.data);

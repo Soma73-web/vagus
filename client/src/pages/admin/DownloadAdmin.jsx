@@ -65,6 +65,10 @@ const DownloadAdmin = () => {
 
   const resetForm = () => {
     setForm({ id: null, title: '', file: null });
+    
+    // Reset form inputs
+    const formElement = document.querySelector("form");
+    if (formElement) formElement.reset();
   };
 
   return (

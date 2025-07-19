@@ -40,6 +40,10 @@ const TestimonialAdmin = () => {
       }
       fetchTestimonials();
       resetForm();
+      
+      // Reset form inputs
+      const formElement = document.querySelector("form");
+      if (formElement) formElement.reset();
     } catch (err) {
       console.error('Error submitting testimonial:', err);
       alert('Failed to save testimonial.');

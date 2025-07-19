@@ -76,6 +76,10 @@ const ResultAdmin = () => {
       image: null,
     });
     setPreview(null);
+    
+    // Reset form inputs
+    const formElement = document.querySelector("form");
+    if (formElement) formElement.reset();
   };
 
   // ─────── Edit row ───────

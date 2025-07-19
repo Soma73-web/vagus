@@ -58,6 +58,10 @@ const SliderAdmin = () => {
 
       showSuccess("Image uploaded successfully!");
       await fetchImages();
+      
+      // Reset form
+      const formElement = document.querySelector("form");
+      if (formElement) formElement.reset();
     } catch (err) {
       console.error("Upload failed:", err);
       showError("Failed to upload image.");
