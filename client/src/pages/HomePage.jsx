@@ -3,11 +3,12 @@ import HomeSlider from '../components/HomeSlider';
 import Hero from '../components/Hero';
 import Courses from '../components/Courses';
 import Features from '../components/Features';
+import Events from '../components/Events';
 import Gallery from '../components/Gallery';
 import Testimonials from '../components/Testimonials';
+import Results from '../components/Results';
 // import DownloadSection from '../components/DownloadSection';
 import Footer from '../components/Footer';
-import ResultsPage from './ResultsPage';
 
 const HomePage = () => {
   const resultsRef = useRef(null);
@@ -46,19 +47,23 @@ const HomePage = () => {
           <Courses />
         </div>
 
-        <div className="mb-16">
+        <div className="mb-12">
           <Features />
         </div>
 
-        <div ref={resultsRef} className="mb-16">
-          <ResultsPage />
+        <div className="mb-12">
+          <Events />
         </div>
 
-        <div ref={galleryRef} className="mb-16">
+        <div ref={resultsRef} className="mb-12">
+          <Results />
+        </div>
+
+        <div ref={galleryRef} className="mb-12">
           <Gallery />
         </div>
 
-        <div ref={testimonialsRef} className="mb-16">
+        <div ref={testimonialsRef} className="mb-12">
           <Testimonials />
         </div>
 

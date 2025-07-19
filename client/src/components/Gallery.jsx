@@ -46,7 +46,7 @@ const Gallery = () => {
 
   if (loading) {
     return (
-      <section className="py-20 bg-gray-100">
+      <section className="py-16 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <LoadingSpinner message="Our gallery team is preparing visual memories..." />
         </div>
@@ -56,7 +56,7 @@ const Gallery = () => {
 
   if (images.length === 0) {
     return (
-      <section className="py-20 bg-gray-100">
+      <section className="py-16 bg-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <EmptyState
             icon="📸"
@@ -69,7 +69,7 @@ const Gallery = () => {
   }
 
   return (
-    <section id="gallery" className="py-20 bg-white scroll-mt-24">
+    <section id="gallery" className="py-16 bg-white scroll-mt-24">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-4 mb-2">

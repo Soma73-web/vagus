@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../api";
 import Contact from "./ContactPage";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
 
@@ -10,6 +11,8 @@ const ResultPage = () => {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  useScrollToTop(); // Scroll to top when component mounts
+  
   useEffect(() => {
     const fetchResults = async () => {
       try {

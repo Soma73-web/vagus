@@ -125,11 +125,11 @@ const Courses = () => {
   return (
     <section
       id="courses"
-      className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 scroll-mt-24"
+      className="py-16 bg-gradient-to-br from-gray-50 to-blue-50 scroll-mt-24"
     >
       <div className="max-w-7xl mx-auto px-6">
         {/* Header Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Our <span className="text-blue-600">Courses</span>
           </h2>
@@ -142,7 +142,7 @@ const Courses = () => {
         </div>
 
         {/* Course Category Tabs */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-10">
           <div className="bg-white rounded-2xl shadow-lg p-2 border border-gray-200">
             {["neet", "jee", "foundation"].map((tab) => (
               <button

@@ -4,7 +4,7 @@ import heroImage from '../assets/logoo.jpg';
 
 const Hero = () => {
   return (
-    <section className="min-h-[85vh] flex items-center pt-24 pb-12 px-6 bg-white scroll-mt-24">
+    <section className="min-h-[80vh] flex items-center pt-20 pb-16 px-6 bg-white scroll-mt-24">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 
         {/* Text Content */}
