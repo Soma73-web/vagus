@@ -65,19 +65,49 @@ const getAllEvents = async (req, res) => {
 
     console.log(`📊 Found ${events.length} events in database`);
 
-    // Process events - imageUrl should already be base64 data from database
-    const processedEvents = events.map((event) => {
+    // Process events - convert file-based images to base64 if needed
+    const processedEvents = await Promise.all(events.map(async (event) => {
       const eventData = event.toJSON();
       console.log(`🖼️ Processing event ${eventData.id}: imageUrl type = ${eventData.imageUrl ? (eventData.imageUrl.startsWith('data:') ? 'base64' : 'url') : 'none'}`);
       
-      // If imageUrl is not base64, it might be a URL that needs to be converted
+      // If imageUrl is not base64, try to convert from file
       if (eventData.imageUrl && !eventData.imageUrl.startsWith('data:')) {
         console.log(`⚠️ Event ${eventData.id} has non-base64 imageUrl: ${eventData.imageUrl.substring(0, 50)}...`);
-        // For now, keep the URL as is - it will be handled by frontend
+        
+        // Try to convert file path to base64
+        try {
+          // Check if it's a relative path and convert to absolute
+          let filePath = eventData.imageUrl;
+          if (filePath.startsWith('/uploads/')) {
+            filePath = path.join(__dirname, '..', filePath.substring(1)); // Remove leading slash
+          }
+          
+          if (fs.existsSync(filePath)) {
+            console.log(`✅ Converting file to base64: ${filePath}`);
+            const imageBuffer = fs.readFileSync(filePath);
+            const base64Image = imageBuffer.toString('base64');
+            const mimeType = path.extname(filePath).toLowerCase() === '.png' ? 'image/png' : 'image/jpeg';
+            eventData.imageUrl = `data:${mimeType};base64,${base64Image}`;
+            
+            // Update the database record
+            await Event.update(
+              { imageUrl: eventData.imageUrl },
+              { where: { id: eventData.id } }
+            );
+            
+            console.log(`✅ Converted event ${eventData.id} to base64 (${base64Image.length} chars)`);
+          } else {
+            console.log(`❌ File not found: ${filePath}`);
+            // Keep the original URL as fallback
+          }
+        } catch (err) {
+          console.error(`❌ Error converting event ${eventData.id} to base64:`, err);
+          // Keep the original URL as fallback
+        }
       }
       
       return eventData;
-    });
+    }));
 
     console.log(`🎉 Returning ${processedEvents.length} events from database`);
     res.json(processedEvents);
