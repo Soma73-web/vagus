@@ -9,6 +9,7 @@ const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [validImages, setValidImages] = useState(new Set());
 
   useEffect(() => {
     const fetchEvents = async () => {
