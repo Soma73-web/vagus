@@ -34,7 +34,7 @@ const Events = () => {
 
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % events.length);
-    }, 20000); // 20 seconds
+    }, 3000); // 3 seconds for faster cycling
 
     return () => clearInterval(interval);
   }, [events.length]);
@@ -66,9 +66,9 @@ const Events = () => {
           />
         ) : (
           <div className="relative">
-            {/* Full-Cover Slider */}
+            {/* Full-Cover Slider - Images Only */}
             <div className="relative h-96 md:h-[500px] lg:h-[600px] overflow-hidden rounded-2xl shadow-2xl">
-              {/* Slides */}
+              {/* Slides - Images Only */}
               {events.map((event, index) => (
                 <div
                   key={event.id}
@@ -78,34 +78,12 @@ const Events = () => {
                       : "opacity-0 transform translate-x-full"
                   }`}
                 >
-                  {/* Full-cover image */}
+                  {/* Full-cover image only */}
                   <img
                     src={`${API_BASE}/api/events/image/${event.id}`}
-                    alt={event.description || "Event"}
+                    alt="Event"
                     className="w-full h-full object-cover"
                   />
-                  
-                  {/* Dark overlay for text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                  
-                  {/* Event content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                    <div className="max-w-4xl mx-auto">
-                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
-                        {event.description || "Institute Event"}
-                      </h3>
-                      {event.eventDate && (
-                        <p className="text-lg md:text-xl opacity-90">
-                          {new Date(event.eventDate).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
-                      )}
-                    </div>
-                  </div>
                 </div>
               ))}
 
@@ -151,13 +129,6 @@ const Events = () => {
                       aria-label={`Go to slide ${index + 1}`}
                     />
                   ))}
-                </div>
-              )}
-
-              {/* Auto-slide indicator */}
-              {events.length > 1 && (
-                <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-                  Auto-sliding every 20s
                 </div>
               )}
             </div>
