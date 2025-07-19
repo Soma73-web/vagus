@@ -95,7 +95,10 @@ const Events = () => {
               className="w-full h-full object-cover"
               onError={(e) => {
                 console.error("Image failed to load:", e.target.src);
+                // Hide the broken image and show placeholder
                 e.target.style.display = "none";
+                // You could also set a fallback image:
+                // e.target.src = '/placeholder-event.jpg';
               }}
             />
             {/* Overlay for better text readability */}
