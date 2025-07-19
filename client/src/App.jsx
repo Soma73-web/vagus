@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import SiteLoader from "./components/SiteLoader";
 import ErrorBoundary from "./components/ErrorBoundary";
 import authManager from "./utils/auth";
+import PopupWrapper from "./components/PopupWrapper";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -62,6 +63,7 @@ function App() {
         <Header />
         <WhatsAppButton />
         <AIChatbot />
+        <PopupWrapper />
 
         <Routes>
           <Route

@@ -38,6 +38,7 @@ const categorizedImageRoutes = require("./routes/categorizedImageRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const adminStudentRoutes = require("./routes/adminStudentRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const popupRoutes = require("./routes/popupRoutes");
 const adminRoutes = require("./routes/admin");
 const chatbotRoutes = require("./routes/chatbotRoutes");
 
@@ -49,6 +50,7 @@ app.use("/api/gallery", categorizedImageRoutes);
 app.use("/api/students", studentRoutes);
 app.use("/api/admin", adminStudentRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/popup", popupRoutes);
 app.use("/api/auth", adminRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 
