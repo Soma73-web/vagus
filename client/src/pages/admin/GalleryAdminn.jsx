@@ -11,7 +11,7 @@ const GalleryAdminn = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await api.get('/api/image-gallery');
+        const res = await api.get('/api/image-gallery/categorized');
         setCategories(res.data);
         if (res.data.length > 0) {
           setSelectedCat(res.data[0].id.toString()); // set first category selected
@@ -49,7 +49,7 @@ const GalleryAdminn = () => {
       if (fileInput) fileInput.value = '';
 
       // Refresh categories after upload to show new image
-      const res = await api.get('/api/image-gallery');
+      const res = await api.get('/api/image-gallery/categorized');
       setCategories(res.data);
     } catch (err) {
       console.error(err);
@@ -65,7 +65,7 @@ const GalleryAdminn = () => {
       toast.success('Image deleted');
 
       // Refresh categories after deletion
-      const res = await api.get('/api/image-gallery');
+      const res = await api.get('/api/image-gallery/categorized');
       setCategories(res.data);
     } catch (err) {
       console.error(err);
@@ -117,10 +117,10 @@ const GalleryAdminn = () => {
 
       {/* Images Grid */}
       <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-        {(selectedCategory?.images || []).map(img => (
+        {(selectedCategory?.CategorizedGalleryImages || []).map(img => (
           <div key={img.id} className="relative group border p-2 rounded shadow">
             <img
-              src={img.image} // Assuming your backend sends image as base64 or URL
+              src={img.image_url}
               alt={`Gallery ${img.id}`}
               className="w-full h-40 object-cover rounded"
             />
