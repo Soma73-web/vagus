@@ -60,34 +60,26 @@ function App() {
     <ErrorBoundary>
       <Router>
         <ScrollToHash />
-        <Header />
-        <WhatsAppButton />
-        <AIChatbot />
-        <PopupWrapper />
-
+        {/* Only show public UI on non-admin pages */}
         <Routes>
           <Route
             path="/"
             element={
               <>
+                <Header />
+                <WhatsAppButton />
+                <AIChatbot />
                 <main className="pt-[96px]">
                   <HomeSlider />
-
                   <Events />
-
                   <Hero />
-
                   {/* Courses Section */}
                   <div id="courses" className="scroll-mt-24">
                     <Courses />
                   </div>
-
                   <Features />
-
                   <Results />
-
                   <Gallery />
-
                   {/* Testimonials Section */}
                   <div id="testimonials" className="scroll-mt-24">
                     <Testimonials />
@@ -99,11 +91,11 @@ function App() {
           />
 
           {/* Other Pages */}
-          <Route path="/gallery" element={<GallerySection />} />
-          <Route path="/downloads" element={<DownloadSection />} />
-          <Route path="/directors-message" element={<DirectorsMessage />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/gallery" element={<><Header /><GallerySection /><Footer /></>} />
+          <Route path="/downloads" element={<><Header /><DownloadSection /><Footer /></>} />
+          <Route path="/directors-message" element={<><Header /><DirectorsMessage /><Footer /></>} />
+          <Route path="/privacy-policy" element={<><Header /><PrivacyPolicy /><Footer /></>} />
+          <Route path="/contact" element={<><Header /><ContactPage /><Footer /></>} />
           <Route
             path="/admin"
             element={
@@ -113,10 +105,10 @@ function App() {
             }
           />
           <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/results" element={<ResultsPage />} />
-          <Route path="/student-login" element={<StudentLogin />} />
-          <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/about" element={<><Header /><About /><Footer /></>} />
+          <Route path="/results" element={<><Header /><ResultsPage /><Footer /></>} />
+          <Route path="/student-login" element={<><Header /><StudentLogin /><Footer /></>} />
+          <Route path="/student-dashboard" element={<><Header /><StudentDashboard /><Footer /></>} />
         </Routes>
 
         <ToastContainer

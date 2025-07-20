@@ -13,6 +13,7 @@ import TestResultAdmin from "./admin/TestResultAdmin";
 import EventAdmin from "./admin/EventAdmin";
 import StudyMaterialAdmin from "./admin/StudyMaterialAdmin";
 import PopupAdmin from "./admin/PopupAdmin";
+import AdminLayout from "../components/AdminLayout";
 
 const TABS = [
   { id: "slider", label: "Slider", component: <SliderAdmin /> },
@@ -64,11 +65,6 @@ const AdminPanel = () => {
     return tab?.component || null;
   };
 
-  const handleLogout = () => {
-    authManager.removeToken();
-    navigate("/admin-login");
-  };
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -78,39 +74,10 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="pt-24 px-4 sm:px-6 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">Admin Dashboard</h1>
-
-      {/* Tabs */}
-      <div className="flex flex-wrap mb-6 gap-2 justify-center">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
-              activeTab === tab.id
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="mb-12">{renderTabContent()}</div>
-
-      {/* Logout Button */}
-      <div className="flex justify-end mt-8">
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
+    <AdminLayout>
+      {/* Tab selection logic can be improved to use query params or context for sidebar links */}
+      {renderTabContent()}
+    </AdminLayout>
   );
 };
 
