@@ -28,17 +28,6 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  // Auto-slide functionality
-  useEffect(() => {
-    if (events.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % events.length);
-    }, 3000); // 3 seconds for faster cycling
-
-    return () => clearInterval(interval);
-  }, [events.length]);
-
   // Manual slide navigation
   const goToSlide = useCallback((index) => {
     setCurrentSlide(index);
