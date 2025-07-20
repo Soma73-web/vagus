@@ -1,6 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import authManager from "../utils/auth";
 
 const AdminLayout = ({ children, activeTab, setActiveTab }) => {
+  const navigation = useNavigate();
   const navigationItems = [
     { id: "slider", label: "Slider" },
     { id: "students", label: "Students" },
@@ -15,6 +18,13 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
     { id: "testimonials", label: "Testimonials" },
     { id: "downloads", label: "Downloads" },
   ];
+
+  const handleLogout = () => {
+    console.log("Logout clicked");
+    authManager.removeToken();
+    console.log("Token removed, navigating to admin-login");
+    window.location.href = "#/admin-login";
+  };
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -38,10 +48,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
         </nav>
         <div className="mt-auto pt-8">
           <button
-            onClick={() => {
-              localStorage.removeItem("adminToken");
-              window.location.href = "#/admin-login";
-            }}
+            onClick={handleLogout}
             className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors"
           >
             Logout

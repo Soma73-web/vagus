@@ -13,8 +13,66 @@ router.post("/ask", async (req, res) => {
         .json({ error: "Question is required and must be a string" });
     }
 
-    // Check if OpenAI API key is configured
-    if (!process.env.OPENAI_API_KEY) {
+    // Prefer Perplexity API key if present, otherwise use OpenAI
+    const perplexityApiKey = process.env.PERPLEXITY_API_KEY;
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+
+    if (!perplexityApiKey && !openaiApiKey) {
+      return res.status(500).json({
+        error:
+          "No AI API key configured. Please add PERPLEXITY_API_KEY or OPENAI_API_KEY to your environment variables.",
+      });
+    }
+
+    // Use Perplexity API if key is present
+    if (perplexityApiKey) {
+      // Example Perplexity API call (update endpoint and payload as needed)
+      const response = await fetch("https://api.perplexity.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${perplexityApiKey}`,
+        },
+        body: JSON.stringify({
+          model: "pplx-70b-chat", // or your preferred model
+          messages: [
+            {
+              role: "system",
+              content: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. \nYou help students with NEET-related questions, study tips, exam strategies, and general guidance about medical entrance exams.\nKeep your responses helpful, encouraging, and focused on NEET preparation.\nIf asked about topics unrelated to NEET or medical entrance exams, politely redirect the conversation back to NEET preparation.`,
+            },
+            {
+              role: "user",
+              content: question,
+            },
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Perplexity API error:", data);
+        return res.status(response.status).json({
+          error: data.error?.message || "Failed to get response from Perplexity AI",
+        });
+      }
+
+      const aiResponse = data.choices?.[0]?.message?.content;
+
+      if (!aiResponse) {
+        return res.status(500).json({ error: "No response from Perplexity AI" });
+      }
+
+      return res.json({
+        response: aiResponse,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Fallback to OpenAI if Perplexity is not configured
+    if (!openaiApiKey) {
       return res.status(500).json({
         error:
           "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
@@ -26,7 +84,7 @@ router.post("/ask", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
