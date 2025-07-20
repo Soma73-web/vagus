@@ -47,6 +47,7 @@ app.use("/uploads", express.static("uploads"));
 // CORS Configuration
 const allowedOrigins = [
   "http://localhost:3000",
+  "http://74.176.208.152:3000",
   "http://localhost:3001",
   "https://vagus.vercel.app",
   "https://vagus-update.vercel.app",
