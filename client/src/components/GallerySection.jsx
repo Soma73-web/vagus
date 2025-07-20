@@ -5,14 +5,12 @@ import heroBg from '../assets/gallery-hero.jpg';
 
 const GallerySection = () => {
   const [categories, setCategories] = useState([]);
-  const [activeTab, setActiveTab] = useState('All');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/image-gallery`);
-
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/image-gallery/categorized`);
         setCategories(res.data);
       } catch (err) {
         console.error('Gallery fetch error:', err);
@@ -22,15 +20,6 @@ const GallerySection = () => {
     };
     fetchGallery();
   }, []);
-
-  const allImages = categories.flatMap((cat) =>
-    (cat.images || []).map((img) => ({ ...img, catName: cat.name }))
-  );
-
-  const filteredImages =
-    activeTab === 'All'
-      ? allImages
-      : allImages.filter((img) => img.catName === activeTab);
 
   return (
     <>
@@ -51,56 +40,40 @@ const GallerySection = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="bg-white sticky top-[96px] z-40 border-b">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-4 overflow-x-auto no-scrollbar py-3">
-            {['All', ...categories.map((c) => c.name)].map((label) => (
-              <button
-                key={label}
-                onClick={() => setActiveTab(label)}
-                className={`relative px-3 py-1.5 font-semibold whitespace-nowrap transition-all duration-300
-                  ${
-                    activeTab === label
-                      ? 'text-red-600 after:scale-x-100'
-                      : 'text-gray-700 hover:text-red-600 after:scale-x-0'
-                  }
-                  after:content-[''] after:absolute after:left-0 after:bottom-0
-                  after:h-[2px] after:w-full after:bg-red-600 after:transition-transform after:origin-left
-                `}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Gallery Grid */}
+      {/* Categorized Gallery */}
       <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
           {loading ? (
             <p className="text-center animate-pulse">Loading images …</p>
-          ) : filteredImages.length === 0 ? (
+          ) : categories.length === 0 ? (
             <p className="text-center italic text-gray-500">
-              No images available for {activeTab}.
+              No categorized images available.
             </p>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-              {filteredImages.map((img) => (
-                <div
-                  key={img.id}
-                  className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300"
-                >
-                  <img
-                    src={img.image}
-                    alt={img.catName}
-                    loading="lazy"
-                    className="w-full h-64 object-cover transition-transform duration-300 hover:scale-105"
-                  />
+            categories.map((category) => (
+              <div key={category.id} className="mb-12">
+                <h2 className="text-2xl font-bold mb-4">{category.name}</h2>
+                <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+                  {category.CategorizedGalleryImages && category.CategorizedGalleryImages.length > 0 ? (
+                    category.CategorizedGalleryImages.map((img) => (
+                      <div
+                        key={img.id}
+                        className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300"
+                      >
+                        <img
+                          src={img.image_url}
+                          alt={category.name}
+                          loading="lazy"
+                          className="w-full h-64 object-cover transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-400 italic col-span-full">No images in this category.</p>
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))
           )}
         </div>
       </section>
