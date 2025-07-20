@@ -74,8 +74,7 @@ const AdminPanel = () => {
   }
 
   return (
-    <AdminLayout>
-      {/* Tab selection logic can be improved to use query params or context for sidebar links */}
+    <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
       {renderTabContent()}
     </AdminLayout>
   );
