@@ -13,6 +13,7 @@ import ScrollToHash from "./components/ScrollToHash";
 import WhatsAppButton from "./components/WhatsAppButton";
 import AIChatbot from "./components/AIChatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Homepage Components
 import HomeSlider from "./components/HomeSlider";
@@ -59,6 +60,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
+        <ScrollToTop />
         <ScrollToHash />
         {/* Only show public UI on non-admin pages */}
         <Routes>
