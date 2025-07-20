@@ -1,4 +1,5 @@
-const Popup = require('../models/Popup');
+const db = require('../models');
+const Popup = db.Popup;
 
 // Get active popup
 const getActivePopup = async (req, res) => {
@@ -37,103 +38,47 @@ const getPopupImage = async (req, res) => {
   }
 };
 
-// Get all popups (admin)
-const getAllPopups = async (req, res) => {
+exports.getAllPopups = async (req, res) => {
   try {
-    const popups = await Popup.findAll({
-      attributes: { exclude: ['imageData'] }, // Don't send BLOB data in list
-      order: [['createdAt', 'DESC']]
-    });
-
+    const popups = await Popup.findAll();
     res.json(popups);
-  } catch (error) {
-    console.error('Error fetching popups:', error);
-    res.status(500).json({ message: 'Server error' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Create popup (admin)
-const createPopup = async (req, res) => {
+exports.createPopup = async (req, res) => {
   try {
-    const { title, speaker, affiliation, description, displayDelay } = req.body;
-    const imageFile = req.file;
-
-    const popupData = {
-      title,
-      speaker,
-      affiliation,
-      description,
-      displayDelay: displayDelay || 5
-    };
-
-    if (imageFile) {
-      popupData.imageData = imageFile.buffer;
-      popupData.imageMimeType = imageFile.mimetype;
-    }
-
-    const popup = await Popup.create(popupData);
-    
-    // Return popup without BLOB data
-    const { imageData, ...popupResponse } = popup.toJSON();
-    res.status(201).json(popupResponse);
-  } catch (error) {
-    console.error('Error creating popup:', error);
-    res.status(500).json({ message: 'Server error' });
+    const { title, message, isActive } = req.body;
+    const popup = await Popup.create({ title, message, isActive });
+    res.status(201).json(popup);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Update popup (admin)
-const updatePopup = async (req, res) => {
+exports.updatePopup = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, speaker, affiliation, description, displayDelay, isActive } = req.body;
-    const imageFile = req.file;
-
+    const { title, message, isActive } = req.body;
     const popup = await Popup.findByPk(id);
-    if (!popup) {
-      return res.status(404).json({ message: 'Popup not found' });
-    }
-
-    const updateData = {
-      title,
-      speaker,
-      affiliation,
-      description,
-      displayDelay,
-      isActive
-    };
-
-    if (imageFile) {
-      updateData.imageData = imageFile.buffer;
-      updateData.imageMimeType = imageFile.mimetype;
-    }
-
-    await popup.update(updateData);
-    
-    // Return popup without BLOB data
-    const { imageData, ...popupResponse } = popup.toJSON();
-    res.json(popupResponse);
-  } catch (error) {
-    console.error('Error updating popup:', error);
-    res.status(500).json({ message: 'Server error' });
+    if (!popup) return res.status(404).json({ error: 'Popup not found' });
+    await popup.update({ title, message, isActive });
+    res.json(popup);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// Delete popup (admin)
-const deletePopup = async (req, res) => {
+exports.deletePopup = async (req, res) => {
   try {
     const { id } = req.params;
     const popup = await Popup.findByPk(id);
-    
-    if (!popup) {
-      return res.status(404).json({ message: 'Popup not found' });
-    }
-
+    if (!popup) return res.status(404).json({ error: 'Popup not found' });
     await popup.destroy();
-    res.json({ message: 'Popup deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting popup:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.json({ message: 'Popup deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
