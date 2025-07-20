@@ -3,6 +3,9 @@ import api from '../../api'; // Axios instance with baseURL
 
 const ResultAdmin = () => {
   const [results, setResults] = useState([]);
+  const [filteredResults, setFilteredResults] = useState([]);
+  const [selectedYear, setSelectedYear] = useState('all');
+  const [availableYears, setAvailableYears] = useState([]);
   const [form, setForm] = useState({
     id: null,
     name: '',
@@ -18,11 +21,25 @@ const ResultAdmin = () => {
     fetchResults();
   }, []);
 
+  // ─────── Filter results when year changes ───────
+  useEffect(() => {
+    if (selectedYear === 'all') {
+      setFilteredResults(results);
+    } else {
+      setFilteredResults(results.filter(r => r.year === selectedYear));
+    }
+  }, [selectedYear, results]);
+
   // ─────── Get all results ───────
   const fetchResults = async () => {
     try {
       const { data } = await api.get('/api/results');
-      setResults(data || []);
+      const resultsData = data || [];
+      setResults(resultsData);
+      
+      // Extract unique years and sort them
+      const years = [...new Set(resultsData.map(r => r.year))].sort((a, b) => b - a);
+      setAvailableYears(years);
     } catch (err) {
       console.error('Error fetching results:', err);
       alert('Failed to load results.');
@@ -92,7 +109,7 @@ const ResultAdmin = () => {
       year: item.year,
       image: null, // Must upload new image to change
     });
-    setPreview(`/api/results/image/${item.id}`);
+    setPreview(`/api/results/${item.id}/image`);
   };
 
   // ─────── Delete row ───────
@@ -111,6 +128,26 @@ const ResultAdmin = () => {
   return (
     <div className="border p-6 bg-white rounded shadow mb-10">
       <h2 className="text-xl font-semibold mb-4 text-blue-800">Manage Results</h2>
+
+      {/* ─────── Year Filter ─────── */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Filter by Year:
+        </label>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(e.target.value)}
+          className="border px-4 py-2 rounded bg-white"
+        >
+          <option value="all">All Years</option>
+          {availableYears.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+        <span className="ml-4 text-sm text-gray-600">
+          Showing {filteredResults.length} of {results.length} results
+        </span>
+      </div>
 
       {/* ─────── Form ─────── */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -149,27 +186,85 @@ const ResultAdmin = () => {
       </form>
 
       {/* ─────── Results List ─────── */}
-      <ul className="space-y-3">
-        {results.map((r) => (
-          <li key={r.id} className="flex justify-between items-center bg-gray-100 p-3 rounded">
-            <div className="flex items-center gap-3">
-              <img
-                src={`/api/results/image/${r.id}`}
-                alt={r.name}
-                className="w-12 h-12 object-cover rounded-full border"
-              />
-              <div>
-                <p className="font-medium">{r.name} — Rank {r.rank}</p>
-                <p className="text-sm text-gray-600">{r.college} ({r.year})</p>
+      <div className="space-y-6">
+        {availableYears.length > 0 && selectedYear === 'all' ? (
+          // Group by year when showing all
+          availableYears.map(year => {
+            const yearResults = results.filter(r => r.year === year);
+            return (
+              <div key={year} className="border rounded-lg p-4 bg-gray-50">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">
+                  Year {year} ({yearResults.length} results)
+                </h3>
+                <ul className="space-y-3">
+                  {yearResults.map((r) => (
+                    <li key={r.id} className="flex justify-between items-center bg-white p-3 rounded shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={`/api/results/${r.id}/image`}
+                          alt={r.name}
+                          className="w-12 h-12 object-cover rounded-full border"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                        <div className="w-12 h-12 bg-gray-200 rounded-full border flex items-center justify-center text-gray-500 text-xs" style={{display: 'none'}}>
+                          No Image
+                        </div>
+                        <div>
+                          <p className="font-medium">{r.name} — Rank {r.rank}</p>
+                          <p className="text-sm text-gray-600">{r.college}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <button onClick={() => handleEdit(r)} className="text-blue-600 hover:underline">Edit</button>
+                        <button onClick={() => handleDelete(r.id)} className="text-red-600 hover:underline">Delete</button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => handleEdit(r)} className="text-blue-600 hover:underline">Edit</button>
-              <button onClick={() => handleDelete(r.id)} className="text-red-600 hover:underline">Delete</button>
-            </div>
-          </li>
-        ))}
-      </ul>
+            );
+          })
+        ) : (
+          // Show filtered results
+          <ul className="space-y-3">
+            {filteredResults.map((r) => (
+              <li key={r.id} className="flex justify-between items-center bg-gray-100 p-3 rounded">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={`/api/results/${r.id}/image`}
+                    alt={r.name}
+                    className="w-12 h-12 object-cover rounded-full border"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                  <div className="w-12 h-12 bg-gray-200 rounded-full border flex items-center justify-center text-gray-500 text-xs" style={{display: 'none'}}>
+                    No Image
+                  </div>
+                  <div>
+                    <p className="font-medium">{r.name} — Rank {r.rank}</p>
+                    <p className="text-sm text-gray-600">{r.college} ({r.year})</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => handleEdit(r)} className="text-blue-600 hover:underline">Edit</button>
+                  <button onClick={() => handleDelete(r.id)} className="text-red-600 hover:underline">Delete</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        
+        {filteredResults.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            {selectedYear === 'all' ? 'No results found.' : `No results found for year ${selectedYear}.`}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
