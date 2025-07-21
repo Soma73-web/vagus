@@ -36,10 +36,21 @@ const ResultPage = () => {
     : [];
 
   return (
-    <div className="pt-8 bg-white min-h-screen">
-      {/* Our Achievers Header */}
-      <div className="max-w-4xl mx-auto px-4 mb-6">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-blue-800 text-center mb-2 tracking-tight">Our Achievers</h1>
+    <div className="pt-0 bg-white min-h-screen">
+      {/* Hero/Header Section */}
+      <div className="relative w-full h-64 md:h-80 flex items-center justify-center mb-8 overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80"
+          alt="Results Hero"
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
+        />
+        <div className="absolute inset-0 bg-blue-800 bg-opacity-70 z-10"></div>
+        <div className="relative z-20 flex flex-col items-center justify-center w-full px-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white text-center mb-4 drop-shadow-lg">Our Achievers</h1>
+          <p className="text-lg md:text-2xl text-white text-center max-w-2xl drop-shadow-md">
+            Celebrating the success stories of our students who have excelled in NEET examinations and made us proud.
+          </p>
+        </div>
       </div>
 
       {/* Year Filter */}
