@@ -75,21 +75,36 @@ const ResultPage = () => {
             <p className="text-gray-500">We will update this section as soon as results are available.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {filtered.map((item) => (
-              <div key={item.id} className="bg-white rounded-xl shadow-md border p-4 flex flex-col items-center">
-                <img
-                  src={item.photoUrl}
-                  alt={item.name}
-                  className="w-24 h-24 object-cover rounded-full border-2 border-blue-200 mb-3"
-                  onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.name); }}
-                />
-                <div className="text-lg font-semibold text-blue-700 mb-1 text-center">{item.name}</div>
-                <div className="text-sm text-gray-600 mb-1 text-center">{item.rank ? `Rank: ${item.rank}` : null}</div>
-                <div className="text-xs text-gray-400 text-center">{item.year}</div>
-              </div>
-            ))}
-          </div>
+          <>
+            {/* Heading Row */}
+            <div className="hidden md:grid grid-cols-4 gap-6 mb-2 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <div>Photo</div>
+              <div>Name</div>
+              <div>Rank</div>
+              <div>Year</div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {filtered.map((item) => (
+                <div key={item.id} className="bg-white rounded-xl shadow-md border p-4 flex flex-col items-center md:grid md:grid-cols-4 md:items-center md:gap-4">
+                  {/* Photo */}
+                  <div className="flex justify-center items-center w-24 h-24 md:w-20 md:h-20 bg-gray-100 rounded-lg overflow-hidden border-2 border-blue-200 shadow-sm">
+                    <img
+                      src={item.photoUrl}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.name); }}
+                    />
+                  </div>
+                  {/* Name */}
+                  <div className="mt-2 md:mt-0 text-base font-semibold text-blue-700 text-center md:text-left md:col-span-1">{item.name}</div>
+                  {/* Rank */}
+                  <div className="text-sm text-gray-600 text-center md:text-left md:col-span-1">{item.rank ? `Rank: ${item.rank}` : <span className='text-gray-300'>—</span>}</div>
+                  {/* Year */}
+                  <div className="text-xs text-gray-400 text-center md:text-left md:col-span-1">{item.year}</div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
