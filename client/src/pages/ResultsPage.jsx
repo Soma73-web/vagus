@@ -77,15 +77,14 @@ const ResultPage = () => {
         ) : (
           <>
             {/* Heading Row */}
-            <div className="hidden md:grid grid-cols-4 gap-6 mb-2 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <div className="hidden md:grid grid-cols-3 gap-6 mb-2 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
               <div>Photo</div>
               <div>Name</div>
-              <div>Rank</div>
-              <div>Year</div>
+              <div>College</div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filtered.map((item) => (
-                <div key={item.id} className="bg-white rounded-xl shadow-md border p-4 flex flex-col items-center md:grid md:grid-cols-4 md:items-center md:gap-4">
+                <div key={item.id} className="bg-white rounded-xl shadow-md border p-4 flex flex-col items-center md:grid md:grid-cols-3 md:items-center md:gap-4">
                   {/* Photo */}
                   <div className="flex justify-center items-center w-24 h-24 md:w-20 md:h-20 bg-gray-100 rounded-lg overflow-hidden border-2 border-blue-200 shadow-sm">
                     <img
@@ -97,10 +96,8 @@ const ResultPage = () => {
                   </div>
                   {/* Name */}
                   <div className="mt-2 md:mt-0 text-base font-semibold text-blue-700 text-center md:text-left md:col-span-1">{item.name}</div>
-                  {/* Rank */}
-                  <div className="text-sm text-gray-600 text-center md:text-left md:col-span-1">{item.rank ? `Rank: ${item.rank}` : <span className='text-gray-300'>—</span>}</div>
-                  {/* Year */}
-                  <div className="text-xs text-gray-400 text-center md:text-left md:col-span-1">{item.year}</div>
+                  {/* College */}
+                  <div className="text-sm text-yellow-600 text-center md:text-left md:col-span-1 font-medium">{item.college || <span className='text-gray-300'>—</span>}</div>
                 </div>
               ))}
             </div>
