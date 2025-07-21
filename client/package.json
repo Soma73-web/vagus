@@ -23,7 +23,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "prebuild": "echo REACT_APP_BUILD_TIME=$(date) > .env",
+    "prebuild": "echo REACT_APP_BUILD_TIME=$(date) >> .env && echo REACT_APP_GIT_COMMIT=$(git rev-parse --short HEAD) >> .env",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
