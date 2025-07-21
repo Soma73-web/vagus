@@ -26,7 +26,7 @@ const StudentLogin = () => {
 
     try {
       const response = await axios.post(
-        `${API_BASE}/api/students/login`,
+        `${API_BASE}/students/login`,
         formData,
       );
 
