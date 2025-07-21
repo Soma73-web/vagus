@@ -12,10 +12,10 @@ const ResultPage = () => {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const res = await api.get("/results");
+        const res = await api.get("/api/results");
         const data = res.data.map((r) => ({
           ...r,
-          photoUrl: `${API_BASE}/results/${r.id}/image`,
+          photoUrl: `${API_BASE}/api/results/${r.id}/image`,
         }));
         setItems(data);
 
