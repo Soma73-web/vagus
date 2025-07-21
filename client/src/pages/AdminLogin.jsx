@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
-import LoadingSpinner from "../components/LoadingSpinner";
-import { showSuccess, showError } from "../utils/notifications";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -14,7 +12,6 @@ const AdminLogin = () => {
     // Check if already logged in
     const token = localStorage.getItem("admin_token");
     if (token) {
-      // Verify token validity
       verifyToken(token);
     }
   }, []);
@@ -26,16 +23,17 @@ const AdminLogin = () => {
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
-        },
+        }
       );
 
       if (res.status === 200) {
         navigate("/admin");
       }
     } catch (err) {
-      // Token is invalid, remove it
+      // Invalid token, clear storage
       localStorage.removeItem("admin_token");
       localStorage.removeItem("admin_logged_in");
+      localStorage.removeItem("admin_info");
     }
   };
 
@@ -48,34 +46,42 @@ const AdminLogin = () => {
       const res = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/api/auth/login`,
         credentials,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
 
       if (res.status === 200) {
-        // Store JWT token and admin info
-        localStorage.setItem("admin_token", res.data.token);
+        const { token, admin } = res.data;
+
+        // Store token and admin info
+        localStorage.setItem("admin_token", token);
         localStorage.setItem("admin_logged_in", "true");
-        localStorage.setItem("admin_info", JSON.stringify(res.data.admin));
+        localStorage.setItem("admin_info", JSON.stringify(admin));
 
-        // Set up auto-logout timer (30 minutes)
         setupAutoLogout();
-
         navigate("/admin");
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed");
-      console.error("Login error:", err);
+      console.error("Login error:", err.response || err.message || err);
+      setError(
+        err.response?.data?.error ||
+          "Login failed. Please check credentials or server."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const setupAutoLogout = () => {
-    // Clear any existing timer
+    // Clear existing timer
     if (window.adminLogoutTimer) {
       clearTimeout(window.adminLogoutTimer);
     }
 
-    // Set new timer for 30 minutes (1800000 ms)
+    // Set new timer for 30 minutes
     window.adminLogoutTimer = setTimeout(() => {
       localStorage.removeItem("admin_token");
       localStorage.removeItem("admin_logged_in");
