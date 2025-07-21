@@ -14,11 +14,11 @@ const HomeSlider = () => {
   useEffect(() => {
     const fetchSliderImages = async () => {
       try {
-        const res = await fetch(`${API_BASE}/slider`);
+        const res = await fetch(`${API_BASE}/api/slider`);
         const data = await res.json();
         const formatted = data.map((img) => ({
           ...img,
-          url: `${API_BASE.replace(/\/$/, "")}/slider/image/${img.id}`,
+          url: `${API_BASE.replace(/\/$/, "")}/api/slider/image/${img.id}`,
         }));
         setImages(formatted);
       } catch (error) {

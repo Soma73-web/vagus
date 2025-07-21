@@ -30,7 +30,7 @@ const Testimonials = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const res = await api.get("/testimonials");
+        const res = await api.get("/api/testimonials");
         const data = res.data.map((t) => ({
           ...t,
           embedUrl: convertToEmbed(t.video_link),

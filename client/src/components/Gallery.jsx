@@ -15,7 +15,7 @@ const Gallery = () => {
 
   const fetchGallery = async () => {
     try {
-      const res = await api.get("/gallery");
+      const res = await api.get("/api/gallery");
       setImages(res.data || []);
     } catch (err) {
       console.error("Gallery load error:", err);
@@ -90,7 +90,7 @@ const Gallery = () => {
             <div key={img.id} className="px-2">
               <div className="overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all relative">
                 <img
-                  src={`${API_BASE}/gallery/image/${img.id}`}
+                  src={`${API_BASE}/api/gallery/image/${img.id}`}
                   alt={img.title || "Gallery Image"}
                   className="w-full h-64 object-cover"
                   onError={(e) => {
