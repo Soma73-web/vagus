@@ -1,10 +1,29 @@
 const path = require('path');
 const { GalleryImage } = require('../models'); // ✅ Correct import from initialized models
+const redis = require("redis");
+let redisClient;
+(async () => {
+  redisClient = redis.createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+  });
+  redisClient.on('error', (err) => console.error('Redis Client Error', err));
+  await redisClient.connect().catch(err => console.error('Redis connect error:', err));
+})();
 
 // GET all gallery items
 exports.getAllGalleryItems = async (_req, res) => {
   try {
+    const cacheKey = 'gallery:all';
+    if (redisClient && redisClient.isOpen) {
+      const cached = await redisClient.get(cacheKey);
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+    }
     const items = await GalleryImage.findAll({ attributes: ['id', 'title'] });
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.set(cacheKey, JSON.stringify(items), { EX: 300 });
+    }
     res.json(items);
   } catch (err) {
     console.error('Error fetching gallery items:', err);
@@ -63,7 +82,9 @@ exports.createGalleryItem = async (req, res) => {
       image: file.buffer,
       image_type: file.mimetype
     });
-
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.del('gallery:all');
+    }
     res.status(201).json({ message: 'Gallery item created successfully' });
   } catch (err) {
     console.error('Error creating gallery item:', err);
@@ -88,6 +109,9 @@ exports.updateGalleryItem = async (req, res) => {
     }
 
     await item.save();
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.del('gallery:all');
+    }
     res.json({ message: 'Gallery item updated successfully' });
   } catch (err) {
     console.error('Error updating gallery item:', err);
@@ -104,6 +128,9 @@ exports.deleteGalleryItem = async (req, res) => {
     if (!deleted) return res.status(404).send('Not found');
 
     res.json({ message: 'Gallery item deleted successfully' });
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.del('gallery:all');
+    }
   } catch (err) {
     console.error('Error deleting gallery item:', err);
     res.status(500).json({ error: 'Internal Server Error' });

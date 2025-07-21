@@ -1,16 +1,34 @@
 const { Event } = require("../models");
 const path = require("path");
 const fs = require("fs");
+const redis = require("redis");
+let redisClient;
+(async () => {
+  redisClient = redis.createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379'
+  });
+  redisClient.on('error', (err) => console.error('Redis Client Error', err));
+  await redisClient.connect().catch(err => console.error('Redis connect error:', err));
+})();
 
 // Get all events
 const getAllEvents = async (req, res) => {
   try {
+    const cacheKey = 'events:all';
+    if (redisClient && redisClient.isOpen) {
+      const cached = await redisClient.get(cacheKey);
+      if (cached) {
+        return res.json(JSON.parse(cached));
+      }
+    }
     const events = await Event.findAll({
       where: { isActive: true },
       order: [["eventDate", "DESC"]],
       attributes: { exclude: ['imageData'] } // Exclude BLOB data from response
     });
-
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.set(cacheKey, JSON.stringify(events), { EX: 300 }); // 5 min expiry
+    }
     res.json(events);
   } catch (error) {
     console.error("Get events error:", error);
@@ -45,7 +63,10 @@ const createEvent = async (req, res) => {
       category: "general",
       addedBy,
     });
-
+    // Invalidate cache
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.del('events:all');
+    }
     res.status(201).json({
       message: "Event created successfully",
       event: {
@@ -77,7 +98,10 @@ const updateEvent = async (req, res) => {
     await Event.update(updateData, { where: { id } });
 
     const updatedEvent = await Event.findByPk(id);
-
+    // Invalidate cache
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.del('events:all');
+    }
     res.json({
       message: "Event updated successfully",
       event: {
@@ -97,7 +121,10 @@ const deleteEvent = async (req, res) => {
     const { id } = req.params;
 
     await Event.update({ isActive: false }, { where: { id } });
-
+    // Invalidate cache
+    if (redisClient && redisClient.isOpen) {
+      await redisClient.del('events:all');
+    }
     res.json({ message: "Event deleted successfully" });
   } catch (error) {
     console.error("Delete event error:", error);
