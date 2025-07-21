@@ -37,32 +37,38 @@ const ResultPage = () => {
 
   return (
     <div className="pt-8 bg-white min-h-screen">
-      {/* Heading */}
-      <div className="max-w-4xl mx-auto px-4 mb-2">
-        <h1 className="text-xl md:text-2xl font-bold text-blue-800 mb-1 text-center tracking-tight">Our Achievers</h1>
+      {/* Our Achievers Header */}
+      <div className="max-w-4xl mx-auto px-4 mb-6">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-blue-800 text-center mb-2 tracking-tight">Our Achievers</h1>
       </div>
 
       {/* Year Filter */}
       {years.length > 0 && (
-        <div className="flex justify-center flex-wrap gap-2 mb-6 px-2 overflow-x-auto">
-          {years.map((year) => (
-            <button
-              key={year}
-              onClick={() => setSelected(year)}
-              className={`px-5 py-2 rounded-full font-semibold transition-all duration-200 text-sm md:text-base whitespace-nowrap shadow-sm border-2 ${
-                String(selected) === String(year)
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-blue-600 border-blue-200 hover:border-blue-400 hover:bg-blue-50"
-              }`}
-            >
-              NEET {year}
-            </button>
+        <div className="flex justify-center gap-0 mb-10 px-2 relative">
+          {years.map((year, idx) => (
+            <div key={year} className="relative flex flex-col items-center">
+              <button
+                onClick={() => setSelected(year)}
+                className={`px-10 py-4 rounded-none font-semibold text-lg transition-all duration-200 whitespace-nowrap border-0 focus:outline-none ${
+                  String(selected) === String(year)
+                    ? "bg-blue-600 text-white font-bold shadow-md z-10"
+                    : "bg-gray-100 text-blue-800 hover:bg-blue-100 z-0"
+                }`}
+                style={{ borderRadius: idx === 0 ? '12px 0 0 12px' : idx === years.length - 1 ? '0 12px 12px 0' : '0' }}
+              >
+                NEET {year}
+              </button>
+              {/* Arrow under active tab */}
+              {String(selected) === String(year) && (
+                <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-600 mt-0.5"></div>
+              )}
+            </div>
           ))}
         </div>
       )}
 
       {/* Results Grid */}
-      <div className="max-w-5xl mx-auto px-4 pb-16">
+      <div className="max-w-7xl mx-auto px-4 pb-16">
         {loading ? (
           <div className="text-center py-20">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -75,33 +81,26 @@ const ResultPage = () => {
             <p className="text-gray-500">We will update this section as soon as results are available.</p>
           </div>
         ) : (
-          <>
-            {/* Heading Row */}
-            <div className="hidden md:grid grid-cols-3 gap-6 mb-2 px-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              <div>Photo</div>
-              <div>Name</div>
-              <div>College</div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filtered.map((item) => (
-                <div key={item.id} className="bg-white rounded-xl shadow-md border p-4 flex flex-col items-center md:grid md:grid-cols-3 md:items-center md:gap-4">
-                  {/* Photo */}
-                  <div className="flex justify-center items-center w-24 h-24 md:w-20 md:h-20 bg-gray-100 rounded-lg overflow-hidden border-2 border-blue-200 shadow-sm">
-                    <img
-                      src={item.photoUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                      onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.name); }}
-                    />
-                  </div>
-                  {/* Name */}
-                  <div className="mt-2 md:mt-0 text-base font-semibold text-blue-700 text-center md:text-left md:col-span-1">{item.name}</div>
-                  {/* College */}
-                  <div className="text-sm text-yellow-600 text-center md:text-left md:col-span-1 font-medium">{item.college || <span className='text-gray-300'>—</span>}</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {filtered.map((item) => (
+              <div key={item.id} className="flex flex-col items-center border border-blue-200 rounded-lg shadow-md overflow-hidden bg-white">
+                {/* Square Photo */}
+                <div className="w-full aspect-square bg-gray-100 flex items-center justify-center overflow-hidden border-b border-blue-200">
+                  <img
+                    src={item.photoUrl}
+                    alt={item.name}
+                    className="object-cover w-full h-full"
+                    onError={e => { e.target.onerror = null; e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(item.name); }}
+                  />
                 </div>
-              ))}
-            </div>
-          </>
+                {/* Name and College on blue bar */}
+                <div className="w-full bg-blue-600 py-3 px-2 flex flex-col items-center">
+                  <div className="text-lg font-bold text-white text-center leading-tight">{item.name}</div>
+                  <div className="text-sm text-yellow-300 text-center font-medium mt-1">{item.college || <span className='text-blue-200'>—</span>}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
