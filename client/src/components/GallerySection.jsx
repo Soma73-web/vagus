@@ -11,7 +11,7 @@ const GallerySection = () => {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/image-gallery/categorized`);
+        const res = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/image-gallery/categorized`);
         setCategories(res.data);
       } catch (err) {
         console.error('Gallery fetch error:', err);

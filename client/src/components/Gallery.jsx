@@ -15,7 +15,7 @@ const Gallery = () => {
 
   const fetchGallery = async () => {
     try {
-      const res = await api.get("/api/gallery");
+      const res = await api.get("/gallery");
       setImages(res.data || []);
     } catch (err) {
       console.error("Gallery load error:", err);

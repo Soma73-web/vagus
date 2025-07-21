@@ -12,7 +12,7 @@ const DownloadSection = () => {
   useEffect(() => {
     const fetchDownloads = async () => {
       try {
-        const res = await api.get('/api/downloads');
+        const res = await api.get('/downloads');
         setDownloads(res.data || []);
       } catch (err) {
         console.error('Error fetching downloads:', err);
