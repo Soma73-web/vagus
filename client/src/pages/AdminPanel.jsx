@@ -10,7 +10,6 @@ import SliderAdmin from "./admin/SliderAdmin";
 import StudentAdmin from "./admin/StudentAdmin";
 import AttendanceAdmin from "./admin/AttendanceAdmin";
 import TestResultAdmin from "./admin/TestResultAdmin";
-import EventAdmin from "./admin/EventAdmin";
 import StudyMaterialAdmin from "./admin/StudyMaterialAdmin";
 import PopupAdmin from "./admin/PopupAdmin";
 import AdminLayout from "../components/AdminLayout";
@@ -20,12 +19,7 @@ const TABS = [
   { id: "students", label: "Students", component: <StudentAdmin /> },
   { id: "attendance", label: "Attendance", component: <AttendanceAdmin /> },
   { id: "test-results", label: "Test Results", component: <TestResultAdmin /> },
-  { id: "events", label: "Events", component: <EventAdmin /> },
-  {
-    id: "study-materials",
-    label: "Study Materials",
-    component: <StudyMaterialAdmin />,
-  },
+  { id: "study-materials", label: "Study Materials", component: <StudyMaterialAdmin /> },
   { id: "popup", label: "Popup", component: <PopupAdmin /> },
   { id: "results", label: "Results", component: <ResultAdmin /> },
   { id: "gallery", label: "Gallery", component: <GalleryAdmin /> },

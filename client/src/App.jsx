@@ -73,7 +73,7 @@ function App() {
                 <AIChatbot />
                 <main className="pt-[96px]">
                   <HomeSlider />
-                  <Events />
+                  {/* <Events /> removed as per user request */}
                   <Hero />
                   {/* Courses Section */}
                   <div id="courses" className="scroll-mt-24">

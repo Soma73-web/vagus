@@ -10,7 +10,6 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
     { id: "students", label: "Students" },
     { id: "attendance", label: "Attendance" },
     { id: "test-results", label: "Test Results" },
-    { id: "events", label: "Events" },
     { id: "study-materials", label: "Study Materials" },
     { id: "popup", label: "Popup" },
     { id: "results", label: "Results" },
