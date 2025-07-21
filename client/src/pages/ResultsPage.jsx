@@ -38,8 +38,8 @@ const ResultPage = () => {
   return (
     <div className="pt-8 bg-white min-h-screen">
       {/* Heading */}
-      <div className="max-w-4xl mx-auto px-4 mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-blue-800 mb-2 text-center">NEET Results</h1>
+      <div className="max-w-4xl mx-auto px-4 mb-2">
+        <h1 className="text-xl md:text-2xl font-bold text-blue-800 mb-1 text-center tracking-tight">Our Achievers</h1>
       </div>
 
       {/* Year Filter */}
