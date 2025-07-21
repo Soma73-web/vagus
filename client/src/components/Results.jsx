@@ -21,7 +21,7 @@ const Results = () => {
         const res = await api.get("/results");
         const data = res.data.map((r) => ({
           ...r,
-          photoUrl: `${API_BASE}/results/${r.id}/image`,
+          photoUrl: `${API_BASE}/gallery/image/${r.id}`,
         }));
         setItems(data);
 
