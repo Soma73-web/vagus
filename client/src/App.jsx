@@ -14,6 +14,7 @@ import WhatsAppButton from "./components/WhatsAppButton";
 import AIChatbot from "./components/AIChatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
+import BackToTop from "./components/BackToTop";
 
 // Homepage Components
 import HomeSlider from "./components/HomeSlider";
@@ -37,6 +38,7 @@ import About from "./pages/About";
 import ResultsPage from "./pages/ResultsPage";
 import StudentLogin from "./pages/StudentLogin";
 import StudentDashboard from "./pages/StudentDashboard";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -62,6 +64,7 @@ function App() {
       <Router>
         <ScrollToTop />
         <ScrollToHash />
+        <BackToTop />
         {/* Only show public UI on non-admin pages */}
         <Routes>
           <Route
@@ -111,6 +114,7 @@ function App() {
           <Route path="/results" element={<><Header /><ResultsPage /><Footer /></>} />
           <Route path="/student-login" element={<><Header /><StudentLogin /><Footer /></>} />
           <Route path="/student-dashboard" element={<><Header /><StudentDashboard /><Footer /></>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
 
         <ToastContainer
