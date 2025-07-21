@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import authManager from "../utils/auth";
+import BuildInfo from "./BuildInfo";
 
 const AdminLayout = ({ children, activeTab, setActiveTab }) => {
   const navigation = useNavigate();
@@ -20,9 +21,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
   ];
 
   const handleLogout = () => {
-    console.log("Logout clicked");
     authManager.removeToken();
-    console.log("Token removed, navigating to admin-login");
     window.location.href = "#/admin-login";
   };
 
@@ -31,7 +30,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-lg flex flex-col p-6 border-r">
         <div className="text-2xl font-bold mb-8 text-blue-700">Admin Panel</div>
-        <nav className="flex flex-col gap-2">
+        <nav className="flex flex-col gap-2 flex-1">
           {navigationItems.map((item) => (
             <button
               key={item.id}
@@ -46,13 +45,14 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
             </button>
           ))}
         </nav>
-        <div className="mt-auto pt-8">
+        <div className="mt-8">
           <button
             onClick={handleLogout}
             className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors"
           >
             Logout
           </button>
+          <BuildInfo />
         </div>
       </aside>
       {/* Main Content */}
