@@ -71,7 +71,7 @@ const AIChatbot = () => {
 
   const checkConfiguration = async () => {
     try {
-      const response = await api.get("/chatbot/health");
+      const response = await api.get("/api/chatbot/health");
       setIsConfigured(response.data.openai_configured);
     } catch (error) {
       console.error("Error checking chatbot configuration:", error);
@@ -99,7 +99,7 @@ const AIChatbot = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/chatbot/ask", {
+      const response = await api.post("/api/chatbot/ask", {
         question: userMessage.text,
       });
 
