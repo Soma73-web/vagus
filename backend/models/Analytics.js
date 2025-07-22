@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('./index').sequelize;
+const sequelize = require('../config/db');
 
 const Analytics = sequelize.define('Analytics', {
   date: {
