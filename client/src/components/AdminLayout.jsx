@@ -27,7 +27,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
   return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col justify-between min-h-screen p-6 border-r">
+      <aside className="w-full sm:w-64 bg-white shadow-lg flex flex-col justify-between min-h-screen p-4 sm:p-6 border-r fixed sm:static left-0 top-0 bottom-0 z-30 max-h-screen overflow-y-auto">
         <div>
           <div className="text-2xl font-bold mb-8 text-blue-700">Admin Panel</div>
           <nav className="flex flex-col gap-2">
@@ -46,7 +46,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
             ))}
           </nav>
         </div>
-        <div className="flex flex-col gap-2 pt-4 pb-2">
+        <div className="flex flex-col gap-2 pt-4 pb-2 mt-8 sm:mt-0">
           <button
             onClick={handleLogout}
             className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors"
@@ -57,9 +57,9 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
         </div>
       </aside>
       {/* Main Content */}
-      <main className="flex-1 p-10">
+      <main className="flex-1 p-4 sm:p-10 ml-0 sm:ml-64 transition-all duration-300">
         <header className="mb-8 border-b pb-4 flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-blue-800">
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">
             {navigationItems.find(item => item.id === activeTab)?.label || "Admin Dashboard"}
           </h1>
         </header>
