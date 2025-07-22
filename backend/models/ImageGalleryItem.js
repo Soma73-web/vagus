@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       image: { type: DataTypes.TEXT("long"), allowNull: false },
     },
     {
-      tableName: "gallery_imagees", // ✅ Confirm your actual table name spelling in DB
+      tableName: "categorized_gallery_images", // ✅ Corrected table name
       timestamps: false,
     },
   );
