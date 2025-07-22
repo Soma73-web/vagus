@@ -12,7 +12,7 @@ import {
 
 const About = () => {
   return (
-    <section id="about" className="bg-white">
+    <section id="about" className="bg-white pt-[120px]">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-blue-50 to-indigo-100 py-16 mb-10">
         <div className="max-w-5xl mx-auto px-6 text-center">

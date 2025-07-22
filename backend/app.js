@@ -49,7 +49,9 @@ const adminStudentRoutes = require("./routes/adminStudentRoutes");
 const popupRoutes = require("./routes/popupRoutes");
 const adminRoutes = require("./routes/admin");
 const chatbotRoutes = require("./routes/chatbotRoutes");
+const analyticsController = require('./controllers/analyticsController');
 
+app.use(analyticsController.trackVisit);
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/downloads", downloadRoutes);

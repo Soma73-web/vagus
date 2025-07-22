@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const db = require("../models");
 const Admin = db.Admin;
 const authMiddleware = require("../middleware/authMiddleware");
+const analyticsController = require('../controllers/analyticsController');
 require("dotenv").config();
 
 // POST /api/auth/login
@@ -115,5 +116,10 @@ router.post("/create-admin", async (req, res) => {
     res.status(500).json({ error: "Failed to create admin" });
   }
 });
+
+// Analytics summary for admin
+router.get('/analytics/summary', analyticsController.getSummary);
+// Analytics trends for admin
+router.get('/analytics/trends', analyticsController.getTrends);
 
 module.exports = router;
