@@ -19,9 +19,6 @@ jobs:
             cd ~/vagus
             git fetch origin
             git reset --hard origin/master-1
-            cd backend
-            npm install
-            pm2 restart vagus-backend
-            cd ../client
+            cd client
             npm install
             npm run build

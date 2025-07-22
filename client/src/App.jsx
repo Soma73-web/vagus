@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,19 +26,19 @@ import Gallery from "./components/Gallery";
 import Testimonials from "./components/Testimonials";
 import Events from "./components/Events";
 
-// Other Pages
-import GallerySection from "./components/GallerySection";
-import DownloadSection from "./components/DownloadSection";
-import DirectorsMessage from "./pages/DirectorsMessage";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import ContactPage from "./pages/ContactPage";
-import AdminPanel from "./pages/AdminPanel";
-import AdminLogin from "./pages/AdminLogin";
-import About from "./pages/About";
-import ResultsPage from "./pages/ResultsPage";
-import StudentLogin from "./pages/StudentLogin";
-import StudentDashboard from "./pages/StudentDashboard";
-import NotFound from "./pages/NotFound";
+// Lazy load major pages/components
+const GallerySection = lazy(() => import("./components/GallerySection"));
+const DownloadSection = lazy(() => import("./components/DownloadSection"));
+const DirectorsMessage = lazy(() => import("./pages/DirectorsMessage"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const About = lazy(() => import("./pages/About"));
+const ResultsPage = lazy(() => import("./pages/ResultsPage"));
+const StudentLogin = lazy(() => import("./pages/StudentLogin"));
+const StudentDashboard = lazy(() => import("./pages/StudentDashboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -65,6 +65,7 @@ function App() {
         <ScrollToTop />
         <ScrollToHash />
         <BackToTop />
+        <Suspense fallback={<SiteLoader />}> {/* Suspense for lazy routes */}
         {/* Only show public UI on non-admin pages */}
         <Routes>
           <Route
@@ -116,7 +117,7 @@ function App() {
           <Route path="/student-dashboard" element={<><Header /><StudentDashboard /><Footer /></>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-
+        </Suspense>
         <ToastContainer
           position="top-right"
           autoClose={3000}

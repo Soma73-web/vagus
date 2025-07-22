@@ -8,7 +8,7 @@ const ResultPage = () => {
   const [years, setYears] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     const fetchResults = async () => {
       try {
@@ -53,8 +53,8 @@ const ResultPage = () => {
         </div>
       </div>
 
-      {/* Year Filter */}
-      {years.length > 0 && (
+        {/* Year Filter */}
+        {years.length > 0 && (
         <div className="flex justify-center gap-0 mb-10 px-2 relative">
           {years.map((year, idx) => (
             <div key={year} className="relative flex flex-col items-center">
@@ -74,11 +74,11 @@ const ResultPage = () => {
                 <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-600 mt-0.5"></div>
               )}
             </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {/* Results Grid */}
+        {/* Results Grid */}
       <div className="max-w-7xl mx-auto px-4 pb-16">
         {loading ? (
           <div className="text-center py-20">
@@ -97,7 +97,7 @@ const ResultPage = () => {
               <div key={item.id} className="flex flex-col items-center border border-blue-200 rounded-lg shadow-md overflow-hidden bg-white">
                 {/* Square Photo */}
                 <div className="w-full aspect-square bg-gray-100 flex items-center justify-center overflow-hidden border-b border-blue-200">
-                  <img
+                      <img
                     src={item.photoUrl}
                     alt={item.name}
                     className="object-cover w-full h-full"
@@ -111,7 +111,7 @@ const ResultPage = () => {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
         )}
       </div>
     </div>
