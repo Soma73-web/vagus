@@ -15,8 +15,8 @@ exports.getCategoriesWithImages = async (req, res) => {
 
 exports.uploadImage = async (req, res) => {
   try {
-    const { categoryId } = req.body;
-    if (!categoryId) return res.status(400).json({ message: 'Category ID is required' });
+    const { category_id } = req.body;
+    if (!category_id) return res.status(400).json({ message: 'Category ID is required' });
     if (!req.file) return res.status(400).json({ message: 'Image file is required' });
 
     const base64Image = req.file.buffer.toString('base64');
@@ -24,8 +24,8 @@ exports.uploadImage = async (req, res) => {
     const imageData = `data:${mimeType};base64,${base64Image}`;
 
     const newImage = await ImageGalleryItem.create({
-      categoryId,
-      image: imageData,
+      category_id,
+      image_url: imageData,
     });
 
     res.status(201).json(newImage);

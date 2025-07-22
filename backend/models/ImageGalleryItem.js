@@ -3,22 +3,22 @@ module.exports = (sequelize, DataTypes) => {
     "ImageGalleryItem",
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      categoryId: {
+      category_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: "gallery_categories", key: "id" }, // ✅ Ensure table name is correct
+        references: { model: "gallery_categories", key: "id" },
       },
-      image: { type: DataTypes.TEXT("long"), allowNull: false },
+      image_url: { type: DataTypes.TEXT("long"), allowNull: false },
     },
     {
-      tableName: "categorized_gallery_images", // ✅ Corrected table name
+      tableName: "categorized_gallery_images",
       timestamps: false,
     },
   );
 
   ImageGalleryItem.associate = (models) => {
     ImageGalleryItem.belongsTo(models.GalleryCategory, {
-      foreignKey: "categoryId",
+      foreignKey: "category_id",
       as: "category",
     });
   };
