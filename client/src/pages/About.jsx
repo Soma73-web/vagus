@@ -1,58 +1,57 @@
 import React from "react";
 import {
   FaChartLine,
-  FaCoins,
   FaLightbulb,
   FaRocket,
   FaHandshake,
   FaCogs,
+  FaUserGraduate,
+  FaAward,
+  FaChalkboardTeacher,
 } from "react-icons/fa";
 
 const About = () => {
   return (
-    <section id="about" className="pt-24 pb-16 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Top Section */}
-        <div className="grid md:grid-cols-2 gap-10 items-center mb-20">
-          {/* Text and Icons */}
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              We believe in doing the right thing
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Foster a supportive and inclusive environment where our team can
-              thrive. We believe in doing the right things, always.
-            </p>
+    <section id="about" className="bg-white">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-blue-50 to-indigo-100 py-16 mb-10">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-800 mb-4 drop-shadow-sm">
+            About Vagus Science Academy
+          </h1>
+          <p className="text-lg md:text-xl text-gray-700 mb-6 max-w-2xl mx-auto">
+            Empowering students to achieve their dreams through quality education, mentorship, and innovation.
+          </p>
+          <a
+            href="#contact"
+            className="inline-block bg-indigo-600 text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-indigo-700 transition"
+          >
+            Join Us
+          </a>
+        </div>
+      </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-100 rounded p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <FaChartLine className="text-blue-600" />
-                  <h4 className="text-sm font-semibold text-gray-800">
-                    Growth
-                  </h4>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Our mission is to drive growth & improve progress.
-                </p>
-              </div>
-
-              <div className="bg-gray-100 rounded p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <FaCoins className="text-green-600" />
-                  <h4 className="text-sm font-semibold text-gray-800">
-                    Revenue
-                  </h4>
-                </div>
-                <p className="text-xs text-gray-600">
-                  Our mission is to grow & improve sustainability.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Image or YouTube Embed */}
-          <div className="rounded-lg overflow-hidden shadow-lg">
+      {/* Academy Overview & Director's Message */}
+      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center mb-20">
+        {/* Overview */}
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Who We Are</h2>
+          <p className="text-gray-700 mb-4">
+            Vagus Science Academy is dedicated to nurturing the next generation of medical and science professionals. Our mission is to provide a supportive, inclusive, and innovative environment where every student can thrive and reach their full potential. We believe in integrity, operational excellence, and a student-first approach.
+          </p>
+          <ul className="space-y-2 text-gray-600">
+            <li className="flex items-center gap-2"><FaChartLine className="text-blue-600" /> Focused on growth and progress for every student</li>
+            <li className="flex items-center gap-2"><FaHandshake className="text-green-600" /> Building trust and lifelong relationships</li>
+            <li className="flex items-center gap-2"><FaRocket className="text-pink-500" /> Embracing innovation in teaching and learning</li>
+          </ul>
+        </div>
+        {/* Director's Message */}
+        <div className="bg-white rounded-lg shadow-lg p-4">
+          <h3 className="text-lg font-semibold text-indigo-700 mb-2">Director's Message</h3>
+          <p className="text-gray-600 mb-3 text-sm">
+            Hear from our Director about our vision, values, and commitment to student success.
+          </p>
+          <div className="rounded-lg overflow-hidden aspect-video">
             <iframe
               width="100%"
               height="315"
@@ -64,19 +63,40 @@ const About = () => {
             ></iframe>
           </div>
         </div>
+      </div>
 
-        {/* Bottom Card Grid */}
+      {/* Achievements Row */}
+      <div className="max-w-5xl mx-auto px-6 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+          <div className="bg-indigo-50 rounded-lg p-6 flex flex-col items-center">
+            <FaUserGraduate className="text-3xl text-indigo-600 mb-2" />
+            <div className="text-2xl font-bold text-indigo-800">2000+</div>
+            <div className="text-gray-700">Students Trained</div>
+          </div>
+          <div className="bg-indigo-50 rounded-lg p-6 flex flex-col items-center">
+            <FaAward className="text-3xl text-yellow-500 mb-2" />
+            <div className="text-2xl font-bold text-yellow-600">100+</div>
+            <div className="text-gray-700">Top NEET Ranks</div>
+          </div>
+          <div className="bg-indigo-50 rounded-lg p-6 flex flex-col items-center">
+            <FaChalkboardTeacher className="text-3xl text-green-600 mb-2" />
+            <div className="text-2xl font-bold text-green-700">15+</div>
+            <div className="text-gray-700">Expert Faculty</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Core Values Grid */}
+      <div className="max-w-7xl mx-auto px-6 mb-20">
         <div className="text-center mb-8">
           <span className="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-full inline-block">
-            Our Services
+            Our Core Values
           </span>
           <h2 className="text-2xl font-bold mt-2">Unleash Your Potential</h2>
           <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
-            About Us section typically appears on a company or organization’s
-            website and provides visitors with key information about the entity.
+            We are committed to fostering creativity, innovation, and integrity in every aspect of our academy.
           </p>
         </div>
-
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
@@ -102,19 +122,11 @@ const About = () => {
           ].map((card, index) => (
             <div
               key={index}
-              className="bg-gray-50 rounded p-5 shadow-sm hover:shadow-md transition"
+              className="bg-gray-50 rounded p-5 shadow-sm hover:shadow-md transition flex flex-col items-start"
             >
               <div className="mb-3">{card.icon}</div>
               <h4 className="font-semibold text-gray-800 mb-2">{card.title}</h4>
               <p className="text-sm text-gray-600">{card.desc}</p>
-              <button
-                className="text-indigo-600 text-sm mt-3 inline-block hover:text-indigo-800 transition"
-                onClick={() =>
-                  console.log("Read more clicked for:", card.title)
-                }
-              >
-                Read more →
-              </button>
             </div>
           ))}
         </div>
