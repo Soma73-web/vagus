@@ -44,7 +44,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
             </button>
           ))}
         </nav>
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col gap-2 sticky bottom-0 bg-white pt-4 pb-2">
           <button
             onClick={handleLogout}
             className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors"
