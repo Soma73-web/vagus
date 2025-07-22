@@ -88,6 +88,7 @@ const adminStudentRoutes = require("./routes/adminStudentRoutes");
 const chatbotRoutes = require("./routes/chatbotRoutes");
 const studyMaterialRoutes = require("./routes/studyMaterialRoutes");
 const popupRoutes = require('./routes/popupRoutes');
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 // Route Mounting
 app.use("/api/testimonials", testimonialRoutes);
@@ -102,6 +103,7 @@ app.use("/api/admin", adminStudentRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/study-materials", studyMaterialRoutes);
 app.use('/api/popup', popupRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

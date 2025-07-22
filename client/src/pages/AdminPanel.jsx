@@ -18,6 +18,7 @@ import api from "../api";
 import AnalyticsTrendsChart from "../components/AnalyticsTrendsChart";
 
 const TABS = [
+  { id: "analytics", label: "Analytics", component: null },
   { id: "slider", label: "Slider", component: <SliderAdmin /> },
   { id: "students", label: "Students", component: <StudentAdmin /> },
   { id: "attendance", label: "Attendance", component: <AttendanceAdmin /> },
@@ -95,6 +96,27 @@ const AdminPanel = () => {
   }, []);
 
   const renderTabContent = () => {
+    if (activeTab === "analytics") {
+      return (
+        <>
+          <div className="mb-8">
+            <AnalyticsSummary
+              hits={analytics.hits}
+              visitors={analytics.visitors}
+              loading={analyticsLoading}
+              error={analyticsError}
+              hitsIncrease={analytics.hitsIncrease}
+              hitsPercent={analytics.hitsPercent}
+              visitorsIncrease={analytics.visitorsIncrease}
+              visitorsPercent={analytics.visitorsPercent}
+            />
+          </div>
+          <div className="mb-8">
+            <AnalyticsTrendsChart trends={trends} loading={trendsLoading} error={trendsError} />
+          </div>
+        </>
+      );
+    }
     const tab = TABS.find((t) => t.id === activeTab);
     return tab?.component || null;
   };
@@ -109,21 +131,6 @@ const AdminPanel = () => {
 
   return (
     <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
-      <div className="mb-8">
-        <AnalyticsSummary
-          hits={analytics.hits}
-          visitors={analytics.visitors}
-          loading={analyticsLoading}
-          error={analyticsError}
-          hitsIncrease={analytics.hitsIncrease}
-          hitsPercent={analytics.hitsPercent}
-          visitorsIncrease={analytics.visitorsIncrease}
-          visitorsPercent={analytics.visitorsPercent}
-        />
-      </div>
-      <div className="mb-8">
-        <AnalyticsTrendsChart trends={trends} loading={trendsLoading} error={trendsError} />
-      </div>
       {renderTabContent()}
     </AdminLayout>
   );
