@@ -32,7 +32,7 @@ const GalleryAdminn = () => {
     if (!selectedCat) return toast.error('Please select a category');
 
     const formData = new FormData();
-    formData.append('categoryId', selectedCat);
+    formData.append('category_id', selectedCat); // updated to match backend
     formData.append('image', file);
 
     try {
