@@ -27,24 +27,26 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
   return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col p-6 border-r">
-        <div className="text-2xl font-bold mb-8 text-blue-700">Admin Panel</div>
-        <nav className="flex flex-col gap-2 flex-1">
-          {navigationItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === item.id
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-        <div className="mt-8 flex flex-col gap-2 sticky bottom-0 bg-white pt-4 pb-2">
+      <aside className="w-64 bg-white shadow-lg flex flex-col justify-between min-h-screen p-6 border-r">
+        <div>
+          <div className="text-2xl font-bold mb-8 text-blue-700">Admin Panel</div>
+          <nav className="flex flex-col gap-2">
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === item.id
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+        <div className="flex flex-col gap-2 pt-4 pb-2">
           <button
             onClick={handleLogout}
             className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors"
