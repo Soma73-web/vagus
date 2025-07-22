@@ -49,9 +49,24 @@ const StudentLogin = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("studentToken");
+    localStorage.removeItem("studentInfo");
+    toast.success("Logged out successfully");
+    window.location.reload();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 relative">
+        {localStorage.getItem("studentToken") && (
+          <button
+            onClick={handleLogout}
+            className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow transition"
+          >
+            Logout
+          </button>
+        )}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Student Login
