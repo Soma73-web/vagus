@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('./index').sequelize;
+const { sequelize } = require('./index');
 
 const Analytics = sequelize.define('Analytics', {
   date: {
@@ -16,7 +16,6 @@ const Analytics = sequelize.define('Analytics', {
   },
   uniqueIps: {
     type: DataTypes.TEXT, // JSON string of IPs
-    defaultValue: '[]',
   },
 }, {
   tableName: 'analytics',
