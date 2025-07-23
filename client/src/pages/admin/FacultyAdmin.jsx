@@ -41,7 +41,7 @@ const FacultyAdmin = () => {
 
   const handleEdit = (fac) => {
     setForm({ id: fac.id, name: fac.name, subject: fac.subject, photo: null });
-    setPreview(fac.photo ? fac.photo : null);
+    setPreview(`${API_BASE}/api/faculty/${fac.id}/photo`);
     setEditing(true);
   };
 
@@ -85,10 +85,9 @@ const FacultyAdmin = () => {
     setEditing(false);
   };
 
-  const getPhotoUrl = (photo, name) => {
-    if (!photo) return null;
-    if (photo.startsWith('/uploads')) return `${API_BASE}${photo}`;
-    return photo;
+  const getPhotoUrl = (photo, name, id) => {
+    if (photo && photo.startsWith('data:')) return photo;
+    return `${API_BASE}/api/faculty/${id}/photo`;
   };
 
   return (
@@ -174,11 +173,7 @@ const FacultyAdmin = () => {
               {faculty.map((fac) => (
                 <tr key={fac.id} className="border-t">
                   <td className="px-4 py-2">
-                    {fac.photo ? (
-                      <img src={getPhotoUrl(fac.photo, fac.name)} alt={fac.name} className="h-32 w-32 rounded-full object-cover border" onError={e => { e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fac.name); }} />
-                    ) : (
-                      <span className="text-gray-400">No photo</span>
-                    )}
+                    <img src={getPhotoUrl(fac.photo, fac.name, fac.id)} alt={fac.name} className="h-32 w-32 rounded-full object-cover border" onError={e => { e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fac.name); }} />
                   </td>
                   <td className="px-4 py-2">{fac.name}</td>
                   <td className="px-4 py-2">{fac.subject}</td>

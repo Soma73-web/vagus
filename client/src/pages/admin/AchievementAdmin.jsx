@@ -41,7 +41,7 @@ const AchievementAdmin = () => {
 
   const handleEdit = (item) => {
     setForm({ id: item.id, title: item.title, description: item.description || "", image: null });
-    setPreview(item.image ? getImageUrl(item.image) : null);
+    setPreview(item.image ? getImageUrl(item.image, item.id) : null);
     setEditing(true);
   };
 
@@ -85,10 +85,9 @@ const AchievementAdmin = () => {
     setEditing(false);
   };
 
-  const getImageUrl = (image) => {
-    if (!image) return null;
-    if (image.startsWith('/uploads')) return `${API_BASE}${image}`;
-    return image;
+  const getImageUrl = (image, id) => {
+    if (image && image.startsWith('data:')) return image;
+    return `${API_BASE}/api/achievements/${id}/image`;
   };
 
   return (
@@ -174,7 +173,7 @@ const AchievementAdmin = () => {
                 <tr key={item.id} className="border-t">
                   <td className="px-4 py-2">
                     {item.image ? (
-                      <img src={getImageUrl(item.image)} alt={item.title} className="h-20 w-20 rounded-lg object-cover border" />
+                      <img src={getImageUrl(item.image, item.id)} alt={item.title} className="h-20 w-20 rounded-lg object-cover border" />
                     ) : (
                       <span className="text-gray-400">No image</span>
                     )}

@@ -34,10 +34,9 @@ const About = () => {
     fetchAchievements();
   }, []);
 
-  const getImageUrl = (image) => {
-    if (!image) return null;
-    if (image.startsWith('/uploads')) return `${API_BASE}${image}`;
-    return image;
+  const getImageUrl = (image, id) => {
+    if (image && image.startsWith('data:')) return image;
+    return `${API_BASE}/api/achievements/${id}/image`;
   };
 
   return (
@@ -182,7 +181,7 @@ const About = () => {
                 {item.image && (
                   <div className="absolute inset-0 w-full h-full">
                     <img
-                      src={getImageUrl(item.image)}
+                      src={getImageUrl(item.image, item.id)}
                       alt={item.title}
                       className="w-full h-full object-cover object-center"
                     />
