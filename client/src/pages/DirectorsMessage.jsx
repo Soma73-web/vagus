@@ -1,14 +1,36 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaUserTie } from 'react-icons/fa';
+import api from '../api';
 
-const faculty = [
-  { name: 'Dr. BV PS', subject: 'Biology', photo: '/faculty/kumar.jpg' },
-  { name: 'Dr. Devipriya', subject: 'Chemistry', photo: '/faculty/meena.jpg' },
-  { name: 'Mr. Sagar GH', subject: 'Mathematics', photo: '/faculty/rao.jpg' },
-  { name: 'Dr. Veena GH', subject: 'Physics', photo: '/faculty/singh.jpg' }
-];
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 const DirectorsMessage = () => {
+  const [faculty, setFaculty] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchFaculty = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get('/api/faculty');
+        setFaculty(res.data || []);
+      } catch (err) {
+        setError('Failed to load faculty');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFaculty();
+  }, []);
+
+  const getPhotoUrl = (photo, name) => {
+    if (!photo) return null;
+    if (photo.startsWith('/uploads')) return `${API_BASE}${photo}`;
+    return photo;
+  };
+
   return (
     <section id="directors-message" className="bg-white pt-[120px] min-h-screen">
       {/* Hero Section */}
@@ -66,20 +88,32 @@ const DirectorsMessage = () => {
       {/* Faculty Section */}
       <div className="max-w-6xl mx-auto px-6 mb-20">
         <h3 className="text-2xl font-bold text-center mb-8 text-indigo-800">Our Faculty</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {faculty.map((fac, idx) => (
-            <div key={idx} className="bg-gray-50 text-center p-6 rounded-lg shadow hover:shadow-md transition flex flex-col items-center">
-              <img
-                src={fac.photo}
-                alt={fac.name}
-                className="w-24 h-24 mx-auto rounded-full object-cover border-2 border-indigo-200 mb-3"
-                onError={e => { e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fac.name); }}
-              />
-              <h4 className="text-lg font-semibold text-indigo-700 mb-1">{fac.name}</h4>
-              <p className="text-sm text-gray-600">{fac.subject}</p>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center text-gray-500">Loading faculty...</div>
+        ) : error ? (
+          <div className="text-center text-red-600">{error}</div>
+        ) : faculty.length === 0 ? (
+          <div className="text-center text-gray-500">No faculty added yet.</div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {faculty.map((fac) => (
+              <div key={fac.id} className="bg-gray-50 text-center p-6 rounded-lg shadow hover:shadow-md transition flex flex-col items-center">
+                {fac.photo ? (
+                  <img
+                    src={getPhotoUrl(fac.photo, fac.name)}
+                    alt={fac.name}
+                    className="w-24 h-24 mx-auto rounded-full object-cover border-2 border-indigo-200 mb-3"
+                    onError={e => { e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fac.name); }}
+                  />
+                ) : (
+                  <span className="w-24 h-24 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 mb-3">No Photo</span>
+                )}
+                <h4 className="text-lg font-semibold text-indigo-700 mb-1">{fac.name}</h4>
+                <p className="text-sm text-gray-600">{fac.subject}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

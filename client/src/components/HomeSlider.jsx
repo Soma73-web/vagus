@@ -5,7 +5,7 @@ import "slick-carousel/slick/slick-theme.css";
 import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 const HomeSlider = () => {
   const [images, setImages] = useState([]);
@@ -58,7 +58,8 @@ const HomeSlider = () => {
                 <img
                   src={img.url}
                   alt={`Slide ${img.id}`}
-                  className="w-full h-[280px] sm:h-[230px] object-cover"
+                  className="w-full h-[230px] object-cover"
+                  onError={e => { e.target.onerror = null; e.target.src = '/fallback.png'; }}
                 />
               </div>
             ))}

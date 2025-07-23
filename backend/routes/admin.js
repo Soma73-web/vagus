@@ -6,6 +6,7 @@ const Admin = db.Admin;
 const authMiddleware = require("../middleware/authMiddleware");
 const analyticsController = require('../controllers/analyticsController');
 require("dotenv").config();
+const fetch = require('node-fetch');
 
 // POST /api/auth/login
 router.post("/login", async (req, res) => {
@@ -121,5 +122,24 @@ router.post("/create-admin", async (req, res) => {
 router.get('/analytics/summary', analyticsController.getSummary);
 // Analytics trends for admin
 router.get('/analytics/trends', analyticsController.getTrends);
+
+// Proxy Perplexity API endpoint
+router.post('/ai/perplexity', async (req, res) => {
+  try {
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer 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',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Perplexity proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch from Perplexity API' });
+  }
+});
 
 module.exports = router;

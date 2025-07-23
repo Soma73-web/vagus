@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || "http://localhost:5000",
+  baseURL: process.env.REACT_APP_API_BASE_URL,
 });
 
 // Add request interceptor to include Admin-Auth header when admin is logged in
@@ -19,5 +19,15 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error),
 );
+
+// Perplexity AI proxy call
+export async function perplexityChat({ model = 'sonar', messages, response_format }) {
+  const res = await api.post('/api/auth/ai/perplexity', {
+    model,
+    messages,
+    ...(response_format ? { response_format } : {}),
+  });
+  return res.data;
+}
 
 export default api;

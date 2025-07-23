@@ -2,12 +2,12 @@ const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'neet_academy',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || 'Shiva@7353',
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     dialect: 'mysql',
     logging: false, // Set to console.log to see SQL queries
     pool: {
@@ -27,6 +27,14 @@ const sequelize = new Sequelize(
     }
   }
 );
+
+// Check for required env variables
+const requiredVars = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
+requiredVars.forEach((v) => {
+  if (!process.env[v]) {
+    console.error(`Missing required environment variable: ${v}`);
+  }
+});
 
 // Test the connection
 const testConnection = async () => {

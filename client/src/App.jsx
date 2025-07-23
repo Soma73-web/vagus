@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from "react";
-import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SiteLoader from "./components/SiteLoader";
@@ -46,6 +46,11 @@ function App() {
   useEffect(() => {
     // Setup auth manager interceptors
     authManager.setupAxiosInterceptors();
+
+    // Redirect to home on full page reload
+    if (typeof window !== 'undefined' && window.location.hash && performance && performance.navigation && performance.navigation.type === 1) {
+      window.location.hash = '#/';
+    }
 
     // Optimize loading time for better UX
     const timer = setTimeout(() => {

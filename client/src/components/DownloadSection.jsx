@@ -59,10 +59,12 @@ const DownloadSection = () => {
                 </div>
 
                 <a
-                  href={`${API_BASE_URL}/api/downloads/file/${doc.id}`}
+                  href={`${API_BASE_URL}/api/downloads/${doc.id}/download`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-3 sm:mt-0 inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition text-sm"
+                  download
+                  onError={e => { e.target.onerror = null; alert('Download failed!'); }}
                 >
                   <FaDownload />
                   Download

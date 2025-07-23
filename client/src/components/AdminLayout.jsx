@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import authManager from "../utils/auth";
 import BuildInfo from "./BuildInfo";
 
-const AdminLayout = ({ children, activeTab, setActiveTab }) => {
-  const navigation = useNavigate();
-  const navigationItems = [
+const AdminLayout = ({ children, activeTab, setActiveTab, navigationItems }) => {
+  // const navigation = useNavigate(); // Remove unused variable
+  const defaultNavigationItems = [
     { id: "slider", label: "Slider" },
     { id: "students", label: "Students" },
     { id: "attendance", label: "Attendance" },
@@ -18,6 +18,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
     { id: "testimonials", label: "Testimonials" },
     { id: "downloads", label: "Downloads" },
   ];
+  const navItems = navigationItems || defaultNavigationItems;
 
   const handleLogout = () => {
     authManager.removeToken();
@@ -31,7 +32,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
         <div>
           <div className="text-2xl font-bold mb-8 text-blue-700">Admin Panel</div>
           <nav className="flex flex-col gap-2">
-            {navigationItems.map((item) => (
+            {navItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
@@ -60,7 +61,7 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
       <main className="flex-1 p-4 sm:p-10 ml-0 sm:ml-64 transition-all duration-300">
         <header className="mb-8 border-b pb-4 flex items-center justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">
-            {navigationItems.find(item => item.id === activeTab)?.label || "Admin Dashboard"}
+            {navItems.find(item => item.id === activeTab)?.label || "Admin Dashboard"}
           </h1>
         </header>
         <section>{children}</section>

@@ -94,10 +94,11 @@ const GallerySection = () => {
                   className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300"
                 >
                   <img
-                    src={img.image_url}
+                    src={img.image_url.startsWith('http') ? img.image_url : `${process.env.REACT_APP_API_BASE_URL}/api/image-gallery/image/${img.id}`}
                     alt={img.catName}
                     loading="lazy"
                     className="w-full h-64 object-cover transition-transform duration-300 hover:scale-105"
+                    onError={e => { e.target.onerror = null; e.target.src = '/fallback.png'; }}
                   />
                 </div>
               ))}

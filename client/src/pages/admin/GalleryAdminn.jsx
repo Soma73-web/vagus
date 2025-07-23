@@ -120,9 +120,10 @@ const GalleryAdminn = () => {
         {(selectedCategory?.CategorizedGalleryImages || []).map(img => (
           <div key={img.id} className="relative group border p-2 rounded shadow">
             <img
-              src={img.image_url}
+              src={img.image_url.startsWith('http') ? img.image_url : `${process.env.REACT_APP_API_BASE_URL}/api/image-gallery/image/${img.id}`}
               alt={`Gallery ${img.id}`}
               className="w-full h-40 object-cover rounded"
+              onError={e => { e.target.onerror = null; e.target.src = '/fallback.png'; }}
             />
             <button
               onClick={() => handleDelete(img.id)}

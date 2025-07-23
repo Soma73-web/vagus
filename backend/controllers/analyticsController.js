@@ -1,4 +1,7 @@
-const Analytics = require('../models/Analytics');
+const db = require('../models');
+console.log('Loaded models:', Object.keys(db));
+console.log('db.Analytics:', db.Analytics);
+const Analytics = db.Analytics;
 const { Op } = require('sequelize');
 
 // Helper to get YYYY-MM-DD
@@ -78,7 +81,6 @@ exports.getSummary = async (req, res) => {
 
 exports.getTrends = async (req, res) => {
   try {
-    const { Op } = require('sequelize');
     const today = new Date();
     const startDate = new Date();
     startDate.setDate(today.getDate() - 29);

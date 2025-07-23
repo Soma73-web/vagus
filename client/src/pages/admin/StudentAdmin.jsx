@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import DataStatusBar from "../../components/DataStatusBar";
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 const StudentAdmin = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);

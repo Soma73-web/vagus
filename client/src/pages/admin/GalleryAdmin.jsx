@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api"; // axios instance
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 const GalleryAdmin = () => {
   const [gallery, setGallery] = useState([]);

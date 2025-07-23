@@ -5,7 +5,7 @@ import 'slick-carousel/slick/slick-theme.css';
 
 import { NextArrow, PrevArrow } from './BlueArrows';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 const HomeSlider = () => {
   const [images, setImages] = useState([]);

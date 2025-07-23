@@ -16,9 +16,13 @@ import AdminLayout from "../components/AdminLayout";
 import AnalyticsSummary from "../components/AnalyticsSummary";
 import api from "../api";
 import AnalyticsTrendsChart from "../components/AnalyticsTrendsChart";
+import FacultyAdmin from "./admin/FacultyAdmin";
+import AchievementAdmin from "./admin/AchievementAdmin";
 
 const TABS = [
   { id: "analytics", label: "Analytics", component: null },
+  { id: "faculty", label: "Faculty", component: <FacultyAdmin /> },
+  { id: "achievements", label: "Achievements", component: <AchievementAdmin /> },
   { id: "slider", label: "Slider", component: <SliderAdmin /> },
   { id: "students", label: "Students", component: <StudentAdmin /> },
   { id: "attendance", label: "Attendance", component: <AttendanceAdmin /> },
@@ -130,7 +134,7 @@ const AdminPanel = () => {
   }
 
   return (
-    <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab}>
+    <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab} navigationItems={TABS}>
       {renderTabContent()}
     </AdminLayout>
   );

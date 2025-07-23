@@ -27,10 +27,14 @@ const setupAdmin = async () => {
     }
     
     // Create admin account
+    if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_NAME) {
+      console.error('Missing required admin environment variables. Set ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_NAME.');
+      process.exit(1);
+    }
     const adminData = {
-      email: "admin@neetacademy.com",
-      password: "admin123",
-      name: "NEET Academy Admin"
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+      name: process.env.ADMIN_NAME
     };
     
     const admin = await Admin.create(adminData);

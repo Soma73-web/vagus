@@ -142,6 +142,7 @@ const SliderAdmin = () => {
                 src={`${api.defaults.baseURL}/api/slider/image/${img.id}`}
                 alt="Slider"
                 className="w-full h-32 object-cover rounded shadow transition-transform group-hover:scale-105"
+                onError={e => { e.target.onerror = null; e.target.src = '/fallback.png'; }}
               />
               <button
                 onClick={() => handleDelete(img.id)}

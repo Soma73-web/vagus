@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaChartLine,
   FaLightbulb,
@@ -9,8 +9,37 @@ import {
   FaAward,
   FaChalkboardTeacher,
 } from "react-icons/fa";
+import api from '../api';
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
 const About = () => {
+  const [achievements, setAchievements] = useState([]);
+  const [achLoading, setAchLoading] = useState(true);
+  const [achError, setAchError] = useState(null);
+
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      setAchLoading(true);
+      setAchError(null);
+      try {
+        const res = await api.get('/api/achievements');
+        setAchievements(res.data || []);
+      } catch (err) {
+        setAchError('Failed to load achievements');
+      } finally {
+        setAchLoading(false);
+      }
+    };
+    fetchAchievements();
+  }, []);
+
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    if (image.startsWith('/uploads')) return `${API_BASE}${image}`;
+    return image;
+  };
+
   return (
     <section id="about" className="bg-white pt-[120px]">
       {/* Hero Section */}
@@ -21,15 +50,15 @@ const About = () => {
           </h1>
           <p className="text-lg md:text-xl text-gray-700 mb-6 max-w-2xl mx-auto">
             Empowering students to achieve their dreams through quality education, mentorship, and innovation.
-          </p>
+                </p>
           <a
             href="#contact"
             className="inline-block bg-indigo-600 text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-indigo-700 transition"
           >
             Join Us
           </a>
-        </div>
-      </div>
+            </div>
+          </div>
 
       {/* Academy Overview & Director's Message */}
       <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center mb-20">
@@ -83,8 +112,8 @@ const About = () => {
             <div className="text-2xl font-bold text-green-700">15+</div>
             <div className="text-gray-700">Expert Faculty</div>
           </div>
+          </div>
         </div>
-      </div>
 
       {/* Core Values Grid */}
       <div className="max-w-7xl mx-auto px-6 mb-20">
@@ -130,6 +159,39 @@ const About = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Achievements & Appreciation Section */}
+      <div className="max-w-7xl mx-auto px-6 mb-20">
+        <div className="text-center mb-8">
+          <span className="text-sm bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full inline-block">
+            Achievements & Appreciation
+          </span>
+          <h2 className="text-2xl font-bold mt-2">Our Achievements</h2>
+        </div>
+        {achLoading ? (
+          <div className="text-center text-gray-500">Loading achievements...</div>
+        ) : achError ? (
+          <div className="text-center text-red-600">{achError}</div>
+        ) : achievements.length === 0 ? (
+          <div className="text-center text-gray-500">No achievements added yet.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {achievements.map((item) => (
+              <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden aspect-square relative">
+                {item.image && (
+                  <div className="absolute inset-0 w-full h-full">
+                    <img
+                      src={getImageUrl(item.image)}
+                      alt={item.title}
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

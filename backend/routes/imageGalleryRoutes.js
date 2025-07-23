@@ -5,6 +5,7 @@ const {
   getCategoriesWithImages,
   uploadImage,
   deleteImage,
+  getImageById,
 } = require('../controllers/imageGalleryController');
 const db = require('../models');
 
@@ -26,6 +27,9 @@ router.get('/categorized', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// GET image by id
+router.get('/image/:id', getImageById);
 
 // POST upload image to category
 router.post('/upload', upload.single('image'), uploadImage);

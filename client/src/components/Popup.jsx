@@ -88,7 +88,7 @@ const Popup = ({ isOpen, onClose, popupData }) => {
           <div className="lg:w-1/2 relative">
             <div className="h-full min-h-[300px] lg:min-h-[400px] bg-gradient-to-br from-blue-50 to-indigo-100 rounded-r-2xl lg:rounded-r-2xl lg:rounded-l-none overflow-hidden">
               <img
-                src={popupData?.id ? `${process.env.REACT_APP_API_BASE_URL || ''}/api/popup/${popupData.id}/image` : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"}
+                src={popupData?.id ? `${process.env.REACT_APP_API_BASE_URL}/api/popup/${popupData.id}/image` : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"}
                 alt={popupData?.speaker || "Medical Professional"}
                 className="w-full h-full object-cover"
                 onError={(e) => {

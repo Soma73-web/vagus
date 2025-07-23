@@ -48,3 +48,22 @@ exports.deleteImage = async (req, res) => {
     res.status(500).json({ message: 'Server error deleting image' });
   }
 };
+
+exports.getImageById = async (req, res) => {
+  try {
+    const image = await ImageGalleryItem.findByPk(req.params.id);
+    if (!image) return res.status(404).json({ message: 'Image not found' });
+    // image_url is a data URL: data:<mime>;base64,<data>
+    if (!image.image_url.startsWith('data:')) return res.status(400).json({ message: 'Invalid image data' });
+    const matches = image.image_url.match(/^data:(.+);base64,(.+)$/);
+    if (!matches) return res.status(400).json({ message: 'Invalid image data' });
+    const mimeType = matches[1];
+    const base64Data = matches[2];
+    const imgBuffer = Buffer.from(base64Data, 'base64');
+    res.set('Content-Type', mimeType);
+    res.send(imgBuffer);
+  } catch (err) {
+    console.error('Error serving image:', err);
+    res.status(500).json({ message: 'Server error serving image' });
+  }
+};
