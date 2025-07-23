@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const path = require('path');
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use(
     credentials: true,
   }),
 );
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database connection
 const sequelize = require("./config/db");

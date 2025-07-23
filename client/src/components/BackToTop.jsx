@@ -5,7 +5,10 @@ const BackToTop = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setVisible(window.scrollY > 200);
+      // Show only when user reaches the end of the page
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const pageHeight = document.documentElement.offsetHeight;
+      setVisible(scrollPosition >= pageHeight - 10);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -20,7 +23,7 @@ const BackToTop = () => {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 focus:outline-none"
+      className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 focus:outline-none"
       aria-label="Back to top"
     >
       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

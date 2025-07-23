@@ -50,7 +50,12 @@ class AuthManager {
 
     // Redirect to login page
     window.location.href = "/admin-login";
-    alert("Session expired due to inactivity. Please login again.");
+    // Show session expired message
+    if (window.toast) {
+      window.toast("Session expired. Please log in again.", { type: "warning" });
+    } else {
+      alert("Session expired. Please log in again.");
+    }
   }
 
   setToken(token) {
