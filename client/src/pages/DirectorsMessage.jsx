@@ -25,10 +25,9 @@ const DirectorsMessage = () => {
     fetchFaculty();
   }, []);
 
-  const getPhotoUrl = (photo, name) => {
-    if (!photo) return null;
-    if (photo.startsWith('/uploads')) return `${API_BASE}${photo}`;
-    return photo;
+  const getPhotoUrl = (photo, name, id) => {
+    if (photo && photo.startsWith('data:')) return photo;
+    return `${API_BASE}/api/faculty/${id}/photo`;
   };
 
   return (
@@ -100,9 +99,9 @@ const DirectorsMessage = () => {
               <div key={fac.id} className="bg-gray-50 text-center p-6 rounded-lg shadow hover:shadow-md transition flex flex-col items-center">
                 {fac.photo ? (
                   <img
-                    src={getPhotoUrl(fac.photo, fac.name)}
+                    src={getPhotoUrl(fac.photo, fac.name, fac.id)}
                     alt={fac.name}
-                    className="w-24 h-24 mx-auto rounded-full object-cover border-2 border-indigo-200 mb-3"
+                    className="w-32 h-32 mx-auto rounded-full object-cover border-2 border-indigo-200 mb-3"
                     onError={e => { e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(fac.name); }}
                   />
                 ) : (
