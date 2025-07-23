@@ -47,10 +47,7 @@ function App() {
     // Setup auth manager interceptors
     authManager.setupAxiosInterceptors();
 
-    // Redirect to home on full page reload
-    if (typeof window !== 'undefined' && window.location.hash && performance && performance.navigation && performance.navigation.type === 1) {
-      window.location.hash = '#/';
-    }
+    // Removed outdated hash redirect to ensure proper SPA routing on refresh
 
     // Optimize loading time for better UX
     const timer = setTimeout(() => {

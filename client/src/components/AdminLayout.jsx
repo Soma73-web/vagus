@@ -20,9 +20,10 @@ const AdminLayout = ({ children, activeTab, setActiveTab, navigationItems }) => 
   ];
   const navItems = navigationItems || defaultNavigationItems;
 
+  const navigate = useNavigate();
   const handleLogout = () => {
     authManager.removeToken();
-    window.location.href = "#/admin-login";
+    navigate('/admin-login', { replace: true });
   };
 
   return (
