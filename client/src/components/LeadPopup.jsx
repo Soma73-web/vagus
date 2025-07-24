@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import popupImage from '../assets/popupImage.png';
+import studentImg from '../assets/popupImage.png'; // Use your own image if available
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -19,7 +19,7 @@ const LeadPopup = ({ isOpen, onClose }) => {
         const res = await axios.get(`${API_BASE}/api/leads/popup-config`);
         setPopupEnabled(res.data.enabled);
       } catch {
-        setPopupEnabled(true); // Default to enabled if error
+        setPopupEnabled(true);
       } finally {
         setConfigChecked(true);
       }
@@ -74,79 +74,93 @@ const LeadPopup = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center">
-        {/* Image at the top, fixed height */}
-        <div className="w-full h-40 relative">
-          <img
-            src={popupImage}
-            alt="Motivation"
-            className="w-full h-full object-cover"
-          />
-          {/* Optional: Overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="absolute top-2 right-2 text-white text-2xl z-20 bg-black/40 rounded-full w-8 h-8 flex items-center justify-center"
-          >
-            &times;
-          </button>
-        </div>
-        {/* Form Card */}
-        <div className="relative z-10 w-full bg-white/95 px-4 py-6 flex flex-col items-center">
-          {showSuccessAnim ? (
-            <div className="flex flex-col items-center justify-center w-full animate-fade-in">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3 animate-scale-in">
-                <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-br from-blue-700 to-green-600 p-0">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-white text-2xl z-20 bg-black/40 rounded-full w-9 h-9 flex items-center justify-center"
+        >
+          &times;
+        </button>
+        <div className="flex flex-col md:flex-row items-center p-5">
+          {/* Left Content */}
+          <div className="flex-1 flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <span className="bg-yellow-400 text-white rounded-full p-2">
+                {/* Crown Icon */}
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M3 17l6-6 4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </div>
-              <div className="text-green-700 text-base font-semibold mb-1 bg-white/80 px-3 py-1 rounded">Thank you!</div>
-              <div className="text-gray-700 text-center mb-1">We will get back to you.</div>
+              </span>
+              <span className="text-white font-bold text-lg">Exemplary <span className="text-yellow-300">Faculty</span> <span className="text-green-300 ml-1">&#10003;</span></span>
             </div>
-          ) : (
-            <>
-              <h2 className="text-xl font-bold text-blue-700 mb-1 text-center">
-                Take Your First Step Toward Becoming a Doctor!
-              </h2>
-              <p className="text-gray-700 mb-3 text-center text-sm">
-                Enter your name and phone number to get expert NEET guidance and updates.
-              </p>
-              <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2">
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Your Name"
-                  value={form.name}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
-                  required
-                />
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="10-digit Phone Number"
-                  value={form.phone}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
-                  maxLength={10}
-                  pattern="\d{10}"
-                  required
-                />
-                {error && <div className="text-red-600 text-xs">{error}</div>}
-                <button
-                  type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-1 transition text-base"
-                  disabled={loading}
-                >
-                  {loading ? "Submitting..." : "Get Started"}
-                </button>
-              </form>
-              <div className="text-xs text-gray-500 mt-2 text-center">
-                We respect your privacy. Your details are safe with us.
+            <div className="flex items-center gap-2">
+              <span className="text-white font-bold text-lg">Expert <span className="text-yellow-300">Guidance</span> <span className="text-green-300 ml-1">&#10003;</span></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-white font-bold text-lg">Exemplary <span className="text-yellow-300">Result</span> <span className="text-green-300 ml-1">&#10003;</span></span>
+            </div>
+            <div className="mt-3">
+              <span className="inline-block bg-yellow-400 text-blue-900 font-bold px-3 py-1 rounded shadow">Admissions Open!</span>
+            </div>
+            {/* Form below badge */}
+            <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2 mt-3">
+              <input
+                type="text"
+                name="name"
+                placeholder="Your Name"
+                value={form.name}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
+                required
+              />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="10-digit Phone Number"
+                value={form.phone}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
+                maxLength={10}
+                pattern="\d{10}"
+                required
+              />
+              {error && <div className="text-red-600 text-xs">{error}</div>}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-1 transition text-base"
+                disabled={loading}
+              >
+                {loading ? "Submitting..." : "Get Started"}
+              </button>
+            </form>
+            {showSuccessAnim && (
+              <div className="flex flex-col items-center justify-center w-full animate-fade-in mt-2">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3 animate-scale-in">
+                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="text-green-700 text-base font-semibold mb-1 bg-white/80 px-3 py-1 rounded">Thank you!</div>
+                <div className="text-gray-700 text-center mb-1">We will get back to you.</div>
               </div>
-            </>
-          )}
+            )}
+          </div>
+          {/* Right Image */}
+          <div className="flex-1 flex justify-center items-center mt-4 md:mt-0">
+            <img
+              src={studentImg}
+              alt="Student"
+              className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg"
+            />
+          </div>
+        </div>
+        {/* Bottom Text */}
+        <div className="px-5 pb-5">
+          <div className="text-white text-center font-bold text-base mt-2">
+            No.1 institute for Long Term coaching<br />
+            <span className="text-yellow-300 text-lg">IIT JEE/NEET</span> with Kota Faculty @ your place
+          </div>
         </div>
       </div>
     </div>
