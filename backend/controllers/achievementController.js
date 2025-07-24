@@ -27,15 +27,17 @@ exports.getById = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const { title, description } = req.body;
-    let image = null;
+    let image_data = null;
+    let image_type = null;
     if (req.file) {
-      image = `/uploads/achievements/${req.file.filename}`;
+      image_data = req.file.buffer;
+      image_type = req.file.mimetype;
     }
     // Input validation
-    if (!image) {
+    if (!image_data) {
       return res.status(400).json({ error: "Image is required" });
     }
-    const achievement = await Achievement.create({ title, description, image });
+    const achievement = await Achievement.create({ title, description, image_data, image_type });
     res.status(201).json(achievement);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create achievement' });
@@ -48,14 +50,29 @@ exports.update = async (req, res) => {
     const { title, description } = req.body;
     const achievement = await Achievement.findByPk(req.params.id);
     if (!achievement) return res.status(404).json({ error: 'Achievement not found' });
-    let image = achievement.image;
+    let image_data = achievement.image_data;
+    let image_type = achievement.image_type;
     if (req.file) {
-      image = `/uploads/achievements/${req.file.filename}`;
+      image_data = req.file.buffer;
+      image_type = req.file.mimetype;
     }
-    await achievement.update({ title, description, image });
+    await achievement.update({ title, description, image_data, image_type });
     res.json(achievement);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update achievement' });
+  }
+};
+
+// Stream achievement image
+exports.getImage = async (req, res) => {
+  try {
+    const ach = await Achievement.findByPk(req.params.id);
+    if (!ach || !ach.image_data) return res.status(404).json({ error: 'Image not found' });
+    res.set('Content-Type', ach.image_type || 'image/jpeg');
+    res.send(ach.image_data);
+  } catch (err) {
+    console.error('Error serving achievement image:', err);
+    res.status(500).json({ error: 'Server error serving image' });
   }
 };
 

@@ -9,9 +9,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    image: {
+    image_data: {
+      type: DataTypes.BLOB('long'),
+      allowNull: true,
+    },
+    image_type: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     description: {
       type: DataTypes.TEXT,

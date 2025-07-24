@@ -14,7 +14,9 @@ const createUploadDirectories = () => {
     'uploads/testimonials',
     'uploads/slider',
     'uploads/study-materials',
-    'uploads/results'
+    'uploads/results',
+    'uploads/achievements',
+    'uploads/faculty'
   ];
   
   uploadDirs.forEach(dir => {
@@ -37,9 +39,19 @@ sequelize
   .then(() => console.log("Sequelize connected to MySQL"))
   .catch((err) => console.error("Sequelize connection error:", err));
 
+// Sync models to reflect schema changes (alter columns as needed)
+sequelize
+  .sync({ alter: true })
+  .then(() => console.log("All models synced (altered)"))
+  .catch((err) => console.error("Error syncing models:", err));
+
 // Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Analytics tracking middleware
+const analyticsController = require("./controllers/analyticsController");
+app.use(analyticsController.trackVisit);
 
 // Serve static files from uploads directory
 app.use("/uploads", express.static("uploads"));

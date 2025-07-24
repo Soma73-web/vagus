@@ -13,8 +13,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    photo: {
-      type: DataTypes.STRING, // store file path or URL
+    education: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    image_data: {
+      type: DataTypes.BLOB('long'), // store binary image data in DB
+      allowNull: true,
+    },
+    image_type: {
+      type: DataTypes.STRING,
       allowNull: true,
     },
   }, {

@@ -11,19 +11,12 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
-  },
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.get('/', achievementController.getAll);
 router.get('/:id', achievementController.getById);
+router.get('/:id/image', achievementController.getImage);
 router.post('/', upload.single('image'), achievementController.create);
 router.put('/:id', upload.single('image'), achievementController.update);
 router.delete('/:id', achievementController.delete);

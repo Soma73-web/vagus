@@ -11,21 +11,14 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
-  },
-});
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.get('/', facultyController.getAllFaculty);
 router.get('/:id', facultyController.getFacultyById);
-router.post('/', upload.single('photo'), facultyController.createFaculty);
-router.put('/:id', upload.single('photo'), facultyController.updateFaculty);
+router.get('/:id/image', facultyController.getFacultyImage);
+router.post('/', upload.single('image'), facultyController.createFaculty);
+router.put('/:id', upload.single('image'), facultyController.updateFaculty);
 router.delete('/:id', facultyController.deleteFaculty);
 
 module.exports = router; 

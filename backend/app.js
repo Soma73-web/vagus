@@ -38,7 +38,7 @@ sequelize
 
 // Sync Models (optional: use { alter: true } or { force: true } for dev)
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then(() => console.log("All models synced"))
   .catch((err) => console.error("Error syncing models:", err));
 
