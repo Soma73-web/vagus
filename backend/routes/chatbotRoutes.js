@@ -42,7 +42,7 @@ router.post("/ask", async (req, res) => {
           "Authorization": `Bearer ${perplexityApiKey}`,
         },
         body: JSON.stringify({
-          model: "pplx-70b-chat",
+          model: "pplx-70b-online",
           messages: [
             {
               role: "system",
@@ -159,7 +159,7 @@ router.get("/health", (req, res) => {
     openai_configured: openaiConfigured,
     perplexity_configured: perplexityConfigured,
     is_configured: isConfigured,
-    model: perplexityConfigured ? "pplx-70b-chat" : (process.env.OPENAI_MODEL || "gpt-3.5-turbo"),
+    model: perplexityConfigured ? "pplx-70b-online" : (process.env.OPENAI_MODEL || "gpt-3.5-turbo"),
   });
 });
 
