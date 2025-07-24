@@ -6,7 +6,14 @@ const path = require('path');
 exports.getAll = async (req, res) => {
   try {
     const achievements = await Achievement.findAll({ order: [['createdAt', 'DESC']] });
-    res.json(achievements);
+    const mapped = achievements.map(a => {
+      const obj = a.toJSON();
+      obj.imageUrl = `${req.protocol}://${req.get('host')}/api/achievements/${a.id}/image`;
+      delete obj.image_data;
+      delete obj.image_type;
+      return obj;
+    });
+    res.json(mapped);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch achievements' });
   }
@@ -17,7 +24,11 @@ exports.getById = async (req, res) => {
   try {
     const achievement = await Achievement.findByPk(req.params.id);
     if (!achievement) return res.status(404).json({ error: 'Achievement not found' });
-    res.json(achievement);
+    const obj = achievement.toJSON();
+    obj.imageUrl = `${req.protocol}://${req.get('host')}/api/achievements/${achievement.id}/image`;
+    delete obj.image_data;
+    delete obj.image_type;
+    res.json(obj);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch achievement' });
   }

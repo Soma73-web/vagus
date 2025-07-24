@@ -17,8 +17,8 @@ const upload = multer({ storage });
 router.get('/', facultyController.getAllFaculty);
 router.get('/:id', facultyController.getFacultyById);
 router.get('/:id/image', facultyController.getFacultyImage);
-router.post('/', upload.single('image'), facultyController.createFaculty);
-router.put('/:id', upload.single('image'), facultyController.updateFaculty);
+router.post('/', upload.any(), facultyController.createFaculty);
+router.put('/:id', upload.any(), facultyController.updateFaculty);
 router.delete('/:id', facultyController.deleteFaculty);
 
 module.exports = router; 
