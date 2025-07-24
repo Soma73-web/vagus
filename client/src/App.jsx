@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/BackToTop";
 import LeadPopup from "./components/LeadPopup";
+import SearchLoader from "./components/SearchLoader";
 
 // Homepage Components
 import HomeSlider from "./components/HomeSlider";
@@ -60,7 +61,7 @@ function App() {
   }, []);
 
   if (loading) {
-    return <SiteLoader />;
+    return <SearchLoader />;
   }
 
   return (

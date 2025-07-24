@@ -48,13 +48,18 @@ class AuthManager {
     localStorage.removeItem("admin_logged_in");
     localStorage.removeItem("admin_info");
 
-    // Redirect to login page
-    window.location.href = "/admin-login";
-    // Show session expired message
-    if (window.toast) {
-      window.toast("Session expired. Please log in again.", { type: "warning" });
+    // Only redirect to /admin-login if on an admin route
+    const path = window.location.pathname;
+    const isAdminRoute = path.startsWith("/admin") && path !== "/";
+    if (isAdminRoute || path === "/admin-login") {
+      window.location.href = "/admin-login";
     } else {
-      alert("Session expired. Please log in again.");
+      // On public routes, just show a message (no redirect)
+      if (window.toast) {
+        window.toast("Admin session expired. Please log in again if needed.", { type: "warning" });
+      } else {
+        alert("Admin session expired. Please log in again if needed.");
+      }
     }
   }
 
