@@ -74,9 +74,9 @@ const LeadPopup = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center">
+      <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center">
         {/* Image at the top, fixed height */}
-        <div className="w-full h-48 md:h-56 relative">
+        <div className="w-full h-40 relative">
           <img
             src={popupImage}
             alt="Motivation"
@@ -87,39 +87,39 @@ const LeadPopup = ({ isOpen, onClose }) => {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 text-white text-2xl z-20 bg-black/40 rounded-full w-9 h-9 flex items-center justify-center"
+            className="absolute top-2 right-2 text-white text-2xl z-20 bg-black/40 rounded-full w-8 h-8 flex items-center justify-center"
           >
             &times;
           </button>
         </div>
         {/* Form Card */}
-        <div className="relative z-10 w-full bg-white/95 px-6 py-8 flex flex-col items-center">
+        <div className="relative z-10 w-full bg-white/95 px-4 py-6 flex flex-col items-center">
           {showSuccessAnim ? (
             <div className="flex flex-col items-center justify-center w-full animate-fade-in">
-              <div className="flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-4 animate-scale-in">
-                <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3 animate-scale-in">
+                <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <div className="text-green-700 text-lg font-semibold mb-2 bg-white/80 px-4 py-2 rounded">Thank you!</div>
-              <div className="text-gray-700 text-center mb-2">We will get back to you.</div>
+              <div className="text-green-700 text-base font-semibold mb-1 bg-white/80 px-3 py-1 rounded">Thank you!</div>
+              <div className="text-gray-700 text-center mb-1">We will get back to you.</div>
             </div>
           ) : (
             <>
-              <h2 className="text-2xl font-bold text-blue-700 mb-2 text-center">
+              <h2 className="text-xl font-bold text-blue-700 mb-1 text-center">
                 Take Your First Step Toward Becoming a Doctor!
               </h2>
-              <p className="text-gray-700 mb-4 text-center">
+              <p className="text-gray-700 mb-3 text-center text-sm">
                 Enter your name and phone number to get expert NEET guidance and updates.
               </p>
-              <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
+              <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2">
                 <input
                   type="text"
                   name="name"
                   placeholder="Your Name"
                   value={form.name}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
                 <input
@@ -128,21 +128,21 @@ const LeadPopup = ({ isOpen, onClose }) => {
                   placeholder="10-digit Phone Number"
                   value={form.phone}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
                   maxLength={10}
                   pattern="\d{10}"
                   required
                 />
-                {error && <div className="text-red-600 text-sm">{error}</div>}
+                {error && <div className="text-red-600 text-xs">{error}</div>}
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg mt-2 transition"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-1 transition text-base"
                   disabled={loading}
                 >
                   {loading ? "Submitting..." : "Get Started"}
                 </button>
               </form>
-              <div className="text-xs text-gray-500 mt-4 text-center">
+              <div className="text-xs text-gray-500 mt-2 text-center">
                 We respect your privacy. Your details are safe with us.
               </div>
             </>
