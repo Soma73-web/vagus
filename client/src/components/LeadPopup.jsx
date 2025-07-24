@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import popupImage from '../assets/popupImage.png';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -60,58 +61,65 @@ const LeadPopup = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      {/* Popup Content */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 flex flex-col items-center">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          &times;
         </button>
-        <h2 className="text-2xl font-bold mb-4 text-center">Get in Touch</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
-            <input
-              type="tel"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              pattern="\d{10}"
-              maxLength={10}
-              required
-            />
-          </div>
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-blue-700 mb-2 text-center">
+          Take Your First Step Toward Becoming a Doctor!
+        </h2>
+        {/* Subtitle */}
+        <p className="text-gray-700 mb-4 text-center">
+          Enter your name and phone number to get expert NEET guidance and updates.
+        </p>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
+          <input
+            type="text"
+            name="name"
+            placeholder="Your Name"
+            value={form.name}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <input
+            type="tel"
+            name="phone"
+            placeholder="10-digit Phone Number"
+            value={form.phone}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
+            maxLength={10}
+            pattern="\d{10}"
+            required
+          />
           {error && <div className="text-red-600 text-sm">{error}</div>}
           {success && <div className="text-green-600 text-sm">{success}</div>}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg mt-2 transition"
             disabled={loading}
           >
-            {loading ? 'Submitting...' : 'Submit'}
+            {loading ? "Submitting..." : "Get Started"}
           </button>
         </form>
+        {/* Footer */}
+        <div className="text-xs text-gray-500 mt-4 text-center">
+          We respect your privacy. Your details are safe with us.
+        </div>
+        {/* Motivational Image */}
+        <img
+          src={popupImage}
+          alt="Motivation"
+          className="w-32 h-32 object-contain mt-4"
+        />
       </div>
     </div>
   );
