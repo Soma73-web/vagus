@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import studentImg from '../assets/popupImage.png'; // Use your own image if available
+import studentImg from '../assets/popupImage.png';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -83,28 +83,28 @@ const LeadPopup = ({ isOpen, onClose }) => {
           &times;
         </button>
         <div className="flex flex-col md:flex-row items-center p-5">
-          {/* Left Content */}
-          <div className="flex-1 flex flex-col gap-3">
-            <div className="flex items-center gap-2">
+          {/* Left Content - Credentials Box Larger */}
+          <div className="flex-1 flex flex-col gap-4 bg-white/90 rounded-xl p-4 mr-0 md:mr-4 min-w-[220px] max-w-[260px] shadow-lg">
+            <h2 className="text-lg font-bold text-blue-700 mb-2 text-center">
+              Take your first step towards your doctor dream.
+            </h2>
+            <div className="flex items-center gap-2 text-base">
               <span className="bg-yellow-400 text-white rounded-full p-2">
                 {/* Crown Icon */}
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path d="M3 17l6-6 4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <span className="text-white font-bold text-lg">Exemplary <span className="text-yellow-300">Faculty</span> <span className="text-green-300 ml-1">&#10003;</span></span>
+              <span className="text-blue-900 font-bold">Exemplary <span className="text-yellow-500">Faculty</span> <span className="text-green-500 ml-1">&#10003;</span></span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-white font-bold text-lg">Expert <span className="text-yellow-300">Guidance</span> <span className="text-green-300 ml-1">&#10003;</span></span>
+            <div className="flex items-center gap-2 text-base">
+              <span className="text-blue-900 font-bold">Expert <span className="text-yellow-500">Guidance</span> <span className="text-green-500 ml-1">&#10003;</span></span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-white font-bold text-lg">Exemplary <span className="text-yellow-300">Result</span> <span className="text-green-300 ml-1">&#10003;</span></span>
+            <div className="flex items-center gap-2 text-base">
+              <span className="text-blue-900 font-bold">Exemplary <span className="text-yellow-500">Result</span> <span className="text-green-500 ml-1">&#10003;</span></span>
             </div>
-            <div className="mt-3">
-              <span className="inline-block bg-yellow-400 text-blue-900 font-bold px-3 py-1 rounded shadow">Admissions Open!</span>
-            </div>
-            {/* Form below badge */}
-            <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2 mt-3">
+            {/* Form below credentials */}
+            <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2 mt-2">
               <input
                 type="text"
                 name="name"
@@ -146,20 +146,13 @@ const LeadPopup = ({ isOpen, onClose }) => {
               </div>
             )}
           </div>
-          {/* Right Image */}
+          {/* Right Image - Square */}
           <div className="flex-1 flex justify-center items-center mt-4 md:mt-0">
             <img
               src={studentImg}
               alt="Student"
-              className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg"
+              className="w-32 h-32 object-cover rounded-lg border-4 border-white shadow-lg"
             />
-          </div>
-        </div>
-        {/* Bottom Text */}
-        <div className="px-5 pb-5">
-          <div className="text-white text-center font-bold text-base mt-2">
-            No.1 institute for Long Term coaching<br />
-            <span className="text-yellow-300 text-lg">IIT JEE/NEET</span> with Kota Faculty @ your place
           </div>
         </div>
       </div>
