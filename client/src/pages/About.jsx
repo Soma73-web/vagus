@@ -75,7 +75,7 @@ const About = () => {
         </div>
         {/* Director's Message */}
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <h3 className="text-lg font-semibold text-indigo-700 mb-2">Director's Message</h3>
+          <h3 className="text-lg font-semibold text-indigo-700 mb-2">About Vagus Science Academy</h3>
           <p className="text-gray-600 mb-3 text-sm">
             Hear from our Director about our vision, values, and commitment to student success.
           </p>
