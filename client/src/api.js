@@ -21,7 +21,7 @@ api.interceptors.request.use(
 );
 
 // Perplexity AI proxy call
-export async function perplexityChat({ model = 'sonar', messages, response_format }) {
+export async function perplexityChat({ model = 'pplx-70b-online', messages, response_format }) {
   const res = await api.post('/api/auth/ai/perplexity', {
     model,
     messages,

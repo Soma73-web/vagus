@@ -54,12 +54,8 @@ class AuthManager {
     if (isAdminRoute || path === "/admin-login") {
       window.location.href = "/admin-login";
     } else {
-      // On public routes, just show a message (no redirect)
-      if (window.toast) {
-        window.toast("Admin session expired. Please log in again if needed.", { type: "warning" });
-      } else {
-        alert("Admin session expired. Please log in again if needed.");
-      }
+      // On public routes, do not show any alert or toast for admin session expiration
+      // (Fix: previously showed alert/toast on home page and public pages)
     }
   }
 
