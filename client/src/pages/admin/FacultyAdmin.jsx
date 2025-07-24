@@ -128,7 +128,7 @@ const FacultyAdmin = () => {
               className="w-full"
             />
             {preview && (
-              <img src={preview} alt="Preview" className="h-16 w-16 rounded-full mt-2 object-cover border" />
+              <img src={preview} alt="Preview" className="h-32 w-32 rounded-full mt-2 object-cover border" />
             )}
           </div>
         </div>

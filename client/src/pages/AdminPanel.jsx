@@ -11,13 +11,13 @@ import StudentAdmin from "./admin/StudentAdmin";
 import AttendanceAdmin from "./admin/AttendanceAdmin";
 import TestResultAdmin from "./admin/TestResultAdmin";
 import StudyMaterialAdmin from "./admin/StudyMaterialAdmin";
-import PopupAdmin from "./admin/PopupAdmin";
 import AdminLayout from "../components/AdminLayout";
 import AnalyticsSummary from "../components/AnalyticsSummary";
 import api from "../api";
 import AnalyticsTrendsChart from "../components/AnalyticsTrendsChart";
 import FacultyAdmin from "./admin/FacultyAdmin";
 import AchievementAdmin from "./admin/AchievementAdmin";
+import LeadsAdmin from "./admin/LeadsAdmin";
 
 const TABS = [
   { id: "analytics", label: "Analytics", component: null },
@@ -28,7 +28,6 @@ const TABS = [
   { id: "attendance", label: "Attendance", component: <AttendanceAdmin /> },
   { id: "test-results", label: "Test Results", component: <TestResultAdmin /> },
   { id: "study-materials", label: "Study Materials", component: <StudyMaterialAdmin /> },
-  { id: "popup", label: "Popup", component: <PopupAdmin /> },
   { id: "results", label: "Results", component: <ResultAdmin /> },
   { id: "gallery", label: "Gallery", component: <GalleryAdmin /> },
   {
@@ -42,6 +41,7 @@ const TABS = [
     component: <TestimonialAdmin />,
   },
   { id: "downloads", label: "Downloads", component: <DownloadAdmin /> },
+  { id: "leads", label: "Leads", component: <LeadsAdmin /> },
 ];
 
 const AdminPanel = () => {

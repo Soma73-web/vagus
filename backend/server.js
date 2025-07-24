@@ -103,6 +103,7 @@ const popupRoutes = require('./routes/popupRoutes');
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const facultyRoutes = require("./routes/facultyRoutes");
 const achievementRoutes = require("./routes/achievementRoutes");
+const leadRoutes = require("./routes/lead");
 
 // Route Mounting
 app.use("/api/testimonials", testimonialRoutes);
@@ -120,6 +121,7 @@ app.use('/api/popup', popupRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/faculty", facultyRoutes);
 app.use("/api/achievements", achievementRoutes);
+app.use("/api/leads", leadRoutes);
 
 // Health check route
 app.get("/", (req, res) => {

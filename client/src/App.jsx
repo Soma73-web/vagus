@@ -5,7 +5,6 @@ import "react-toastify/dist/ReactToastify.css";
 import SiteLoader from "./components/SiteLoader";
 import ErrorBoundary from "./components/ErrorBoundary";
 import authManager from "./utils/auth";
-import PopupWrapper from "./components/PopupWrapper";
 
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -15,6 +14,7 @@ import AIChatbot from "./components/AIChatbot";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/BackToTop";
+import LeadPopup from "./components/LeadPopup";
 
 // Homepage Components
 import HomeSlider from "./components/HomeSlider";
@@ -42,6 +42,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [showLeadPopup, setShowLeadPopup] = useState(false);
 
   useEffect(() => {
     // Setup auth manager interceptors
@@ -52,7 +53,8 @@ function App() {
     // Optimize loading time for better UX
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 800);
+      setShowLeadPopup(true);
+    }, 5000); // Show popup after 5 seconds
 
     return () => clearTimeout(timer);
   }, []);
@@ -94,6 +96,7 @@ function App() {
                   </div>
                 </main>
                 <Footer />
+                <LeadPopup isOpen={showLeadPopup} onClose={() => setShowLeadPopup(false)} />
               </>
             }
           />
