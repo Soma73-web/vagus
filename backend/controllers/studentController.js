@@ -1,11 +1,21 @@
 const { Student, Attendance, TestResult } = require("../models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const validator = require('validator');
 
 // Student login
 const loginStudent = async (req, res) => {
   try {
-    const { studentId, password } = req.body;
+    let { studentId, password } = req.body;
+    // Input sanitization
+    if (typeof studentId !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Invalid input type' });
+    }
+    studentId = validator.trim(studentId);
+    password = validator.trim(password);
+    if (!validator.isAlphanumeric(studentId) || !validator.isLength(password, { min: 4, max: 64 })) {
+      return res.status(400).json({ error: 'Invalid credentials format' });
+    }
 
     const student = await Student.findOne({
       where: { studentId, isActive: true },

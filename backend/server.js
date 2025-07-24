@@ -4,6 +4,9 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 const app = express();
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 // Create upload directories if they don't exist
 const createUploadDirectories = () => {
@@ -46,8 +49,19 @@ sequelize
   .catch((err) => console.error("Error syncing models:", err));
 
 // Middleware
+app.use(helmet());
+app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Rate limiting for login endpoints
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: { error: "Too many login attempts, please try again later." }
+});
+app.use('/api/auth/login', loginLimiter);
+app.use('/api/students/login', loginLimiter);
 
 // Analytics tracking middleware
 const analyticsController = require("./controllers/analyticsController");
