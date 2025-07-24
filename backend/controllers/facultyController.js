@@ -9,6 +9,7 @@ exports.getAllFaculty = async (req, res) => {
     const mapped = faculty.map(f => {
       const obj = f.toJSON();
       obj.imageUrl = `${req.protocol}://${req.get('host')}/api/faculty/${f.id}/image`;
+      obj.photo = obj.imageUrl;
       delete obj.image_data;
       delete obj.image_type;
       return obj;
@@ -26,6 +27,7 @@ exports.getFacultyById = async (req, res) => {
     if (!faculty) return res.status(404).json({ error: 'Faculty not found' });
     const obj = faculty.toJSON();
     obj.imageUrl = `${req.protocol}://${req.get('host')}/api/faculty/${faculty.id}/image`;
+    obj.photo = obj.imageUrl;
     delete obj.image_data;
     delete obj.image_type;
     res.json(obj);
@@ -52,6 +54,7 @@ exports.createFaculty = async (req, res) => {
     const faculty = await Faculty.create({ name, subject, education, image_data, image_type });
     const obj = faculty.toJSON();
     obj.imageUrl = `${req.protocol}://${req.get('host')}/api/faculty/${faculty.id}/image`;
+    obj.photo = obj.imageUrl;
     delete obj.image_data;
     delete obj.image_type;
     res.status(201).json(obj);
@@ -76,6 +79,7 @@ exports.updateFaculty = async (req, res) => {
     await faculty.update({ name, subject, education, image_data, image_type });
     const obj = faculty.toJSON();
     obj.imageUrl = `${req.protocol}://${req.get('host')}/api/faculty/${faculty.id}/image`;
+    obj.photo = obj.imageUrl;
     delete obj.image_data;
     delete obj.image_type;
     res.json(obj);

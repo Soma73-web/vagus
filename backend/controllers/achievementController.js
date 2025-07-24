@@ -9,6 +9,7 @@ exports.getAll = async (req, res) => {
     const mapped = achievements.map(a => {
       const obj = a.toJSON();
       obj.imageUrl = `${req.protocol}://${req.get('host')}/api/achievements/${a.id}/image`;
+      obj.image = obj.imageUrl; // legacy key
       delete obj.image_data;
       delete obj.image_type;
       return obj;
@@ -26,6 +27,7 @@ exports.getById = async (req, res) => {
     if (!achievement) return res.status(404).json({ error: 'Achievement not found' });
     const obj = achievement.toJSON();
     obj.imageUrl = `${req.protocol}://${req.get('host')}/api/achievements/${achievement.id}/image`;
+    obj.image = obj.imageUrl;
     delete obj.image_data;
     delete obj.image_type;
     res.json(obj);
@@ -49,7 +51,12 @@ exports.create = async (req, res) => {
       return res.status(400).json({ error: "Image is required" });
     }
     const achievement = await Achievement.create({ title, description, image_data, image_type });
-    res.status(201).json(achievement);
+    const created = achievement.toJSON();
+    created.imageUrl = `${req.protocol}://${req.get('host')}/api/achievements/${achievement.id}/image`;
+    created.image = created.imageUrl;
+    delete created.image_data;
+    delete created.image_type;
+    res.status(201).json(created);
   } catch (err) {
     res.status(500).json({ error: 'Failed to create achievement' });
   }
@@ -68,7 +75,12 @@ exports.update = async (req, res) => {
       image_type = req.file.mimetype;
     }
     await achievement.update({ title, description, image_data, image_type });
-    res.json(achievement);
+    const updated = achievement.toJSON();
+    updated.imageUrl = `${req.protocol}://${req.get('host')}/api/achievements/${achievement.id}/image`;
+    updated.image = updated.imageUrl;
+    delete updated.image_data;
+    delete updated.image_type;
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update achievement' });
   }
