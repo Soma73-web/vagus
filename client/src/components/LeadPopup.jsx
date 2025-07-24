@@ -74,7 +74,7 @@ const LeadPopup = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-br from-blue-700 to-green-600 p-0">
+      <div className="relative w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden p-0">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -82,77 +82,72 @@ const LeadPopup = ({ isOpen, onClose }) => {
         >
           &times;
         </button>
-        <div className="flex flex-col md:flex-row items-center p-5">
-          {/* Left Content - Credentials Box Larger */}
-          <div className="flex-1 flex flex-col gap-4 bg-white/90 rounded-xl p-4 mr-0 md:mr-4 min-w-[220px] max-w-[260px] shadow-lg">
-            <h2 className="text-lg font-bold text-blue-700 mb-2 text-center">
-              Take your first step towards your doctor dream.
-            </h2>
-            <div className="flex items-center gap-2 text-base">
-              <span className="bg-yellow-400 text-white rounded-full p-2">
-                {/* Crown Icon */}
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M3 17l6-6 4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <span className="text-blue-900 font-bold">Exemplary <span className="text-yellow-500">Faculty</span> <span className="text-green-500 ml-1">&#10003;</span></span>
-            </div>
-            <div className="flex items-center gap-2 text-base">
-              <span className="text-blue-900 font-bold">Expert <span className="text-yellow-500">Guidance</span> <span className="text-green-500 ml-1">&#10003;</span></span>
-            </div>
-            <div className="flex items-center gap-2 text-base">
-              <span className="text-blue-900 font-bold">Exemplary <span className="text-yellow-500">Result</span> <span className="text-green-500 ml-1">&#10003;</span></span>
-            </div>
-            {/* Form below credentials */}
-            <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2 mt-2">
-              <input
-                type="text"
-                name="name"
-                placeholder="Your Name"
-                value={form.name}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
-                required
-              />
-              <input
-                type="tel"
-                name="phone"
-                placeholder="10-digit Phone Number"
-                value={form.phone}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
-                maxLength={10}
-                pattern="\d{10}"
-                required
-              />
-              {error && <div className="text-red-600 text-xs">{error}</div>}
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-1 transition text-base"
-                disabled={loading}
-              >
-                {loading ? "Submitting..." : "Get Started"}
-              </button>
-            </form>
-            {showSuccessAnim && (
-              <div className="flex flex-col items-center justify-center w-full animate-fade-in mt-2">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3 animate-scale-in">
-                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div className="text-green-700 text-base font-semibold mb-1 bg-white/80 px-3 py-1 rounded">Thank you!</div>
-                <div className="text-gray-700 text-center mb-1">We will get back to you.</div>
+        {/* Full Background Image with Overlay */}
+        <div className="relative w-full h-full min-h-[420px] flex flex-col items-center justify-center">
+          <img
+            src={studentImg}
+            alt="Student"
+            className="absolute inset-0 w-full h-full object-cover z-0"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-blue-900/70 z-0" />
+          {/* Content Overlay */}
+          <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-6 py-8">
+            <div className="bg-white/90 rounded-xl p-4 w-full max-w-xs mx-auto shadow-lg flex flex-col gap-4">
+              <h2 className="text-lg font-bold text-blue-700 mb-2 text-center">
+                Take your first step towards your doctor dream.
+              </h2>
+              <div className="flex items-center gap-2 text-base">
+                <span className="text-blue-900 font-bold">Exemplary <span className="text-yellow-500">Faculty</span> <span className="text-green-500 ml-1">&#10003;</span></span>
               </div>
-            )}
-          </div>
-          {/* Right Image - Square */}
-          <div className="flex-1 flex justify-center items-center mt-4 md:mt-0">
-            <img
-              src={studentImg}
-              alt="Student"
-              className="w-32 h-32 object-cover rounded-lg border-4 border-white shadow-lg"
-            />
+              <div className="flex items-center gap-2 text-base">
+                <span className="text-blue-900 font-bold">Expert <span className="text-yellow-500">Guidance</span> <span className="text-green-500 ml-1">&#10003;</span></span>
+              </div>
+              <div className="flex items-center gap-2 text-base">
+                <span className="text-blue-900 font-bold">Exemplary <span className="text-yellow-500">Result</span> <span className="text-green-500 ml-1">&#10003;</span></span>
+              </div>
+              {/* Form below credentials */}
+              <form onSubmit={handleSubmit} className="w-full flex flex-col gap-2 mt-2">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Your Name"
+                  value={form.name}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
+                  required
+                />
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="10-digit Phone Number"
+                  value={form.phone}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm"
+                  maxLength={10}
+                  pattern="\d{10}"
+                  required
+                />
+                {error && <div className="text-red-600 text-xs">{error}</div>}
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg mt-1 transition text-base"
+                  disabled={loading}
+                >
+                  {loading ? "Submitting..." : "Get Started"}
+                </button>
+              </form>
+              {showSuccessAnim && (
+                <div className="flex flex-col items-center justify-center w-full animate-fade-in mt-2">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-3 animate-scale-in">
+                    <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="text-green-700 text-base font-semibold mb-1 bg-white/80 px-3 py-1 rounded">Thank you!</div>
+                  <div className="text-gray-700 text-center mb-1">We will get back to you.</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
