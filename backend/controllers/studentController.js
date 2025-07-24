@@ -20,9 +20,13 @@ const loginStudent = async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
     const token = jwt.sign(
       { id: student.id, studentId: student.studentId },
-      process.env.JWT_SECRET || "fallback_secret",
+      jwtSecret,
       { expiresIn: "24h" },
     );
 

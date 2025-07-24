@@ -78,7 +78,7 @@ const LeadPopup = ({ isOpen, onClose }) => {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-white text-2xl z-20 bg-black/40 rounded-full w-9 h-9 flex items-center justify-center"
+          className="absolute top-3 right-3 z-20 w-11 h-11 flex items-center justify-center rounded-full bg-white shadow-lg border-2 border-blue-600 text-blue-700 text-3xl font-bold hover:bg-blue-600 hover:text-white transition"
         >
           &times;
         </button>

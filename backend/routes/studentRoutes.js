@@ -17,9 +17,13 @@ const authenticateStudent = (req, res, next) => {
 
   try {
     const jwt = require("jsonwebtoken");
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "fallback_secret",
+      jwtSecret,
     );
     req.student = decoded;
     next();
