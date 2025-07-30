@@ -35,6 +35,17 @@ const authenticateStudent = (req, res, next) => {
 // Public routes
 router.post("/login", loginStudent);
 
+// Student logout endpoint
+router.post("/logout", authenticateStudent, (req, res) => {
+  try {
+    // In a more advanced setup, you could blacklist the token
+    // For now, we'll just return success (client should remove token)
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Logout failed" });
+  }
+});
+
 // Protected routes
 router.get("/:studentId/attendance", authenticateStudent, getStudentAttendance);
 router.get(

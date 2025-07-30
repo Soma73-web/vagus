@@ -31,11 +31,29 @@ const StudentDashboard = () => {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("studentToken");
-    localStorage.removeItem("studentInfo");
-    toast.success("Logged out successfully");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("studentToken");
+      if (token) {
+        // Call backend logout endpoint
+        await axios.post(
+          `${API_BASE}/api/students/logout`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Continue with logout even if backend call fails
+    } finally {
+      // Clear local storage
+      localStorage.removeItem("studentToken");
+      localStorage.removeItem("studentInfo");
+      toast.success("Logged out successfully");
+      navigate("/");
+    }
   };
 
   if (!student) {

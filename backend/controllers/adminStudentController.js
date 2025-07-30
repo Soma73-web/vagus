@@ -1,10 +1,11 @@
 const { Student, Attendance, TestResult } = require("../models");
 const bcrypt = require("bcryptjs");
+const validator = require('validator');
 
 // Create student account
 const createStudent = async (req, res) => {
   try {
-    const {
+    let {
       studentId,
       firstName,
       lastName,
@@ -20,12 +21,40 @@ const createStudent = async (req, res) => {
     if (!studentId || !firstName || !lastName || !email || !password) {
       return res.status(400).json({ error: "All fields are required" });
     }
-    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    if (!emailRegex.test(email)) {
+
+    // Sanitize inputs
+    studentId = validator.trim(studentId);
+    firstName = validator.trim(firstName);
+    lastName = validator.trim(lastName);
+    email = validator.trim(email).toLowerCase();
+    phone = phone ? validator.trim(phone) : '';
+    course = validator.trim(course);
+    batch = validator.trim(batch);
+
+    // Validate email
+    if (!validator.isEmail(email)) {
       return res.status(400).json({ error: "Invalid email address" });
     }
+
+    // Validate password strength
     if (password.length < 8) {
       return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    // Validate names (letters and spaces only)
+    if (!validator.matches(firstName, /^[a-zA-Z\s]+$/) || 
+        !validator.matches(lastName, /^[a-zA-Z\s]+$/)) {
+      return res.status(400).json({ error: "Names can only contain letters and spaces" });
+    }
+
+    // Validate student ID (alphanumeric)
+    if (!validator.isAlphanumeric(studentId)) {
+      return res.status(400).json({ error: "Student ID must be alphanumeric" });
+    }
+
+    // Validate phone number if provided
+    if (phone && !validator.isMobilePhone(phone, 'en-IN')) {
+      return res.status(400).json({ error: "Invalid phone number format" });
     }
 
     // Check if student ID already exists

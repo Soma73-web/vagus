@@ -49,12 +49,32 @@ sequelize
   .catch((err) => console.error("Error syncing models:", err));
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
 app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Rate limiting for login endpoints
+// Global rate limiting (safe limits)
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { error: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
+
+// Rate limiting for login endpoints (more strict)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // limit each IP to 10 requests per windowMs
@@ -164,21 +184,42 @@ app.use("*", (req, res) => {
 
 // Global error handler
 app.use((error, req, res, next) => {
-  console.error("Error:", error);
+  // Log error for debugging
+  console.error("Error:", {
+    message: error.message,
+    stack: error.stack,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+    timestamp: new Date().toISOString()
+  });
 
+  // Handle specific error types
   if (error.name === "ValidationError") {
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: "Invalid input data" });
   }
 
   if (error.name === "CastError") {
     return res.status(400).json({ error: "Invalid ID format" });
   }
 
+  if (error.name === "JsonWebTokenError") {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+
+  if (error.name === "TokenExpiredError") {
+    return res.status(401).json({ error: "Token expired" });
+  }
+
+  if (error.code === "ER_DUP_ENTRY") {
+    return res.status(409).json({ error: "Duplicate entry" });
+  }
+
+  // Generic error response (don't expose internal details in production)
+  const isProduction = process.env.NODE_ENV === "production";
   res.status(500).json({
-    error:
-      process.env.NODE_ENV === "production"
-        ? "Internal server error"
-        : error.message,
+    error: isProduction ? "Internal server error" : error.message,
+    ...(isProduction ? {} : { stack: error.stack })
   });
 });
 
