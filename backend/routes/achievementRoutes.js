@@ -12,7 +12,19 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    // Allow images for achievement uploads
+    const allowedImageTypes = /jpeg|jpg|png|webp/;
+    const ext = file.originalname.toLowerCase().split('.').pop();
+    if (!allowedImageTypes.test(ext)) {
+      return cb(new Error('Only image files (jpg, jpeg, png, webp) are allowed!'), false);
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+});
 
 router.get('/', achievementController.getAll);
 router.get('/:id', achievementController.getById);

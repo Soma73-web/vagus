@@ -3,9 +3,21 @@ const multer = require('multer');
 const router = express.Router();
 const resultController = require('../controllers/resultController');
 
-// Store uploaded files in memory (as Buffer)
+// Store uploaded files in memory (as Buffer) with proper filtering
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  fileFilter: (req, file, cb) => {
+    // Allow images for result uploads
+    const allowedImageTypes = /jpeg|jpg|png|webp/;
+    const ext = file.originalname.toLowerCase().split('.').pop();
+    if (!allowedImageTypes.test(ext)) {
+      return cb(new Error('Only image files (jpg, jpeg, png, webp) are allowed!'), false);
+    }
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB
+});
 
 // Routes
 router.get('/', resultController.getAllResults);
