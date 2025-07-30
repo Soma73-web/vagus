@@ -40,10 +40,16 @@ exports.getFacultyById = async (req, res) => {
 exports.createFaculty = async (req, res) => {
   try {
     const { name, subject, education } = req.body;
+    
+    console.log('Faculty upload - req.file:', !!req.file);
+    console.log('Faculty upload - req.files:', !!req.files);
+    console.log('Faculty upload - req.body:', req.body);
+    
     // Input validation
     if (!name || !subject || !education) {
       return res.status(400).json({ error: "Name, subject and education are required" });
     }
+    
     let image_data = null;
     let image_type = null;
     const fileObj = req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
@@ -51,6 +57,7 @@ exports.createFaculty = async (req, res) => {
       image_data = fileObj.buffer;
       image_type = fileObj.mimetype;
     }
+    
     const faculty = await Faculty.create({ name, subject, education, image_data, image_type });
     const obj = faculty.toJSON();
     obj.imageUrl = `${req.protocol}://${req.get('host')}/api/faculty/${faculty.id}/image`;
@@ -59,6 +66,7 @@ exports.createFaculty = async (req, res) => {
     delete obj.image_type;
     res.status(201).json(obj);
   } catch (err) {
+    console.error('Faculty creation error:', err);
     res.status(500).json({ error: 'Failed to create faculty' });
   }
 };

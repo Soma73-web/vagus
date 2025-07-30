@@ -73,6 +73,10 @@ exports.createGalleryItem = async (req, res) => {
     const { title } = req.body;
     const file = req.file;
 
+    console.log('Gallery upload - req.file:', !!file);
+    console.log('Gallery upload - req.files:', !!req.files);
+    console.log('Gallery upload - req.body:', req.body);
+
     if (!file) {
       return res.status(400).json({ error: 'Image file is required' });
     }
