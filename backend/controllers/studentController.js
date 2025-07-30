@@ -7,15 +7,31 @@ const validator = require('validator');
 const loginStudent = async (req, res) => {
   try {
     let { studentId, password } = req.body;
-    // Input sanitization
+    
+    // Input validation and sanitization
+    if (!studentId || !password) {
+      return res.status(400).json({ error: 'Student ID and password are required' });
+    }
+    
     if (typeof studentId !== 'string' || typeof password !== 'string') {
       return res.status(400).json({ error: 'Invalid input type' });
     }
+    
+    // Sanitize inputs
     studentId = validator.trim(studentId);
     password = validator.trim(password);
-    if (!validator.isAlphanumeric(studentId) || !validator.isLength(password, { min: 4, max: 64 })) {
-      return res.status(400).json({ error: 'Invalid credentials format' });
+    
+    // Validate input length and format
+    if (!validator.isLength(studentId, { min: 3, max: 20 })) {
+      return res.status(400).json({ error: 'Student ID must be 3-20 characters' });
     }
+    
+    if (!validator.isLength(password, { min: 4, max: 64 })) {
+      return res.status(400).json({ error: 'Password must be 4-64 characters' });
+    }
+    
+    // Escape special characters to prevent injection
+    studentId = validator.escape(studentId);
 
     const student = await Student.findOne({
       where: { studentId, isActive: true },

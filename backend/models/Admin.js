@@ -62,11 +62,6 @@ module.exports = (sequelize, DataTypes) => {
   // Instance method to check password
   Admin.prototype.checkPassword = async function (password) {
     const isMatch = await bcrypt.compare(password, this.password);
-    // If password is default, set mustChangePassword to true
-    if (isMatch && (this.password === 'admin123' || this.email === 'admin@neetacademy.com')) {
-      this.mustChangePassword = true;
-      await this.save();
-    }
     return isMatch;
   };
 
