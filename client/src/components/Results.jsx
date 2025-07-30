@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import Slider from "react-slick";
 import api from "../api";
 import { NextArrow, PrevArrow } from "./BlueArrows";
@@ -15,31 +15,32 @@ const Results = () => {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        const res = await api.get("/api/results");
-        const data = res.data.map((r) => ({
-          ...r,
-          photoUrl: `${API_BASE}/api/results/${r.id}/image`,
-        }));
-        setItems(data);
+  const fetchResults = useCallback(async () => {
+    try {
+      const res = await api.get("/api/results");
+      const data = res.data.map((r) => ({
+        ...r,
+        photoUrl: `${API_BASE}/api/results/${r.id}/image`,
+      }));
+      setItems(data);
 
-        const ys = [...new Set(data.map((r) => r.year))].sort((a, b) => b - a);
-        setYears(ys);
-        setSelected(ys[0] ?? null);
-      } catch (err) {
-        console.error("Failed to load results:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchResults();
+      const ys = [...new Set(data.map((r) => r.year))].sort((a, b) => b - a);
+      setYears(ys);
+      setSelected(ys[0] ?? null);
+    } catch (err) {
+      console.error("Failed to load results:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchResults();
+  }, [fetchResults]);
 
   const filtered = selected ? items.filter((i) => i.year === selected) : [];
 
-  const slick = {
+  const slick = useMemo(() => ({
     dots: true,
     arrows: true,
     infinite: true,
@@ -73,7 +74,11 @@ const Results = () => {
         },
       },
     ],
-  };
+  }), []);
+
+  const handleYearSelect = useCallback((year) => {
+    setSelected(year);
+  }, []);
 
   return (
     <section
@@ -99,7 +104,7 @@ const Results = () => {
             {years.map((year) => (
               <button
                 key={year}
-                onClick={() => setSelected(year)}
+                onClick={() => handleYearSelect(year)}
                 className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                   selected === year
                     ? "bg-blue-600 text-white shadow-lg transform scale-105"

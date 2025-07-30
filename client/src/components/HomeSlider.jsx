@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Slider from "react-slick";
+import axios from "axios";
+import { NextArrow, PrevArrow } from "./BlueArrows";
+import LoadingSpinner from "./LoadingSpinner";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
@@ -11,24 +13,25 @@ const HomeSlider = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSliderImages = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/slider`);
-        const data = await res.json();
-        const formatted = data.map((img) => ({
-          ...img,
-          url: `${API_BASE.replace(/\/$/, "")}/api/slider/image/${img.id}`,
-        }));
-        setImages(formatted);
-      } catch (error) {
-        console.error("Failed to load slider images:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSliderImages();
+  const fetchImages = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE}/api/slider`);
+      const data = response.data.map((img) => ({
+        ...img,
+        imageUrl: `${API_BASE}/api/slider/image/${img.id}`,
+      }));
+      setImages(data || []);
+    } catch (error) {
+      console.error("Error fetching slider images:", error);
+      setImages([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchImages();
+  }, [fetchImages]);
 
   const settings = {
     dots: true,
@@ -57,7 +60,7 @@ const HomeSlider = () => {
             {images.map((img) => (
               <div key={img.id}>
                 <img
-                  src={img.url}
+                  src={img.imageUrl}
                   alt={`Slide ${img.id}`}
                   className="w-full h-[230px] object-cover"
                   onError={e => { e.target.onerror = null; e.target.src = '/fallback.png'; }}

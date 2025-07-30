@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -18,17 +18,7 @@ const StudyMaterials = () => {
     { name: "Mathematics", icon: "📐", color: "bg-red-500" },
   ];
 
-  useEffect(() => {
-    fetchSubjectsCount();
-  }, []);
-
-  useEffect(() => {
-    if (selectedSubject) {
-      fetchMaterials(selectedSubject);
-    }
-  }, [selectedSubject]);
-
-  const fetchSubjectsCount = async () => {
+  const fetchSubjectsCount = useCallback(async () => {
     try {
       const response = await axios.get(
         `${API_BASE}/api/study-materials/subjects`,
@@ -37,9 +27,9 @@ const StudyMaterials = () => {
     } catch (error) {
       console.error("Error fetching subjects count:", error);
     }
-  };
+  }, []);
 
-  const fetchMaterials = async (subject) => {
+  const fetchMaterials = useCallback(async (subject) => {
     try {
       setLoading(true);
       const response = await axios.get(
@@ -52,7 +42,30 @@ const StudyMaterials = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchSubjectsCount();
+  }, [fetchSubjectsCount]);
+
+  useEffect(() => {
+    if (selectedSubject) {
+      fetchMaterials(selectedSubject);
+    }
+  }, [selectedSubject, fetchMaterials]);
+
+  const handleSubjectSelect = useCallback((subject) => {
+    setSelectedSubject(subject);
+    setSelectedVideo(null);
+  }, []);
+
+  const handleVideoSelect = useCallback((video) => {
+    setSelectedVideo(video);
+  }, []);
+
+  const handleCloseVideo = useCallback(() => {
+    setSelectedVideo(null);
+  }, []);
 
   const getSubjectCount = (subjectName) => {
     const subject = subjectsCount.find((s) => s.subject === subjectName);
@@ -93,7 +106,7 @@ const StudyMaterials = () => {
           {subjects.map((subject) => (
             <button
               key={subject.name}
-              onClick={() => setSelectedSubject(subject.name)}
+              onClick={() => handleSubjectSelect(subject.name)}
               className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                 selectedSubject === subject.name
                   ? `${subject.color} text-white border-transparent shadow-lg`
@@ -141,7 +154,7 @@ const StudyMaterials = () => {
                 <div
                   key={material.id}
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => setSelectedVideo(material)}
+                  onClick={() => handleVideoSelect(material)}
                 >
                   <div className="aspect-w-16 aspect-h-9 bg-gray-200">
                     <iframe
@@ -184,7 +197,7 @@ const StudyMaterials = () => {
                 {selectedVideo.topic}
               </h3>
               <button
-                onClick={() => setSelectedVideo(null)}
+                onClick={handleCloseVideo}
                 className="text-gray-400 hover:text-gray-600 text-2xl"
               >
                 ×

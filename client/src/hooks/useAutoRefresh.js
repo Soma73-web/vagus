@@ -39,11 +39,6 @@ export const useAutoRefresh = (fetchFunction, componentId, intervalMs = 180000) 
     return cleanup;
   }, [componentId, fetchData, intervalMs]);
 
-  // Debug logging
-  useEffect(() => {
-    console.log(`${componentId} - Loading: ${loading}, Error: ${error}, Data length: ${data?.length || 0}`);
-  }, [componentId, loading, error, data]);
-
   // Manual refresh function
   const refresh = useCallback(() => {
     fetchData();
