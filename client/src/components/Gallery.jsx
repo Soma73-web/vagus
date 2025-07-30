@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Slider from "react-slick";
-import api from "../api";
+import axios from "axios";
 import { NextArrow, PrevArrow } from "./BlueArrows";
 import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
@@ -13,20 +13,27 @@ const Gallery = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchGallery = async () => {
+  const fetchGallery = useCallback(async () => {
     try {
-      const res = await api.get("/api/gallery");
+      const res = await axios.get(`${API_BASE}/api/gallery`);
       setImages(res.data || []);
     } catch (err) {
       console.error("Gallery load error:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchGallery();
-  }, []);
+    
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchGallery();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [fetchGallery]);
 
   const settings = {
     dots: true,
