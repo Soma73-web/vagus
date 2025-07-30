@@ -46,8 +46,8 @@ exports.createFaculty = async (req, res) => {
     console.log('Faculty upload - req.body:', req.body);
     
     // Input validation
-    if (!name || !subject || !education) {
-      return res.status(400).json({ error: "Name, subject and education are required" });
+    if (!name || !subject) {
+      return res.status(400).json({ error: "Name and subject are required" });
     }
     
     let image_data = null;
@@ -58,7 +58,7 @@ exports.createFaculty = async (req, res) => {
       image_type = fileObj.mimetype;
     }
     
-    const faculty = await Faculty.create({ name, subject, education, image_data, image_type });
+    const faculty = await Faculty.create({ name, subject, education: education || '', image_data, image_type });
     const obj = faculty.toJSON();
     obj.imageUrl = `${req.protocol}://${req.get('host')}/api/faculty/${faculty.id}/image`;
     obj.photo = obj.imageUrl;

@@ -76,10 +76,23 @@ exports.createGalleryItem = async (req, res) => {
     console.log('Gallery upload - req.file:', !!file);
     console.log('Gallery upload - req.files:', !!req.files);
     console.log('Gallery upload - req.body:', req.body);
+    console.log('Gallery upload - file details:', file ? {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      buffer: !!file.buffer,
+      bufferLength: file.buffer ? file.buffer.length : 0
+    } : 'No file');
 
     if (!file) {
       return res.status(400).json({ error: 'Image file is required' });
     }
+
+    console.log('Creating gallery item with:', {
+      title,
+      image: !!file.buffer,
+      image_type: file.mimetype
+    });
 
     await GalleryImage.create({
       title,

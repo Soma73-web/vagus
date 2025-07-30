@@ -34,6 +34,16 @@ exports.createDownload = async (req, res) => {
     const { title } = req.body;
     const file = req.file;
 
+    console.log('Download upload - req.file:', !!file);
+    console.log('Download upload - req.files:', !!req.files);
+    console.log('Download upload - req.body:', req.body);
+    console.log('Download upload - file details:', file ? {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+      buffer: !!file.buffer
+    } : 'No file');
+
     if (!file) {
       return res.status(400).json({ error: 'File is required' });
     }
