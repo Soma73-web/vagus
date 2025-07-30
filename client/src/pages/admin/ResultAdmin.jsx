@@ -115,12 +115,20 @@ const ResultAdmin = () => {
   // ─────── Delete row ───────
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this result?')) return;
+    
     try {
+      // Optimistic update - remove from UI immediately
+      const originalResults = [...results];
+      const updatedResults = results.filter(r => r.id !== id);
+      setResults(updatedResults);
+
       await api.delete(`/api/results/${id}`);
-      fetchResults();
+      // Don't call fetchResults() here - the optimistic update is already applied
     } catch (err) {
       console.error('Error deleting result:', err);
       alert('Failed to delete result.');
+      // Revert optimistic update on error
+      setResults(originalResults);
     }
   };
 

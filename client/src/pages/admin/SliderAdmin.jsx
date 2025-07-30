@@ -75,12 +75,19 @@ const SliderAdmin = () => {
     if (!window.confirm("Are you sure you want to delete this image?")) return;
 
     try {
+      // Optimistic update - remove from UI immediately
+      const originalImages = [...images];
+      const updatedImages = images.filter(img => img.id !== id);
+      setImages(updatedImages);
+
       await api.delete(`/api/slider/${id}`);
       showSuccess("Image deleted successfully!");
-      await fetchImages();
+      // Don't call fetchImages() here - the optimistic update is already applied
     } catch (err) {
       console.error("Delete failed:", err);
       showError("Failed to delete image.");
+      // Revert optimistic update on error
+      setImages(originalImages);
     }
   };
 

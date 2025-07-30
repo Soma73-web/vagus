@@ -107,11 +107,12 @@ const GalleryAdmin = () => {
       });
 
       toast.success("Image deleted successfully");
-      refresh(); // Refresh to get latest data
+      // Don't call refresh() here - the optimistic update is already applied
     } catch (error) {
       console.error("Failed to delete image:", error);
       toast.error("Failed to delete image");
-      refresh(); // Refresh to revert any optimistic changes
+      // Revert optimistic update on error
+      setGallery(originalGallery);
     }
   };
 

@@ -136,11 +136,12 @@ const FacultyAdmin = () => {
       });
 
       toast.success("Faculty deleted successfully");
-      refresh(); // Refresh to get latest data
+      // Don't call refresh() here - the optimistic update is already applied
     } catch (error) {
       console.error("Failed to delete faculty:", error);
       toast.error("Failed to delete faculty");
-      refresh(); // Refresh to revert any optimistic changes
+      // Revert optimistic update on error
+      setFaculty(originalFaculty);
     }
   };
 

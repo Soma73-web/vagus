@@ -116,11 +116,18 @@ const StudyMaterialAdmin = () => {
       return;
 
     try {
+      // Optimistic update - remove from UI immediately
+      const originalMaterials = [...materials];
+      const updatedMaterials = materials.filter(m => m.id !== id);
+      setMaterials(updatedMaterials);
+
       await api.delete(`/api/study-materials/${id}`);
-      await fetchMaterials();
+      // Don't call fetchMaterials() here - the optimistic update is already applied
     } catch (error) {
       console.error("Error deleting study material:", error);
       alert("Failed to delete study material");
+      // Revert optimistic update on error
+      setMaterials(originalMaterials);
     }
   };
 

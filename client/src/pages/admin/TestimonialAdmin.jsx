@@ -61,11 +61,18 @@ const TestimonialAdmin = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this testimonial?')) {
       try {
+        // Optimistic update - remove from UI immediately
+        const originalTestimonials = [...testimonials];
+        const updatedTestimonials = testimonials.filter(t => t.id !== id);
+        setTestimonials(updatedTestimonials);
+
         await api.delete(`/api/testimonials/${id}`);
-        fetchTestimonials();
+        // Don't call fetchTestimonials() here - the optimistic update is already applied
       } catch (err) {
         console.error('Error deleting testimonial:', err);
         alert('Failed to delete testimonial.');
+        // Revert optimistic update on error
+        setTestimonials(originalTestimonials);
       }
     }
   };

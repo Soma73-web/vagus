@@ -135,11 +135,9 @@ const StudentAdmin = () => {
 
     try {
       // Optimistic update - remove from UI immediately
-      const studentToDelete = studentsArray.find(s => s.id === studentId);
       const originalStudents = [...studentsArray];
-      
-      // Remove from local state immediately for better UX
       const updatedStudents = studentsArray.filter(s => s.id !== studentId);
+      setStudents(updatedStudents);
       
       // Make API call to actually delete
       await axios.delete(`${API_BASE}/api/admin/students/${studentId}`, {
@@ -147,11 +145,12 @@ const StudentAdmin = () => {
       });
       
       toast.success("Student deleted successfully");
-      refresh(); // Refresh to get latest data
+      // Don't call refresh() here - the optimistic update is already applied
     } catch (error) {
       console.error("Failed to delete student:", error);
       toast.error("Failed to delete student");
-      refresh(); // Refresh to revert any optimistic changes
+      // Revert optimistic update on error
+      setStudents(originalStudents);
     }
   };
 
