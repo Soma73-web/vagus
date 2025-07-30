@@ -9,6 +9,9 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const performanceMonitor = require('./middleware/performanceMonitor');
 
+// Trust proxy for rate limiting (important for production)
+app.set('trust proxy', 1);
+
 // Create upload directories if they don't exist
 const createUploadDirectories = () => {
   const uploadDirs = [
@@ -61,10 +64,10 @@ sequelize
 // Periodic health check (every 5 minutes)
 setInterval(checkDatabaseHealth, 5 * 60 * 1000);
 
-// Sync models to reflect schema changes (alter columns as needed)
+// Sync models to reflect schema changes (force sync to fix key issues)
 sequelize
-  .sync({ alter: true })
-  .then(() => console.log("All models synced (altered)"))
+  .sync({ force: false }) // Changed from alter to force: false to prevent key conflicts
+  .then(() => console.log("All models synced"))
   .catch((err) => console.error("Error syncing models:", err));
 
 // Middleware
@@ -130,6 +133,8 @@ const globalLimiter = rateLimit({
   message: { error: "Too many requests, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true, // Skip successful requests
+  skipFailedRequests: false, // Don't skip failed requests
 });
 app.use(globalLimiter);
 
@@ -137,7 +142,9 @@ app.use(globalLimiter);
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10, // limit each IP to 10 requests per windowMs
-  message: { error: "Too many login attempts, please try again later." }
+  message: { error: "Too many login attempts, please try again later." },
+  skipSuccessfulRequests: true,
+  skipFailedRequests: false,
 });
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/students/login', loginLimiter);
