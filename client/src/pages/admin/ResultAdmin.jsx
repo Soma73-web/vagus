@@ -116,9 +116,11 @@ const ResultAdmin = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this result?')) return;
     
+    // Store original state before optimistic update
+    const originalResults = [...results];
+
     try {
       // Optimistic update - remove from UI immediately
-      const originalResults = [...results];
       const updatedResults = results.filter(r => r.id !== id);
       setResults(updatedResults);
 

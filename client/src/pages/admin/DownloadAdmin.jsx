@@ -96,9 +96,11 @@ const DownloadAdmin = () => {
       return;
     }
 
+    // Store original state before optimistic update
+    const originalDownloads = [...downloads];
+
     try {
       // Optimistic update - remove from UI immediately
-      const originalDownloads = [...downloads];
       const updatedDownloads = downloads.filter(d => d.id !== downloadId);
       setDownloads(updatedDownloads);
 

@@ -60,9 +60,11 @@ const TestimonialAdmin = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this testimonial?')) {
+      // Store original state before optimistic update
+      const originalTestimonials = [...testimonials];
+
       try {
         // Optimistic update - remove from UI immediately
-        const originalTestimonials = [...testimonials];
         const updatedTestimonials = testimonials.filter(t => t.id !== id);
         setTestimonials(updatedTestimonials);
 

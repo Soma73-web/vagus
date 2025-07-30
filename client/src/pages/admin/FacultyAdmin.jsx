@@ -125,9 +125,11 @@ const FacultyAdmin = () => {
       return;
     }
 
+    // Store original state before optimistic update
+    const originalFaculty = [...faculty];
+
     try {
       // Optimistic update - remove from UI immediately
-      const originalFaculty = [...faculty];
       const updatedFaculty = faculty.filter(f => f.id !== facultyId);
       setFaculty(updatedFaculty);
 

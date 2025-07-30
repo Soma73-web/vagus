@@ -74,9 +74,11 @@ const SliderAdmin = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this image?")) return;
 
+    // Store original state before optimistic update
+    const originalImages = [...images];
+
     try {
       // Optimistic update - remove from UI immediately
-      const originalImages = [...images];
       const updatedImages = images.filter(img => img.id !== id);
       setImages(updatedImages);
 

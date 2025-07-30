@@ -115,9 +115,11 @@ const StudyMaterialAdmin = () => {
     if (!window.confirm("Are you sure you want to delete this study material?"))
       return;
 
+    // Store original state before optimistic update
+    const originalMaterials = [...materials];
+
     try {
       // Optimistic update - remove from UI immediately
-      const originalMaterials = [...materials];
       const updatedMaterials = materials.filter(m => m.id !== id);
       setMaterials(updatedMaterials);
 

@@ -133,9 +133,11 @@ const StudentAdmin = () => {
       return;
     }
 
+    // Store original state before optimistic update
+    const originalStudents = [...studentsArray];
+
     try {
       // Optimistic update - remove from UI immediately
-      const originalStudents = [...studentsArray];
       const updatedStudents = studentsArray.filter(s => s.id !== studentId);
       setStudents(updatedStudents);
       

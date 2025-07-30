@@ -47,9 +47,12 @@ const AchievementAdmin = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this achievement?")) return;
+    
+    // Store original state before optimistic update
+    const originalAchievements = [...achievements];
+    
     try {
       // Optimistic update - remove from UI immediately
-      const originalAchievements = [...achievements];
       const updatedAchievements = achievements.filter(a => a.id !== id);
       setAchievements(updatedAchievements);
 

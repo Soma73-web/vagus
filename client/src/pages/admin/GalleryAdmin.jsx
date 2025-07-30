@@ -96,9 +96,11 @@ const GalleryAdmin = () => {
       return;
     }
 
+    // Store original state before optimistic update
+    const originalGallery = [...gallery];
+
     try {
       // Optimistic update - remove from UI immediately
-      const originalGallery = [...gallery];
       const updatedGallery = gallery.filter(img => img.id !== imageId);
       setGallery(updatedGallery);
 
