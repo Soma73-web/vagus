@@ -36,12 +36,13 @@ router.post("/ask", async (req, res) => {
     if (perplexityApiKey) {
       console.log("Using Perplexity API");
       
-      // Try different models in order of preference
-      const models = ["llama-3.1-70b-online", "llama-3.1-8b-online", "mixtral-8x7b-instruct"];
+      // Try different models in order of preference - using more reliable models
+      const models = ["llama-3.1-8b-online", "mixtral-8x7b-instruct", "codellama-70b-instruct"];
       let lastError = null;
       
       for (const model of models) {
         try {
+          console.log(`Trying Perplexity model: ${model}`);
           // Perplexity API call
           const response = await fetch("https://api.perplexity.ai/chat/completions", {
             method: "POST",
@@ -179,7 +180,7 @@ router.get("/health", (req, res) => {
     openai_configured: isConfigured, // Return true if either API is configured
     perplexity_configured: perplexityConfigured,
     is_configured: isConfigured,
-    model: perplexityConfigured ? "llama-3.1-70b-online" : (process.env.OPENAI_MODEL || "gpt-3.5-turbo"),
+    model: perplexityConfigured ? "llama-3.1-8b-online" : (process.env.OPENAI_MODEL || "gpt-3.5-turbo"),
   });
 });
 
