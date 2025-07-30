@@ -19,13 +19,13 @@ const SearchLoader = () => (
         style={{ border: "6px solid white" }}
       />
       
-      {/* VAGUS text to the left of logo - with more spacing */}
-      <div className="absolute left-8 top-1/2 transform -translate-y-1/2 animate-fade-in-emerge">
+      {/* VAGUS text to the left of logo - equal spacing */}
+      <div className="absolute left-12 top-1/2 transform -translate-y-1/2 animate-fade-in-emerge">
         <span className="text-2xl font-bold text-blue-800 tracking-wider">VAGUS</span>
       </div>
       
-      {/* NEET ACADEMY text to the right of logo - with more spacing */}
-      <div className="absolute right-8 top-1/2 transform -translate-y-1/2 animate-fade-in-emerge">
+      {/* ACADEMY text to the right of logo - equal spacing */}
+      <div className="absolute right-12 top-1/2 transform -translate-y-1/2 animate-fade-in-emerge">
         <span className="text-2xl font-bold text-blue-800 tracking-wider">ACADEMY</span>
       </div>
     </div>
