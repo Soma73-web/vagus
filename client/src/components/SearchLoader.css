@@ -3,7 +3,7 @@
   100% { transform: rotate(360deg); }
 }
 .animate-spin-slow {
-  animation: spin-slow 1.5s linear infinite;
+  animation: spin-slow 2s linear infinite;
 }
 
 @keyframes fade-in-emerge {

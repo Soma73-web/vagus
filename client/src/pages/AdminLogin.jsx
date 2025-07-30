@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 const AdminLogin = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,7 +39,6 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
 
     try {
       const res = await axios.post(
@@ -70,8 +68,6 @@ const AdminLogin = () => {
         err.response?.data?.error ||
           "Login failed. Please check credentials or server."
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -122,9 +118,8 @@ const AdminLogin = () => {
         <button
           className="btn bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded w-full"
           type="submit"
-          disabled={loading}
         >
-          {loading ? "Logging in..." : "Login"}
+          Login
         </button>
       </form>
     </div>
