@@ -2,8 +2,32 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+@keyframes circle-around {
+  0% { 
+    transform: rotate(0deg) scale(1);
+    opacity: 0.8;
+  }
+  25% { 
+    transform: rotate(90deg) scale(1.05);
+    opacity: 1;
+  }
+  50% { 
+    transform: rotate(180deg) scale(1);
+    opacity: 0.8;
+  }
+  75% { 
+    transform: rotate(270deg) scale(1.05);
+    opacity: 1;
+  }
+  100% { 
+    transform: rotate(360deg) scale(1);
+    opacity: 0.8;
+  }
+}
+
 .animate-spin-slow {
-  animation: spin-slow 1.5s linear infinite;
+  animation: circle-around 2s ease-in-out infinite;
 }
 
 @keyframes fade-in-emerge {

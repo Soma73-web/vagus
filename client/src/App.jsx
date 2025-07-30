@@ -42,6 +42,7 @@ const StudentDashboard = lazy(() => import("./pages/StudentDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
+  const [loading, setLoading] = useState(true);
   const [showLeadPopup, setShowLeadPopup] = useState(false);
 
   useEffect(() => {
@@ -50,11 +51,16 @@ function App() {
 
     // Show popup after 5 seconds
     const timer = setTimeout(() => {
+      setLoading(false);
       setShowLeadPopup(true);
     }, 5000); // Show popup after 5 seconds
 
     return () => clearTimeout(timer);
   }, []);
+
+  if (loading) {
+    return <SearchLoader />;
+  }
 
   return (
     <ErrorBoundary>
