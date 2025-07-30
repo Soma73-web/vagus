@@ -2,14 +2,7 @@ const multer = require('multer');
 const path = require('path');
 
 // Memory storage for BLOB upload
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+const storage = multer.memoryStorage();
 
 // File filter for different upload types
 const fileFilter = (req, file, cb) => {
