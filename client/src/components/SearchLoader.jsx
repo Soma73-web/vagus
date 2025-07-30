@@ -20,7 +20,7 @@ const SearchLoader = () => (
       />
       
       {/* VAGUS text to the left of logo - keep current position */}
-      <div className="absolute left-12 top-1/2 transform -translate-y-1/2 animate-fade-in-emerge">
+      <div className="absolute left-11 top-1/2 transform -translate-y-1/2 animate-fade-in-emerge">
         <span className="text-2xl font-bold text-blue-800 tracking-wider">VAGUS</span>
       </div>
       
