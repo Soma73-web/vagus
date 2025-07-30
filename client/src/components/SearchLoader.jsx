@@ -18,6 +18,16 @@ const SearchLoader = () => (
         className="relative z-10 w-36 h-36 object-contain rounded-full bg-white shadow-lg"
         style={{ border: "6px solid white" }}
       />
+      
+      {/* VAGUS text on the right */}
+      <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-8 animate-fade-in-emerge">
+        <span className="text-2xl font-bold text-blue-800 tracking-wider">VAGUS</span>
+      </div>
+      
+      {/* NEET ACADEMY text on the left */}
+      <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-8 animate-fade-in-emerge">
+        <span className="text-2xl font-bold text-blue-800 tracking-wider">NEET ACADEMY</span>
+      </div>
     </div>
   </div>
 );
