@@ -7,6 +7,7 @@ const app = express();
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const performanceMonitor = require('./middleware/performanceMonitor');
 
 // Create upload directories if they don't exist
 const createUploadDirectories = () => {
@@ -36,11 +37,29 @@ createUploadDirectories();
 // Sequelize DB connection
 const sequelize = require("./config/db");
 
+// Database health check function
+const checkDatabaseHealth = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connection: HEALTHY");
+    return true;
+  } catch (error) {
+    console.error("❌ Database connection: UNHEALTHY", error.message);
+    return false;
+  }
+};
+
 // Authenticate database connection (safe for production)
 sequelize
   .authenticate()
-  .then(() => console.log("Sequelize connected to MySQL"))
+  .then(() => {
+    console.log("Sequelize connected to MySQL");
+    checkDatabaseHealth();
+  })
   .catch((err) => console.error("Sequelize connection error:", err));
+
+// Periodic health check (every 5 minutes)
+setInterval(checkDatabaseHealth, 5 * 60 * 1000);
 
 // Sync models to reflect schema changes (alter columns as needed)
 sequelize
@@ -59,10 +78,50 @@ app.use(helmet({
     },
   },
   crossOriginEmbedderPolicy: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
+  noSniff: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
+
+// Security headers
+app.use((req, res, next) => {
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'DENY');
+  // Prevent MIME type sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Prevent XSS attacks
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // Remove server information
+  res.removeHeader('X-Powered-By');
+  next();
+});
+
 app.use(compression());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Performance monitoring
+app.use(performanceMonitor);
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  
+  // Log request details
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - IP: ${req.ip}`);
+  
+  // Log response time
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+  });
+  
+  next();
+});
 
 // Global rate limiting (safe limits)
 const globalLimiter = rateLimit({
@@ -87,8 +146,24 @@ app.use('/api/students/login', loginLimiter);
 const analyticsController = require("./controllers/analyticsController");
 app.use(analyticsController.trackVisit);
 
-// Serve static files from uploads directory
-app.use("/uploads", express.static("uploads"));
+// Serve static files from uploads directory with caching
+app.use("/uploads", express.static("uploads", {
+  maxAge: '1d', // Cache for 1 day
+  etag: true,
+  lastModified: true
+}));
+
+// Add caching headers for API responses
+app.use((req, res, next) => {
+  // Cache API responses for 5 minutes (except for sensitive data)
+  if (req.path.startsWith('/api/') && req.method === 'GET') {
+    // Don't cache admin routes or sensitive data
+    if (!req.path.includes('/admin') && !req.path.includes('/auth')) {
+      res.set('Cache-Control', 'public, max-age=300'); // 5 minutes
+    }
+  }
+  next();
+});
 
 // CORS Configuration
 const allowedOrigins = [
@@ -164,6 +239,9 @@ app.get("/", (req, res) => {
     status: "healthy",
     timestamp: new Date().toISOString(),
     version: "1.0.0",
+    environment: process.env.NODE_ENV || "development",
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
   });
 });
 
@@ -171,6 +249,11 @@ app.get("/health", (req, res) => {
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: {
+      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + "MB",
+      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + "MB"
+    }
   });
 });
 
@@ -225,6 +308,43 @@ app.use((error, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Graceful shutdown handler
+const gracefulShutdown = async (signal) => {
+  console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+  
+  // Stop accepting new connections
+  server.close(() => {
+    console.log('✅ HTTP server closed');
+  });
+  
+  // Close database connection
+  try {
+    await sequelize.close();
+    console.log('✅ Database connection closed');
+  } catch (error) {
+    console.error('❌ Error closing database connection:', error);
+  }
+  
+  // Exit process
+  process.exit(0);
+};
+
+// Handle different shutdown signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  gracefulShutdown('uncaughtException');
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  gracefulShutdown('unhandledRejection');
 });

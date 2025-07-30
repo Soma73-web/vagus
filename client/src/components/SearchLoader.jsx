@@ -2,24 +2,34 @@ import React from "react";
 import logoCircle from "../assets/logoCircle.jpg";
 import "./SearchLoader.css";
 
-const SearchLoader = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen w-full bg-gradient-to-br from-blue-50 to-white">
-    <div className="relative flex items-center justify-center w-48 h-48">
-      {/* Glowing shadow - fixed positioning */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full bg-blue-400 opacity-20 blur-2xl animate-pulse"></div>
-      {/* Rotating blue ring with modern touch - fixed positioning */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 flex items-center justify-center">
-        <div className="w-full h-full rounded-full border-[10px] border-blue-600 border-t-transparent animate-spin-slow shadow-xl"></div>
+const SearchLoader = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="relative w-[600px] h-[400px] flex items-center justify-center">
+        {/* Logo with rotating ring */}
+        <div className="relative">
+          {/* Rotating blue ring */}
+          <div className="absolute inset-0 w-32 h-32 border-4 border-blue-500 rounded-full animate-spin-slow"></div>
+          
+          {/* Blur circle effect */}
+          <div className="absolute inset-0 w-32 h-32 bg-blue-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
+          
+          {/* Logo image with lazy loading */}
+          <img
+            src={logoCircle}
+            alt="Vagus Logo"
+            className="relative w-24 h-24 rounded-full object-cover z-10"
+            loading="lazy"
+            onLoad={(e) => {
+              // Prevent layout shift by ensuring image is loaded
+              e.target.style.opacity = '1';
+            }}
+            style={{ opacity: 0, transition: 'opacity 0.3s ease-in' }}
+          />
+        </div>
       </div>
-      {/* Centered logo, fully visible */}
-      <img
-        src={logoCircle}
-        alt="Loader Logo"
-        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 w-36 h-36 object-contain rounded-full bg-white shadow-lg"
-        style={{ border: "6px solid white" }}
-      />
     </div>
-  </div>
-);
+  );
+};
 
 export default SearchLoader; 

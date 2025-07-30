@@ -5,16 +5,31 @@ const db = require("../models");
 const Admin = db.Admin;
 const authMiddleware = require("../middleware/authMiddleware");
 const analyticsController = require('../controllers/analyticsController');
+const validator = require('validator');
 require("dotenv").config();
 const fetch = require('node-fetch');
 
 // POST /api/auth/login
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Sanitize inputs
+    email = validator.trim(email).toLowerCase();
+    password = validator.trim(password);
+
+    // Validate email format
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate password length
+    if (password.length < 1) {
+      return res.status(400).json({ error: "Password is required" });
     }
 
     // Find admin by email
@@ -35,13 +50,18 @@ router.post("/login", async (req, res) => {
     await admin.updateActivity();
 
     // Generate JWT token
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+
     const token = jwt.sign(
       {
         id: admin.id,
         email: admin.email,
         role: admin.role,
       },
-      process.env.JWT_SECRET,
+      jwtSecret,
       { expiresIn: "8h" },
     );
 
@@ -90,7 +110,31 @@ router.post("/logout", authMiddleware, async (req, res) => {
 // POST /api/auth/create-admin (for initial setup)
 router.post("/create-admin", async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    let { email, password, name } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // Sanitize inputs
+    email = validator.trim(email).toLowerCase();
+    password = validator.trim(password);
+    name = name ? validator.trim(name) : "Admin";
+
+    // Validate email format
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    // Validate name (letters and spaces only)
+    if (!validator.matches(name, /^[a-zA-Z\s]+$/)) {
+      return res.status(400).json({ error: "Name can only contain letters and spaces" });
+    }
 
     // Check if any admin exists
     const existingAdmin = await Admin.findOne();
@@ -101,7 +145,7 @@ router.post("/create-admin", async (req, res) => {
     const admin = await Admin.create({
       email,
       password,
-      name: name || "Admin",
+      name,
     });
 
     res.status(201).json({
