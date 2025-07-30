@@ -28,8 +28,8 @@ const createStudent = async (req, res) => {
     lastName = validator.trim(lastName);
     email = validator.trim(email).toLowerCase();
     phone = phone ? validator.trim(phone) : '';
-    course = validator.trim(course);
-    batch = validator.trim(batch);
+    course = course ? validator.trim(course) : '';
+    batch = batch ? validator.trim(batch) : '';
 
     // Validate email
     if (!validator.isEmail(email)) {
@@ -37,24 +37,24 @@ const createStudent = async (req, res) => {
     }
 
     // Validate password strength
-    if (password.length < 8) {
-      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
-    // Validate names (letters and spaces only)
-    if (!validator.matches(firstName, /^[a-zA-Z\s]+$/) || 
-        !validator.matches(lastName, /^[a-zA-Z\s]+$/)) {
-      return res.status(400).json({ error: "Names can only contain letters and spaces" });
+    // Validate names (allow letters, spaces, and common characters)
+    if (!validator.isLength(firstName, { min: 2, max: 50 }) || 
+        !validator.isLength(lastName, { min: 2, max: 50 })) {
+      return res.status(400).json({ error: "Names must be 2-50 characters long" });
     }
 
-    // Validate student ID (alphanumeric)
-    if (!validator.isAlphanumeric(studentId)) {
-      return res.status(400).json({ error: "Student ID must be alphanumeric" });
+    // Validate student ID (allow alphanumeric and common characters)
+    if (!validator.isLength(studentId, { min: 3, max: 20 })) {
+      return res.status(400).json({ error: "Student ID must be 3-20 characters long" });
     }
 
-    // Validate phone number if provided
-    if (phone && !validator.isMobilePhone(phone, 'en-IN')) {
-      return res.status(400).json({ error: "Invalid phone number format" });
+    // Validate phone number if provided (more flexible)
+    if (phone && phone.length < 10) {
+      return res.status(400).json({ error: "Phone number must be at least 10 digits" });
     }
 
     // Check if student ID already exists

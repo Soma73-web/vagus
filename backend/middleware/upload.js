@@ -11,13 +11,27 @@ const storage = multer.diskStorage({
   }
 });
 
-// Only allow specific file types
+// File filter for different upload types
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|webp/;
-  const ext = file.originalname.toLowerCase().split('.').pop();
-  if (!allowedTypes.test(ext)) {
-    return cb(new Error('Only image files (jpg, jpeg, png, webp) are allowed!'), false);
+  // Check if this is a download upload (based on route)
+  const isDownloadUpload = req.path.includes('/downloads') || req.path.includes('/study-materials');
+  
+  if (isDownloadUpload) {
+    // Allow PDF, DOC, DOCX, PPT, PPTX for downloads
+    const allowedDownloadTypes = /pdf|doc|docx|ppt|pptx|xls|xlsx|txt/;
+    const ext = file.originalname.toLowerCase().split('.').pop();
+    if (!allowedDownloadTypes.test(ext)) {
+      return cb(new Error('Only document files (PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, TXT) are allowed for downloads!'), false);
+    }
+  } else {
+    // Allow images for other uploads
+    const allowedImageTypes = /jpeg|jpg|png|webp/;
+    const ext = file.originalname.toLowerCase().split('.').pop();
+    if (!allowedImageTypes.test(ext)) {
+      return cb(new Error('Only image files (jpg, jpeg, png, webp) are allowed!'), false);
+    }
   }
+  
   cb(null, true);
 };
 
@@ -25,7 +39,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 2 * 1024 * 1024 } // 2MB
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB for documents
 });
 
 module.exports = upload;
