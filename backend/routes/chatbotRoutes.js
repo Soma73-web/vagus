@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const fetch = require("node-fetch");
 require("dotenv").config();
 
 // POST /api/chatbot/ask
@@ -34,51 +35,70 @@ router.post("/ask", async (req, res) => {
     // Use Perplexity API if key is present
     if (perplexityApiKey) {
       console.log("Using Perplexity API");
-      // Perplexity API call
-      const response = await fetch("https://api.perplexity.ai/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${perplexityApiKey}`,
-        },
-        body: JSON.stringify({
-          model: "pplx-70b-online",
-          messages: [
-            {
-              role: "system",
-              content: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. You help students with NEET-related questions, study tips, exam strategies, and general guidance about medical entrance exams. Keep your responses helpful, encouraging, and focused on NEET preparation. If asked about topics unrelated to NEET or medical entrance exams, politely redirect the conversation back to NEET preparation.`,
+      
+      // Try different models in order of preference
+      const models = ["llama-3.1-70b-online", "llama-3.1-8b-online", "mixtral-8x7b-instruct"];
+      let lastError = null;
+      
+      for (const model of models) {
+        try {
+          // Perplexity API call
+          const response = await fetch("https://api.perplexity.ai/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${perplexityApiKey}`,
             },
-            {
-              role: "user",
-              content: question,
-            },
-          ],
-          max_tokens: 500,
-          temperature: 0.7,
-        }),
-      });
+            body: JSON.stringify({
+              model: model,
+              messages: [
+                {
+                  role: "system",
+                  content: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. You help students with NEET-related questions, study tips, exam strategies, and general guidance about medical entrance exams. Keep your responses helpful, encouraging, and focused on NEET preparation. If asked about topics unrelated to NEET or medical entrance exams, politely redirect the conversation back to NEET preparation.`,
+                },
+                {
+                  role: "user",
+                  content: question,
+                },
+              ],
+              max_tokens: 500,
+              temperature: 0.7,
+            }),
+          });
 
-      const data = await response.json();
-      console.log("Perplexity API response status:", response.status);
+          const data = await response.json();
+          console.log(`Perplexity API response status for ${model}:`, response.status);
 
-      if (!response.ok) {
-        console.error("Perplexity API error:", data);
-        return res.status(response.status).json({
-          error: data.error?.message || "Failed to get response from Perplexity AI",
-        });
+          if (!response.ok) {
+            console.error(`Perplexity API error for ${model}:`, data);
+            lastError = data.error?.message || `Failed to get response from Perplexity AI with model ${model}`;
+            continue; // Try next model
+          }
+
+          const aiResponse = data.choices?.[0]?.message?.content;
+
+          if (!aiResponse) {
+            console.log(`No response content from Perplexity for ${model}`);
+            lastError = `No response from Perplexity AI with model ${model}`;
+            continue; // Try next model
+          }
+
+          console.log(`Perplexity response successful with model ${model}`);
+          return res.json({
+            response: aiResponse,
+            timestamp: new Date().toISOString(),
+            model: model,
+          });
+        } catch (error) {
+          console.error(`Error with Perplexity model ${model}:`, error);
+          lastError = error.message;
+          continue; // Try next model
+        }
       }
-
-      const aiResponse = data.choices?.[0]?.message?.content;
-
-      if (!aiResponse) {
-        console.log("No response content from Perplexity");
-        return res.status(500).json({ error: "No response from Perplexity AI" });
-      }
-
-      console.log("Perplexity response successful");
-      return res.json({
-        response: aiResponse,
-        timestamp: new Date().toISOString(),
+      
+      // If all models failed, return the last error
+      return res.status(500).json({
+        error: lastError || "All Perplexity models failed",
       });
     }
 
@@ -156,10 +176,10 @@ router.get("/health", (req, res) => {
   
   res.json({
     status: "ok",
-    openai_configured: openaiConfigured,
+    openai_configured: isConfigured, // Return true if either API is configured
     perplexity_configured: perplexityConfigured,
     is_configured: isConfigured,
-    model: perplexityConfigured ? "pplx-70b-online" : (process.env.OPENAI_MODEL || "gpt-3.5-turbo"),
+    model: perplexityConfigured ? "llama-3.1-70b-online" : (process.env.OPENAI_MODEL || "gpt-3.5-turbo"),
   });
 });
 

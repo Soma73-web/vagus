@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   FaRobot,
   FaTimes,
@@ -31,7 +31,7 @@ const AIChatbot = () => {
   const location = useLocation();
 
   // Check if chatbot should be hidden on certain pages
-  const shouldHideChatbot = () => {
+  const shouldHideChatbot = useCallback(() => {
     const hiddenPaths = [
       "/results",
       "/student-dashboard",
@@ -39,51 +39,53 @@ const AIChatbot = () => {
       "/admin-login",
     ];
     return hiddenPaths.some((path) => location.pathname.startsWith(path));
-  };
+  }, [location.pathname]);
 
   // Check if user is a student
-  const isStudentLoggedIn = () => {
+  const isStudentLoggedIn = useCallback(() => {
     return (
       localStorage.getItem("studentToken") &&
       localStorage.getItem("studentInfo")
     );
-  };
+  }, []);
+
+  const checkConfiguration = useCallback(async () => {
+    try {
+      const response = await api.get("/api/chatbot/health");
+      setIsConfigured(response.data.is_configured || response.data.openai_configured);
+    } catch (error) {
+      console.error("Error checking chatbot configuration:", error);
+      setIsConfigured(false);
+    }
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   useEffect(() => {
     checkConfiguration();
 
     // Show welcome animation when student logs in
     if (isStudentLoggedIn() && !hasInteracted) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setShowWelcome(true);
         setIsTyping(true);
-        setTimeout(() => {
+        const typingTimer = setTimeout(() => {
           setIsTyping(false);
           setShowWelcome(false);
         }, 3000);
+        return () => clearTimeout(typingTimer);
       }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [checkConfiguration, isStudentLoggedIn, hasInteracted]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, scrollToBottom]);
 
-  const checkConfiguration = async () => {
-    try {
-      const response = await api.get("/api/chatbot/health");
-      setIsConfigured(response.data.openai_configured);
-    } catch (error) {
-      console.error("Error checking chatbot configuration:", error);
-      setIsConfigured(false);
-    }
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!currentMessage.trim() || isLoading) return;
 
     setHasInteracted(true);
@@ -114,11 +116,24 @@ const AIChatbot = () => {
     } catch (error) {
       console.error("Error sending message:", error);
 
+      let errorText = "Sorry, I encountered an error. Please try again later.";
+      
+      if (error.response?.data?.error) {
+        const errorMessage = error.response.data.error;
+        if (errorMessage.includes("API key")) {
+          errorText = "AI service is currently unavailable. Please contact support.";
+        } else if (errorMessage.includes("model")) {
+          errorText = "AI model is temporarily unavailable. Please try again in a few minutes.";
+        } else {
+          errorText = errorMessage;
+        }
+      } else if (error.code === "NETWORK_ERROR") {
+        errorText = "Network error. Please check your internet connection and try again.";
+      }
+
       const errorMessage = {
         id: Date.now() + 1,
-        text:
-          error.response?.data?.error ||
-          "Sorry, I encountered an error. Please try again later.",
+        text: errorText,
         sender: "bot",
         timestamp: new Date(),
         isError: true,
@@ -128,23 +143,28 @@ const AIChatbot = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentMessage, isLoading]);
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = useCallback((e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
-  };
+  }, [handleSendMessage]);
 
-  const toggleChatbot = () => {
+  const toggleChatbot = useCallback(() => {
     setIsOpen(!isOpen);
     setHasInteracted(true);
     setShowWelcome(false);
-  };
+  }, [isOpen]);
 
   // Don't render if not configured or should be hidden
   if (isConfigured === false || shouldHideChatbot()) {
+    return null;
+  }
+
+  // Show loading state while checking configuration
+  if (isConfigured === null) {
     return null;
   }
 
