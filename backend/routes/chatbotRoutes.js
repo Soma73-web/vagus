@@ -54,9 +54,8 @@ const tryHuggingFace = async (question) => {
     
     // Try different free models that work well for chat
     const models = [
-      "microsoft/DialoGPT-medium",
-      "microsoft/DialoGPT-small",
-      "facebook/blenderbot-400M-distill"
+      "mistralai/Mistral-7B-Instruct-v0.1",
+      "google/flan-t5-large"
     ];
     
     for (const model of models) {
@@ -297,9 +296,10 @@ router.get("/test-huggingface", async (req, res) => {
 
   try {
     console.log("Testing Hugging Face API connection...");
+    console.log("API Key format check:", huggingFaceApiKey.substring(0, 3) + "...");
     
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-small",
+      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1",
       {
         method: "POST",
         headers: {
@@ -309,7 +309,7 @@ router.get("/test-huggingface", async (req, res) => {
         body: JSON.stringify({
           inputs: "Hello, how are you?",
           parameters: {
-            max_length: 50,
+            max_length: 100,
             temperature: 0.7,
             do_sample: true
           }
@@ -327,7 +327,8 @@ router.get("/test-huggingface", async (req, res) => {
         status: "success",
         message: "Hugging Face API is working",
         response: data,
-        status_code: response.status
+        status_code: response.status,
+        api_key_format: "Valid (starts with hf_)"
       });
     } else {
       const errorData = await response.text();
@@ -337,7 +338,8 @@ router.get("/test-huggingface", async (req, res) => {
         status: "error",
         message: "Hugging Face API test failed",
         error: errorData,
-        status_code: response.status
+        status_code: response.status,
+        api_key_format: huggingFaceApiKey.startsWith("hf_") ? "Valid format" : "Invalid format (should start with hf_)"
       });
     }
   } catch (error) {
@@ -345,7 +347,8 @@ router.get("/test-huggingface", async (req, res) => {
     res.status(500).json({
       status: "error",
       message: "Hugging Face API test failed",
-      error: error.message
+      error: error.message,
+      api_key_format: huggingFaceApiKey.startsWith("hf_") ? "Valid format" : "Invalid format (should start with hf_)"
     });
   }
 });
