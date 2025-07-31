@@ -52,15 +52,17 @@ const tryHuggingFace = async (question) => {
   try {
     console.log("Trying Hugging Face API");
     
-    // Try different free models
+    // Try different free models that work well for chat
     const models = [
       "microsoft/DialoGPT-medium",
-      "facebook/blenderbot-400M-distill",
-      "microsoft/DialoGPT-small"
+      "microsoft/DialoGPT-small",
+      "facebook/blenderbot-400M-distill"
     ];
     
     for (const model of models) {
       try {
+        console.log(`Trying Hugging Face model: ${model}`);
+        
         const response = await fetch(
           `https://api-inference.huggingface.co/models/${model}`,
           {
@@ -72,23 +74,48 @@ const tryHuggingFace = async (question) => {
             body: JSON.stringify({
               inputs: `You are a NEET Academy AI assistant. Help with NEET preparation. User: ${question}`,
               parameters: {
-                max_length: 200,
+                max_length: 150,
                 temperature: 0.7,
-                do_sample: true
+                do_sample: true,
+                return_full_text: false
               }
             }),
           }
         );
 
+        console.log(`Hugging Face response status for ${model}:`, response.status);
+
         if (response.ok) {
           const data = await response.json();
-          if (data && data[0] && data[0].generated_text) {
+          console.log(`Hugging Face raw response for ${model}:`, data);
+          
+          // Handle different response formats
+          let generatedText = null;
+          
+          if (Array.isArray(data) && data.length > 0) {
+            // Standard format
+            if (data[0].generated_text) {
+              generatedText = data[0].generated_text;
+            } else if (data[0].text) {
+              generatedText = data[0].text;
+            }
+          } else if (data.generated_text) {
+            // Single object format
+            generatedText = data.generated_text;
+          } else if (data.text) {
+            // Alternative format
+            generatedText = data.text;
+          }
+          
+          if (generatedText) {
             console.log(`Hugging Face response successful with model ${model}`);
             return {
-              response: data[0].generated_text,
+              response: generatedText,
               model: model
             };
           }
+        } else {
+          console.error(`Hugging Face API error for ${model}:`, response.status, response.statusText);
         }
       } catch (error) {
         console.error(`Error with Hugging Face model ${model}:`, error);
@@ -204,25 +231,16 @@ router.post("/ask", async (req, res) => {
         .json({ error: "Question is required and must be a string" });
     }
 
-    // Check available API keys
-    const perplexityApiKey = process.env.PERPLEXITY_API_KEY;
-    const openaiApiKey = process.env.OPENAI_API_KEY;
+    // Check Hugging Face API key
     const huggingFaceApiKey = process.env.HUGGINGFACE_API_KEY;
-    const cohereApiKey = process.env.COHERE_API_KEY;
 
     console.log("API Keys check:", {
-      perplexityConfigured: !!perplexityApiKey,
-      openaiConfigured: !!openaiApiKey,
-      huggingFaceConfigured: !!huggingFaceApiKey,
-      cohereConfigured: !!cohereApiKey
+      huggingFaceConfigured: !!huggingFaceApiKey
     });
 
-    // Try free APIs first
-    let result = null;
-
-    // 1. Try Hugging Face (most generous free tier)
+    // Try Hugging Face (only provider)
     if (huggingFaceApiKey) {
-      result = await tryHuggingFace(question);
+      const result = await tryHuggingFace(question);
       if (result) {
         return res.json({
           response: result.response,
@@ -230,165 +248,14 @@ router.post("/ask", async (req, res) => {
           model: result.model,
           provider: "huggingface"
         });
-      }
-    }
-
-    // 2. Try Cohere (free tier available)
-    if (cohereApiKey) {
-      result = await tryCohere(question);
-      if (result) {
-        return res.json({
-          response: result.response,
-          timestamp: new Date().toISOString(),
-          model: result.model,
-          provider: "cohere"
+      } else {
+        return res.status(500).json({
+          error: "Hugging Face API is not responding. Please check your API key and try again.",
         });
       }
     }
 
-    // 3. Try Local Ollama (Completely Free - No Limits)
-    if (process.env.OLLAMA_URL && process.env.OLLAMA_MODEL) {
-      result = await tryLocalOllama(question);
-      if (result) {
-        return res.json({
-          response: result.response,
-          timestamp: new Date().toISOString(),
-          model: result.model,
-          provider: "ollama"
-        });
-      }
-    }
-
-    // 4. Try Perplexity (if configured)
-    if (perplexityApiKey) {
-      console.log("Using Perplexity API");
-      
-      // Try different models in order of preference - using more reliable models
-      const models = ["llama-3.1-8b-online", "mixtral-8x7b-instruct", "codellama-70b-instruct"];
-      let lastError = null;
-      
-      for (const model of models) {
-        try {
-          console.log(`Trying Perplexity model: ${model}`);
-          // Perplexity API call
-          const response = await fetch("https://api.perplexity.ai/chat/completions", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${perplexityApiKey}`,
-            },
-            body: JSON.stringify({
-              model: model,
-              messages: [
-                {
-                  role: "system",
-                  content: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. You help students with NEET-related questions, study tips, exam strategies, and general guidance about medical entrance exams. Keep your responses helpful, encouraging, and focused on NEET preparation. If asked about topics unrelated to NEET or medical entrance exams, politely redirect the conversation back to NEET preparation.`,
-                },
-                {
-                  role: "user",
-                  content: question,
-                },
-              ],
-              max_tokens: 500,
-              temperature: 0.7,
-            }),
-          });
-
-          const data = await response.json();
-          console.log(`Perplexity API response status for ${model}:`, response.status);
-
-          if (!response.ok) {
-            console.error(`Perplexity API error for ${model}:`, data);
-            lastError = data.error?.message || `Failed to get response from Perplexity AI with model ${model}`;
-            continue; // Try next model
-          }
-
-          const aiResponse = data.choices?.[0]?.message?.content;
-
-          if (!aiResponse) {
-            console.log(`No response content from Perplexity for ${model}`);
-            lastError = `No response from Perplexity AI with model ${model}`;
-            continue; // Try next model
-          }
-
-          console.log(`Perplexity response successful with model ${model}`);
-          return res.json({
-            response: aiResponse,
-            timestamp: new Date().toISOString(),
-            model: model,
-            provider: "perplexity"
-          });
-        } catch (error) {
-          console.error(`Error with Perplexity model ${model}:`, error);
-          lastError = error.message;
-          continue; // Try next model
-        }
-      }
-      
-      // If all models failed, return the last error
-      return res.status(500).json({
-        error: lastError || "All Perplexity models failed",
-      });
-    }
-
-    // 5. Fallback to OpenAI if configured
-    if (openaiApiKey) {
-      console.log("Using OpenAI API");
-      
-      // Make request to OpenAI API
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openaiApiKey}`,
-        },
-        body: JSON.stringify({
-          model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. 
-              You help students with NEET-related questions, study tips, exam strategies, and general guidance about medical entrance exams.
-              Keep your responses helpful, encouraging, and focused on NEET preparation.
-              If asked about topics unrelated to NEET or medical entrance exams, politely redirect the conversation back to NEET preparation.`,
-            },
-            {
-              role: "user",
-              content: question,
-            },
-          ],
-          max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 500,
-          temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
-        }),
-      });
-
-      const data = await response.json();
-      console.log("OpenAI API response status:", response.status);
-
-      if (!response.ok) {
-        console.error("OpenAI API error:", data);
-        return res.status(response.status).json({
-          error: data.error?.message || "Failed to get response from AI",
-        });
-      }
-
-      const aiResponse = data.choices?.[0]?.message?.content;
-
-      if (!aiResponse) {
-        console.log("No response content from OpenAI");
-        return res.status(500).json({ error: "No response from AI" });
-      }
-
-      console.log("OpenAI response successful");
-      return res.json({
-        response: aiResponse,
-        timestamp: new Date().toISOString(),
-        model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
-        provider: "openai"
-      });
-    }
-
-    // 6. If no API keys work, provide a basic fallback response
+    // If no Hugging Face API key, provide fallback response
     console.log("No API keys available, using fallback responses");
     const fallbackResponse = getFallbackResponse(question);
     return res.json({
@@ -408,29 +275,79 @@ router.post("/ask", async (req, res) => {
 
 // GET /api/chatbot/health
 router.get("/health", (req, res) => {
-  const perplexityConfigured = !!process.env.PERPLEXITY_API_KEY;
-  const openaiConfigured = !!process.env.OPENAI_API_KEY;
   const huggingFaceConfigured = !!process.env.HUGGINGFACE_API_KEY;
-  const cohereConfigured = !!process.env.COHERE_API_KEY;
-  const ollamaConfigured = !!process.env.OLLAMA_URL && !!process.env.OLLAMA_MODEL;
-  const isConfigured = perplexityConfigured || openaiConfigured || huggingFaceConfigured || cohereConfigured || ollamaConfigured;
   
   res.json({
     status: "ok",
-    openai_configured: openaiConfigured,
-    perplexity_configured: perplexityConfigured,
     huggingface_configured: huggingFaceConfigured,
-    cohere_configured: cohereConfigured,
-    ollama_configured: ollamaConfigured,
-    is_configured: isConfigured,
-    available_providers: {
-      huggingface: huggingFaceConfigured ? "Free tier (30k requests/month)" : null,
-      cohere: cohereConfigured ? "Free tier (5 req/min, 100 req/day)" : null,
-      perplexity: perplexityConfigured ? "Free tier available" : null,
-      openai: openaiConfigured ? "Paid service" : null,
-      ollama: ollamaConfigured ? "Completely free, unlimited" : null
-    }
+    is_configured: huggingFaceConfigured,
+    provider: "Hugging Face Only",
+    free_tier: "30,000 requests/month",
+    setup_required: !huggingFaceConfigured ? "Add HUGGINGFACE_API_KEY to environment variables" : null
   });
+});
+
+// GET /api/chatbot/test-huggingface
+router.get("/test-huggingface", async (req, res) => {
+  const huggingFaceApiKey = process.env.HUGGINGFACE_API_KEY;
+  
+  if (!huggingFaceApiKey) {
+    return res.status(400).json({ error: "Hugging Face API key not configured" });
+  }
+
+  try {
+    console.log("Testing Hugging Face API connection...");
+    
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/microsoft/DialoGPT-small",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${huggingFaceApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: "Hello, how are you?",
+          parameters: {
+            max_length: 50,
+            temperature: 0.7,
+            do_sample: true
+          }
+        }),
+      }
+    );
+
+    console.log("Hugging Face test response status:", response.status);
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Hugging Face test response:", data);
+      
+      res.json({
+        status: "success",
+        message: "Hugging Face API is working",
+        response: data,
+        status_code: response.status
+      });
+    } else {
+      const errorData = await response.text();
+      console.error("Hugging Face test error:", errorData);
+      
+      res.status(response.status).json({
+        status: "error",
+        message: "Hugging Face API test failed",
+        error: errorData,
+        status_code: response.status
+      });
+    }
+  } catch (error) {
+    console.error("Hugging Face test error:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Hugging Face API test failed",
+      error: error.message
+    });
+  }
 });
 
 module.exports = router;
