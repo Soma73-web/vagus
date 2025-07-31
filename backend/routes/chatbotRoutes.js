@@ -3,6 +3,44 @@ const router = express.Router();
 const fetch = require("node-fetch");
 require("dotenv").config();
 
+// Fallback response function for when AI APIs are not available
+const getFallbackResponse = (question) => {
+  const lowerQuestion = question.toLowerCase();
+  
+  // NEET exam related responses
+  if (lowerQuestion.includes("neet") || lowerQuestion.includes("exam") || lowerQuestion.includes("test")) {
+    return "NEET (National Eligibility cum Entrance Test) is a medical entrance exam in India. It's conducted by NTA and is required for admission to MBBS, BDS, and other medical courses. The exam consists of Physics, Chemistry, and Biology sections. Would you like to know more about specific subjects or exam preparation strategies?";
+  }
+  
+  // Study tips
+  if (lowerQuestion.includes("study") || lowerQuestion.includes("prepare") || lowerQuestion.includes("tips")) {
+    return "For NEET preparation, focus on NCERT books first, practice previous year questions, take regular mock tests, and maintain a study schedule. Biology carries the most weight (50%), followed by Chemistry (25%) and Physics (25%). Regular revision and solving practice questions is key to success!";
+  }
+  
+  // Biology related
+  if (lowerQuestion.includes("biology") || lowerQuestion.includes("bio")) {
+    return "Biology is the most important subject for NEET with 50% weightage. Focus on NCERT Biology books, especially Class 11 and 12. Important topics include Human Physiology, Genetics, Ecology, and Plant Physiology. Practice diagrams and understand concepts rather than memorizing.";
+  }
+  
+  // Chemistry related
+  if (lowerQuestion.includes("chemistry") || lowerQuestion.includes("chem")) {
+    return "Chemistry has 25% weightage in NEET. Focus on Physical Chemistry calculations, Organic Chemistry mechanisms, and Inorganic Chemistry facts. NCERT books are essential. Practice numerical problems regularly and understand reaction mechanisms.";
+  }
+  
+  // Physics related
+  if (lowerQuestion.includes("physics")) {
+    return "Physics also has 25% weightage in NEET. Focus on Mechanics, Electromagnetism, and Optics. Practice numerical problems and understand concepts. NCERT books are important, but you may need additional reference books for better understanding.";
+  }
+  
+  // General greeting
+  if (lowerQuestion.includes("hello") || lowerQuestion.includes("hi") || lowerQuestion.includes("hey")) {
+    return "Hello! I'm your NEET Academy AI assistant. I can help you with NEET preparation questions, study tips, and exam strategies. How can I assist you today?";
+  }
+  
+  // Default response
+  return "I'm here to help you with NEET preparation! You can ask me about exam strategies, study tips, specific subjects (Biology, Chemistry, Physics), or any other NEET-related questions. What would you like to know?";
+};
+
 // POST /api/chatbot/ask
 router.post("/ask", async (req, res) => {
   try {
@@ -106,9 +144,13 @@ router.post("/ask", async (req, res) => {
     // Fallback to OpenAI if Perplexity is not configured
     console.log("Using OpenAI API");
     if (!openaiApiKey) {
-      return res.status(500).json({
-        error:
-          "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
+      // If no API keys work, provide a basic fallback response
+      console.log("No API keys available, using fallback responses");
+      const fallbackResponse = getFallbackResponse(question);
+      return res.json({
+        response: fallbackResponse,
+        timestamp: new Date().toISOString(),
+        model: "fallback",
       });
     }
 
