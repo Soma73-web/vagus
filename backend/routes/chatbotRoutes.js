@@ -3,7 +3,7 @@ const router = express.Router();
 const fetch = require("node-fetch");
 require("dotenv").config();
 
-// Fallback response function for when AI APIs are not available
+// Enhanced fallback response function for when AI APIs are not available
 const getFallbackResponse = (question) => {
   const lowerQuestion = question.toLowerCase();
   
@@ -41,6 +41,157 @@ const getFallbackResponse = (question) => {
   return "I'm here to help you with NEET preparation! You can ask me about exam strategies, study tips, specific subjects (Biology, Chemistry, Physics), or any other NEET-related questions. What would you like to know?";
 };
 
+// Try Hugging Face API (Free tier available)
+const tryHuggingFace = async (question) => {
+  const huggingFaceApiKey = process.env.HUGGINGFACE_API_KEY;
+  
+  if (!huggingFaceApiKey) {
+    return null;
+  }
+
+  try {
+    console.log("Trying Hugging Face API");
+    
+    // Try different free models
+    const models = [
+      "microsoft/DialoGPT-medium",
+      "facebook/blenderbot-400M-distill",
+      "microsoft/DialoGPT-small"
+    ];
+    
+    for (const model of models) {
+      try {
+        const response = await fetch(
+          `https://api-inference.huggingface.co/models/${model}`,
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${huggingFaceApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              inputs: `You are a NEET Academy AI assistant. Help with NEET preparation. User: ${question}`,
+              parameters: {
+                max_length: 200,
+                temperature: 0.7,
+                do_sample: true
+              }
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data[0] && data[0].generated_text) {
+            console.log(`Hugging Face response successful with model ${model}`);
+            return {
+              response: data[0].generated_text,
+              model: model
+            };
+          }
+        }
+      } catch (error) {
+        console.error(`Error with Hugging Face model ${model}:`, error);
+        continue;
+      }
+    }
+  } catch (error) {
+    console.error("Hugging Face API error:", error);
+  }
+  
+  return null;
+};
+
+// Try Cohere API (Free tier available)
+const tryCohere = async (question) => {
+  const cohereApiKey = process.env.COHERE_API_KEY;
+  
+  if (!cohereApiKey) {
+    return null;
+  }
+
+  try {
+    console.log("Trying Cohere API");
+    
+    const response = await fetch("https://api.cohere.ai/v1/generate", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${cohereApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "command-light",
+        prompt: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. Help students with NEET-related questions, study tips, and exam strategies. Keep responses focused on NEET preparation.\n\nUser: ${question}\nAssistant:`,
+        max_tokens: 200,
+        temperature: 0.7,
+        k: 0,
+        stop_sequences: [],
+        return_likelihoods: "NONE"
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.generations && data.generations[0] && data.generations[0].text) {
+        console.log("Cohere response successful");
+        return {
+          response: data.generations[0].text.trim(),
+          model: "cohere-command-light"
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Cohere API error:", error);
+  }
+  
+  return null;
+};
+
+// Try Local Ollama (Completely Free - No Limits)
+const tryLocalOllama = async (question) => {
+  const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434";
+  const ollamaModel = process.env.OLLAMA_MODEL || "llama2";
+  
+  try {
+    console.log("Trying Local Ollama API");
+    
+    const response = await fetch(`${ollamaUrl}/api/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: ollamaModel,
+        prompt: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. Help students with NEET-related questions, study tips, and exam strategies. Keep responses focused on NEET preparation.
+
+User: ${question}
+Assistant:`,
+        stream: false,
+        options: {
+          temperature: 0.7,
+          top_p: 0.9,
+          max_tokens: 300
+        }
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.response) {
+        console.log("Local Ollama response successful");
+        return {
+          response: data.response.trim(),
+          model: ollamaModel
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Local Ollama API error:", error);
+  }
+  
+  return null;
+};
+
 // POST /api/chatbot/ask
 router.post("/ask", async (req, res) => {
   try {
@@ -53,24 +204,62 @@ router.post("/ask", async (req, res) => {
         .json({ error: "Question is required and must be a string" });
     }
 
-    // Prefer Perplexity API key if present, otherwise use OpenAI
+    // Check available API keys
     const perplexityApiKey = process.env.PERPLEXITY_API_KEY;
     const openaiApiKey = process.env.OPENAI_API_KEY;
+    const huggingFaceApiKey = process.env.HUGGINGFACE_API_KEY;
+    const cohereApiKey = process.env.COHERE_API_KEY;
 
     console.log("API Keys check:", {
       perplexityConfigured: !!perplexityApiKey,
-      openaiConfigured: !!openaiApiKey
+      openaiConfigured: !!openaiApiKey,
+      huggingFaceConfigured: !!huggingFaceApiKey,
+      cohereConfigured: !!cohereApiKey
     });
 
-    if (!perplexityApiKey && !openaiApiKey) {
-      console.log("No API keys configured");
-      return res.status(500).json({
-        error:
-          "No AI API key configured. Please add PERPLEXITY_API_KEY or OPENAI_API_KEY to your environment variables.",
-      });
+    // Try free APIs first
+    let result = null;
+
+    // 1. Try Hugging Face (most generous free tier)
+    if (huggingFaceApiKey) {
+      result = await tryHuggingFace(question);
+      if (result) {
+        return res.json({
+          response: result.response,
+          timestamp: new Date().toISOString(),
+          model: result.model,
+          provider: "huggingface"
+        });
+      }
     }
 
-    // Use Perplexity API if key is present
+    // 2. Try Cohere (free tier available)
+    if (cohereApiKey) {
+      result = await tryCohere(question);
+      if (result) {
+        return res.json({
+          response: result.response,
+          timestamp: new Date().toISOString(),
+          model: result.model,
+          provider: "cohere"
+        });
+      }
+    }
+
+    // 3. Try Local Ollama (Completely Free - No Limits)
+    if (process.env.OLLAMA_URL && process.env.OLLAMA_MODEL) {
+      result = await tryLocalOllama(question);
+      if (result) {
+        return res.json({
+          response: result.response,
+          timestamp: new Date().toISOString(),
+          model: result.model,
+          provider: "ollama"
+        });
+      }
+    }
+
+    // 4. Try Perplexity (if configured)
     if (perplexityApiKey) {
       console.log("Using Perplexity API");
       
@@ -127,6 +316,7 @@ router.post("/ask", async (req, res) => {
             response: aiResponse,
             timestamp: new Date().toISOString(),
             model: model,
+            provider: "perplexity"
           });
         } catch (error) {
           console.error(`Error with Perplexity model ${model}:`, error);
@@ -141,68 +331,73 @@ router.post("/ask", async (req, res) => {
       });
     }
 
-    // Fallback to OpenAI if Perplexity is not configured
-    console.log("Using OpenAI API");
-    if (!openaiApiKey) {
-      // If no API keys work, provide a basic fallback response
-      console.log("No API keys available, using fallback responses");
-      const fallbackResponse = getFallbackResponse(question);
+    // 5. Fallback to OpenAI if configured
+    if (openaiApiKey) {
+      console.log("Using OpenAI API");
+      
+      // Make request to OpenAI API
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openaiApiKey}`,
+        },
+        body: JSON.stringify({
+          model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. 
+              You help students with NEET-related questions, study tips, exam strategies, and general guidance about medical entrance exams.
+              Keep your responses helpful, encouraging, and focused on NEET preparation.
+              If asked about topics unrelated to NEET or medical entrance exams, politely redirect the conversation back to NEET preparation.`,
+            },
+            {
+              role: "user",
+              content: question,
+            },
+          ],
+          max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 500,
+          temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("OpenAI API response status:", response.status);
+
+      if (!response.ok) {
+        console.error("OpenAI API error:", data);
+        return res.status(response.status).json({
+          error: data.error?.message || "Failed to get response from AI",
+        });
+      }
+
+      const aiResponse = data.choices?.[0]?.message?.content;
+
+      if (!aiResponse) {
+        console.log("No response content from OpenAI");
+        return res.status(500).json({ error: "No response from AI" });
+      }
+
+      console.log("OpenAI response successful");
       return res.json({
-        response: fallbackResponse,
+        response: aiResponse,
         timestamp: new Date().toISOString(),
-        model: "fallback",
-      });
-    }
-
-    // Make request to OpenAI API
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: `You are an AI assistant for NEET Academy, a coaching institute for NEET (National Eligibility cum Entrance Test) preparation. 
-            You help students with NEET-related questions, study tips, exam strategies, and general guidance about medical entrance exams.
-            Keep your responses helpful, encouraging, and focused on NEET preparation.
-            If asked about topics unrelated to NEET or medical entrance exams, politely redirect the conversation back to NEET preparation.`,
-          },
-          {
-            role: "user",
-            content: question,
-          },
-        ],
-        max_tokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 500,
-        temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
-      }),
-    });
-
-    const data = await response.json();
-    console.log("OpenAI API response status:", response.status);
-
-    if (!response.ok) {
-      console.error("OpenAI API error:", data);
-      return res.status(response.status).json({
-        error: data.error?.message || "Failed to get response from AI",
+        provider: "openai"
       });
     }
 
-    const aiResponse = data.choices?.[0]?.message?.content;
-
-    if (!aiResponse) {
-      console.log("No response content from OpenAI");
-      return res.status(500).json({ error: "No response from AI" });
-    }
-
-    console.log("OpenAI response successful");
-    res.json({
-      response: aiResponse,
+    // 6. If no API keys work, provide a basic fallback response
+    console.log("No API keys available, using fallback responses");
+    const fallbackResponse = getFallbackResponse(question);
+    return res.json({
+      response: fallbackResponse,
       timestamp: new Date().toISOString(),
+      model: "fallback",
+      provider: "fallback"
     });
+
   } catch (error) {
     console.error("Chatbot error:", error);
     res.status(500).json({
@@ -215,14 +410,26 @@ router.post("/ask", async (req, res) => {
 router.get("/health", (req, res) => {
   const perplexityConfigured = !!process.env.PERPLEXITY_API_KEY;
   const openaiConfigured = !!process.env.OPENAI_API_KEY;
-  const isConfigured = perplexityConfigured || openaiConfigured;
+  const huggingFaceConfigured = !!process.env.HUGGINGFACE_API_KEY;
+  const cohereConfigured = !!process.env.COHERE_API_KEY;
+  const ollamaConfigured = !!process.env.OLLAMA_URL && !!process.env.OLLAMA_MODEL;
+  const isConfigured = perplexityConfigured || openaiConfigured || huggingFaceConfigured || cohereConfigured || ollamaConfigured;
   
   res.json({
     status: "ok",
-    openai_configured: isConfigured, // Return true if either API is configured
+    openai_configured: openaiConfigured,
     perplexity_configured: perplexityConfigured,
+    huggingface_configured: huggingFaceConfigured,
+    cohere_configured: cohereConfigured,
+    ollama_configured: ollamaConfigured,
     is_configured: isConfigured,
-    model: perplexityConfigured ? "llama-3.1-8b-online" : (process.env.OPENAI_MODEL || "gpt-3.5-turbo"),
+    available_providers: {
+      huggingface: huggingFaceConfigured ? "Free tier (30k requests/month)" : null,
+      cohere: cohereConfigured ? "Free tier (5 req/min, 100 req/day)" : null,
+      perplexity: perplexityConfigured ? "Free tier available" : null,
+      openai: openaiConfigured ? "Paid service" : null,
+      ollama: ollamaConfigured ? "Completely free, unlimited" : null
+    }
   });
 });
 

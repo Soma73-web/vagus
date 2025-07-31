@@ -61,7 +61,12 @@ const requiredVars = [
   'DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD', 'DB_NAME',
   'STORAGE_ACCOUNT', 'STORAGE_KEY',
   'FRONTEND_URL_DEV', 'FRONTEND_URL_PROD',
-  'JWT_SECRET', 'PERPLEXITY_API_KEY', 'OPENAI_API_KEY'
+  'JWT_SECRET'
+];
+
+// Optional AI API keys (at least one is recommended)
+const optionalAiKeys = [
+  'PERPLEXITY_API_KEY', 'OPENAI_API_KEY', 'HUGGINGFACE_API_KEY', 'COHERE_API_KEY', 'OLLAMA_URL', 'OLLAMA_MODEL'
 ];
 requiredVars.forEach((v) => {
   if (!process.env[v]) {
