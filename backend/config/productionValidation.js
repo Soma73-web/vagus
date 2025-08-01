@@ -3,7 +3,7 @@ const validateProductionConfig = () => {
   const requiredVars = [
     'DB_HOST',
     'DB_PORT', 
-    'DB_USERNAME',
+    'DB_USER',
     'DB_PASSWORD',
     'DB_NAME',
     'JWT_SECRET',

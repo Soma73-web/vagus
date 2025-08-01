@@ -3,7 +3,7 @@ const environments = {
     database: {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
-      username: process.env.DB_USERNAME,
+      username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       dialect: 'mysql',
@@ -31,7 +31,7 @@ const environments = {
     database: {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
-      username: process.env.DB_USERNAME,
+      username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       dialect: 'mysql',
@@ -58,7 +58,7 @@ const environments = {
 
 // Check for required env variables
 const requiredVars = [
-  'DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD', 'DB_NAME',
+  'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME',
   'STORAGE_ACCOUNT', 'STORAGE_KEY',
   'FRONTEND_URL_DEV', 'FRONTEND_URL_PROD',
   'JWT_SECRET'
