@@ -21,7 +21,18 @@ const Gallery = () => {
       logger.log(`Fetching gallery (${refreshType})...`);
       setLoading(true);
       const response = await api.get(`${API_BASE}/api/gallery`);
-      const data = response.data.map((img) => ({
+      
+      // Remove duplicates by ID and ensure unique entries
+      const uniqueData = response.data.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+      
+      const data = uniqueData.map((img) => ({
         ...img,
         imageUrl: `${API_BASE}/api/gallery/image/${img.id}?t=${Date.now()}`, // Add cache busting
       }));

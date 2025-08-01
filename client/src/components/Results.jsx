@@ -21,7 +21,18 @@ const Results = () => {
     try {
       logger.log(`Fetching results (${refreshType})...`);
       const res = await api.get("/api/results");
-      const data = res.data.map((r) => ({
+      
+      // Remove duplicates by ID and ensure unique entries
+      const uniqueData = res.data.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+      
+      const data = uniqueData.map((r) => ({
         ...r,
         photoUrl: `${API_BASE}/api/results/${r.id}/image?t=${Date.now()}`, // Add cache busting
       }));

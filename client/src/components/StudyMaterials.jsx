@@ -25,7 +25,18 @@ const StudyMaterials = () => {
       const response = await axios.get(
         `${API_BASE}/api/study-materials/subjects`,
       );
-      setSubjectsCount(response.data || []);
+      
+      // Remove duplicates by subject name and ensure unique entries
+      const uniqueData = response.data.reduce((acc, current) => {
+        const x = acc.find(item => item.subject === current.subject);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+      
+      setSubjectsCount(uniqueData || []);
     } catch (error) {
       console.error("Error fetching subjects count:", error);
     }
@@ -38,7 +49,18 @@ const StudyMaterials = () => {
       const response = await axios.get(
         `${API_BASE}/api/study-materials/subject/${subject}`,
       );
-      setMaterials(response.data || []);
+      
+      // Remove duplicates by ID and ensure unique entries
+      const uniqueData = response.data.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+      
+      setMaterials(uniqueData || []);
     } catch (error) {
       console.error("Error fetching study materials:", error);
       setMaterials([]);

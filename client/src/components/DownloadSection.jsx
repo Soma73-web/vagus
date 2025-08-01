@@ -14,7 +14,18 @@ const DownloadSection = () => {
     try {
       console.log(`Fetching downloads (${refreshType})...`);
       const res = await api.get('/api/downloads');
-      setDownloads(res.data || []);
+      
+      // Remove duplicates by ID and ensure unique entries
+      const uniqueData = res.data.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+      
+      setDownloads(uniqueData || []);
     } catch (err) {
       console.error('Error fetching downloads:', err);
     } finally {

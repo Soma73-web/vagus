@@ -15,8 +15,19 @@ const Events = () => {
     try {
       console.log(`Fetching events (${refreshType})...`);
       const response = await axios.get(`${API_BASE}/api/events`);
+      
+      // Remove duplicates by ID and ensure unique entries
+      const uniqueData = response.data.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+      
       // Filter events that have images only
-      const eventsWithImages = response.data.filter(
+      const eventsWithImages = uniqueData.filter(
         (event) => event.imageUrl,
       );
       setEvents(eventsWithImages);

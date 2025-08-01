@@ -24,10 +24,10 @@ const Testimonials = () => {
       try {
         const u = new URL(trimmed);
         if (u.hostname === "www.instagram.com" || u.hostname === "instagram.com") {
-          // Convert Instagram post URL to embed URL
+          // Convert Instagram post URL to embed URL with proper parameters
           const pathParts = u.pathname.split('/');
           const postId = pathParts[pathParts.length - 2]; // Get the post ID
-          return `https://www.instagram.com/p/${postId}/embed/`;
+          return `https://www.instagram.com/p/${postId}/embed/captioned/`;
         }
       } catch {
         return "";
@@ -53,7 +53,18 @@ const Testimonials = () => {
     try {
       logger.log(`Fetching testimonials (${refreshType})...`);
       const res = await api.get("/api/testimonials");
-      const data = res.data.map((t) => ({
+      
+      // Remove duplicates by ID and ensure unique entries
+      const uniqueData = res.data.reduce((acc, current) => {
+        const x = acc.find(item => item.id === current.id);
+        if (!x) {
+          return acc.concat([current]);
+        } else {
+          return acc;
+        }
+      }, []);
+      
+      const data = uniqueData.map((t) => ({
         ...t,
         youtubeEmbedUrl: convertToEmbed(t.video_link, 'youtube'),
         instagramEmbedUrl: convertToEmbed(t.instagram_link, 'instagram'),
@@ -69,7 +80,7 @@ const Testimonials = () => {
   }, [convertToEmbed]);
 
   // Use the auto-refresh hook
-  useAutoRefresh(fetchTestimonials, [convertToEmbed], 30000); // Refresh every 30 seconds
+  useAutoRefresh(fetchTestimonials, [convertToEmbed], 60000); // Refresh every 60 seconds to reduce API calls
 
   const settings = {
     dots: true,
@@ -142,14 +153,29 @@ const Testimonials = () => {
                       allowFullScreen
                     />
                   ) : t.hasInstagram ? (
-                    <iframe
-                      src={t.instagramEmbedUrl}
-                      title={`${t.name} Instagram testimonial`}
-                      className="w-full h-full"
-                      frameBorder="0"
-                      loading="lazy"
-                      allow="encrypted-media"
-                    />
+                    <div className="relative w-full h-full">
+                      <iframe
+                        src={t.instagramEmbedUrl}
+                        title={`${t.name} Instagram testimonial`}
+                        className="w-full h-full"
+                        frameBorder="0"
+                        loading="lazy"
+                        allow="encrypted-media"
+                        onError={(e) => {
+                          console.warn('Instagram embed failed to load:', e);
+                        }}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm">
+                        <a 
+                          href={t.instagram_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
+                        >
+                          View on Instagram
+                        </a>
+                      </div>
+                    </div>
                   ) : (
                     <div className="flex items-center justify-center h-full bg-gray-100 text-gray-500 text-sm">
                       No media available
