@@ -7,6 +7,7 @@ import EmptyState from "./EmptyState";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import logger from "../utils/logger";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -18,7 +19,7 @@ const Results = () => {
 
   const fetchResults = useCallback(async (refreshType = 'initial') => {
     try {
-      console.log(`Fetching results (${refreshType})...`);
+      logger.log(`Fetching results (${refreshType})...`);
       const res = await api.get("/api/results");
       const data = res.data.map((r) => ({
         ...r,
@@ -30,7 +31,7 @@ const Results = () => {
       setYears(ys);
       setSelected(ys[0] ?? null);
     } catch (err) {
-      console.error("Failed to load results:", err);
+      logger.error("Failed to load results:", err);
     } finally {
       setLoading(false);
     }

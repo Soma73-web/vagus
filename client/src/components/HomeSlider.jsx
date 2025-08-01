@@ -7,6 +7,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import EmptyState from "./EmptyState";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import logger from "../utils/logger";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -16,9 +17,9 @@ const HomeSlider = () => {
 
   const fetchImages = useCallback(async (refreshType = 'initial') => {
     try {
-      console.log(`Fetching slider images (${refreshType})...`);
+      logger.log(`Fetching slider images (${refreshType})...`);
       const response = await axios.get(`${API_BASE}/api/slider`);
-      console.log("Slider API response:", response.data);
+      logger.log("Slider API response:", response.data);
       
       // Ensure we have unique images and proper data structure
       const data = response.data
@@ -28,10 +29,10 @@ const HomeSlider = () => {
           imageUrl: `${API_BASE}/api/slider/image/${img.id}?t=${Date.now()}`, // Add cache busting
         }));
       
-      console.log("Processed slider images:", data);
+      logger.log("Processed slider images:", data);
       setImages(data || []);
     } catch (error) {
-      console.error("Error fetching slider images:", error);
+      logger.error("Error fetching slider images:", error);
       setImages([]);
     } finally {
       setLoading(false);
@@ -74,11 +75,13 @@ const HomeSlider = () => {
                   alt={`Slide ${index + 1}`}
                   className="w-full h-[230px] object-cover"
                   onError={(e) => { 
-                    console.error(`Failed to load image ${img.id}:`, e);
+                    logger.error(`Failed to load image ${img.id}:`, e);
                     e.target.onerror = null; 
                     e.target.src = '/fallback.png'; 
                   }}
-                  onLoad={() => console.log(`Image ${img.id} loaded successfully`)}
+                  onLoad={() => {
+                    logger.log(`Image ${img.id} loaded successfully`);
+                  }}
                 />
               </div>
             ))}

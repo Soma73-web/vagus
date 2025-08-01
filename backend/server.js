@@ -3,11 +3,18 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
+
+// Production validation
+if (process.env.NODE_ENV === 'production') {
+  const { validateProductionConfig } = require('./config/productionValidation');
+  validateProductionConfig();
+}
 const app = express();
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const performanceMonitor = require('./middleware/performanceMonitor');
+const logger = require('./config/logger');
 
 // Trust proxy for rate limiting (important for production)
 app.set('trust proxy', 1);
@@ -44,10 +51,10 @@ const sequelize = require("./config/db");
 const checkDatabaseHealth = async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ Database connection: HEALTHY");
+    logger.info("✅ Database connection: HEALTHY");
     return true;
   } catch (error) {
-    console.error("❌ Database connection: UNHEALTHY", error.message);
+    logger.error("❌ Database connection: UNHEALTHY", error.message);
     return false;
   }
 };
@@ -56,10 +63,10 @@ const checkDatabaseHealth = async () => {
 sequelize
   .authenticate()
   .then(() => {
-    console.log("Sequelize connected to MySQL");
+    logger.info("Sequelize connected to MySQL");
     checkDatabaseHealth();
   })
-  .catch((err) => console.error("Sequelize connection error:", err));
+  .catch((err) => logger.error("Sequelize connection error:", err));
 
 // Periodic health check (every 5 minutes)
 setInterval(checkDatabaseHealth, 5 * 60 * 1000);
@@ -67,8 +74,8 @@ setInterval(checkDatabaseHealth, 5 * 60 * 1000);
 // Sync models to reflect schema changes (force sync to fix key issues)
 sequelize
   .sync({ force: false }) // Changed from alter to force: false to prevent key conflicts
-  .then(() => console.log("All models synced"))
-  .catch((err) => console.error("Error syncing models:", err));
+  .then(() => logger.info("All models synced"))
+  .catch((err) => logger.error("Error syncing models:", err));
 
 // Middleware
 app.use(helmet({

@@ -7,6 +7,7 @@ import EmptyState from "./EmptyState";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import logger from "../utils/logger";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -32,7 +33,7 @@ const Testimonials = () => {
 
   const fetchTestimonials = useCallback(async (refreshType = 'initial') => {
     try {
-      console.log(`Fetching testimonials (${refreshType})...`);
+      logger.log(`Fetching testimonials (${refreshType})...`);
       const res = await api.get("/api/testimonials");
       const data = res.data.map((t) => ({
         ...t,
@@ -40,7 +41,7 @@ const Testimonials = () => {
       }));
       setTestimonials(data);
     } catch (err) {
-      console.error("Failed to load testimonials:", err);
+      logger.error("Failed to load testimonials:", err);
     } finally {
       setLoading(false);
     }

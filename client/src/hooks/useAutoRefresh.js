@@ -1,11 +1,12 @@
 import { useEffect, useCallback } from 'react';
+import logger from '../utils/logger';
 
 // Global refresh trigger
 let refreshCallbacks = new Set();
 
 // Function to trigger refresh across all components
 export const triggerGlobalRefresh = (type = 'general') => {
-  console.log(`Triggering global refresh: ${type}`);
+  logger.log(`Triggering global refresh: ${type}`);
   refreshCallbacks.forEach(callback => callback(type));
 };
 
@@ -20,19 +21,19 @@ export const useAutoRefresh = (callback, dependencies = [], refreshInterval = 30
     // Initial call
     memoizedCallback('initial');
 
-    // Set up interval for auto-refresh
-    const interval = setInterval(() => {
-      console.log('Auto-refresh triggered');
-      memoizedCallback('interval');
-    }, refreshInterval);
+               // Set up interval for auto-refresh
+           const interval = setInterval(() => {
+             logger.log('Auto-refresh triggered');
+             memoizedCallback('interval');
+           }, refreshInterval);
 
-    // Listen for storage events (when admin makes changes)
-    const handleStorageChange = (e) => {
-      if (e.key === 'slider-updated' || e.key === 'content-updated') {
-        console.log(`Content update detected: ${e.key}, refreshing...`);
-        memoizedCallback('storage');
-      }
-    };
+               // Listen for storage events (when admin makes changes)
+           const handleStorageChange = (e) => {
+             if (e.key === 'slider-updated' || e.key === 'content-updated') {
+               logger.log(`Content update detected: ${e.key}, refreshing...`);
+               memoizedCallback('storage');
+             }
+           };
 
     window.addEventListener('storage', handleStorageChange);
 

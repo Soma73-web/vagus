@@ -7,6 +7,7 @@ import EmptyState from "./EmptyState";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import logger from "../utils/logger";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -17,7 +18,7 @@ const Gallery = () => {
 
   const fetchGallery = useCallback(async (refreshType = 'initial') => {
     try {
-      console.log(`Fetching gallery (${refreshType})...`);
+      logger.log(`Fetching gallery (${refreshType})...`);
       setLoading(true);
       const response = await api.get(`${API_BASE}/api/gallery`);
       const data = response.data.map((img) => ({
@@ -26,7 +27,7 @@ const Gallery = () => {
       }));
       setImages(data || []);
     } catch (error) {
-      console.error("Error fetching gallery:", error);
+      logger.error("Error fetching gallery:", error);
       setImages([]);
     } finally {
       setLoading(false);
