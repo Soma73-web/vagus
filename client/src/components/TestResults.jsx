@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import logger from "../utils/logger";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -27,7 +28,7 @@ const TestResults = ({ studentId }) => {
 
   const fetchAvailableTests = useCallback(async (refreshType = 'initial') => {
     try {
-      console.log(`Fetching available tests (${refreshType})...`);
+      logger.log(`Fetching available tests (${refreshType})...`);
       const token = localStorage.getItem("studentToken");
       const response = await axios.get(
         `${API_BASE}/api/students/${studentId}/available-tests`,
@@ -37,7 +38,7 @@ const TestResults = ({ studentId }) => {
       );
       setAvailableTests(response.data);
     } catch (error) {
-      console.error("Failed to fetch available tests:", error);
+      logger.error("Failed to fetch available tests:", error);
       toast.error("Failed to load test information");
     }
   }, [studentId]);
@@ -45,7 +46,7 @@ const TestResults = ({ studentId }) => {
   const fetchTestResults = useCallback(async (refreshType = 'initial') => {
     setLoading(true);
     try {
-      console.log(`Fetching test results (${refreshType})...`);
+      logger.log(`Fetching test results (${refreshType})...`);
       const token = localStorage.getItem("studentToken");
       const url = selectedTest
         ? `${API_BASE}/api/students/${studentId}/test-results?testNumber=${selectedTest}`
@@ -57,7 +58,7 @@ const TestResults = ({ studentId }) => {
 
       setTestResults(response.data);
     } catch (error) {
-      console.error("Failed to fetch test results:", error);
+      logger.error("Failed to fetch test results:", error);
       toast.error("Failed to load test results");
     } finally {
       setLoading(false);
@@ -76,12 +77,12 @@ const TestResults = ({ studentId }) => {
       );
       setTestResults(response.data);
     } catch (error) {
-      console.error("Failed to fetch test results:", error);
+      logger.error("Failed to fetch test results:", error);
       toast.error("Failed to load test results");
     } finally {
       setLoading(false);
     }
-  };
+  }, [studentId]);
 
   const getGradeColor = (grade) => {
     switch (grade) {
