@@ -152,30 +152,41 @@ const Testimonials = () => {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
-                  ) : t.hasInstagram ? (
-                    <iframe
-                      src={t.instagramEmbedUrl}
-                      title={`${t.name} Instagram testimonial`}
-                      className="w-full h-full"
-                      frameBorder="0"
-                      loading="lazy"
-                      allow="encrypted-media"
-                      onError={(e) => {
-                        console.warn('Instagram embed failed to load:', e);
-                        // Fallback to direct link if embed fails
-                        e.target.style.display = 'none';
-                        const fallbackDiv = document.createElement('div');
-                        fallbackDiv.className = 'flex items-center justify-center h-full bg-gray-100 text-gray-500 text-sm';
-                        fallbackDiv.innerHTML = `
-                          <a href="${t.instagram_link}" target="_blank" rel="noopener noreferrer" 
-                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                            View on Instagram
-                          </a>
-                        `;
-                        e.target.parentNode.appendChild(fallbackDiv);
-                      }}
-                    />
-                  ) : (
+                                     ) : t.hasInstagram ? (
+                     <div className="relative w-full h-full overflow-hidden">
+                       <iframe
+                         src={t.instagramEmbedUrl}
+                         title={`${t.name} Instagram testimonial`}
+                         className="w-full h-full"
+                         frameBorder="0"
+                         loading="lazy"
+                         allow="encrypted-media"
+                         style={{
+                           // Hide Instagram UI elements by scaling and positioning
+                           transform: 'scale(1.15)',
+                           transformOrigin: 'center center',
+                           marginTop: '-10px',
+                           marginLeft: '-10px',
+                           width: 'calc(100% + 20px)',
+                           height: 'calc(100% + 20px)'
+                         }}
+                         onError={(e) => {
+                           console.warn('Instagram embed failed to load:', e);
+                           // Fallback to direct link if embed fails
+                           e.target.style.display = 'none';
+                           const fallbackDiv = document.createElement('div');
+                           fallbackDiv.className = 'flex items-center justify-center h-full bg-gray-100 text-gray-500 text-sm';
+                           fallbackDiv.innerHTML = `
+                             <a href="${t.instagram_link}" target="_blank" rel="noopener noreferrer" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                               View on Instagram
+                             </a>
+                           `;
+                           e.target.parentNode.appendChild(fallbackDiv);
+                         }}
+                       />
+                     </div>
+                   ) : (
                     <div className="flex items-center justify-center h-full bg-gray-100 text-gray-500 text-sm">
                       No media available
                     </div>
