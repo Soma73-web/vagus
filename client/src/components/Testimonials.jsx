@@ -27,7 +27,7 @@ const Testimonials = () => {
           // Convert Instagram post URL to embed URL with proper parameters
           const pathParts = u.pathname.split('/');
           const postId = pathParts[pathParts.length - 2]; // Get the post ID
-          return `https://www.instagram.com/p/${postId}/embed/captioned/`;
+          return `https://www.instagram.com/p/${postId}/embed/`;
         }
       } catch {
         return "";
@@ -153,29 +153,28 @@ const Testimonials = () => {
                       allowFullScreen
                     />
                   ) : t.hasInstagram ? (
-                    <div className="relative w-full h-full">
-                      <iframe
-                        src={t.instagramEmbedUrl}
-                        title={`${t.name} Instagram testimonial`}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        loading="lazy"
-                        allow="encrypted-media"
-                        onError={(e) => {
-                          console.warn('Instagram embed failed to load:', e);
-                        }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white text-sm">
-                        <a 
-                          href={t.instagram_link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
-                        >
-                          View on Instagram
-                        </a>
-                      </div>
-                    </div>
+                    <iframe
+                      src={t.instagramEmbedUrl}
+                      title={`${t.name} Instagram testimonial`}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      loading="lazy"
+                      allow="encrypted-media"
+                      onError={(e) => {
+                        console.warn('Instagram embed failed to load:', e);
+                        // Fallback to direct link if embed fails
+                        e.target.style.display = 'none';
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.className = 'flex items-center justify-center h-full bg-gray-100 text-gray-500 text-sm';
+                        fallbackDiv.innerHTML = `
+                          <a href="${t.instagram_link}" target="_blank" rel="noopener noreferrer" 
+                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                            View on Instagram
+                          </a>
+                        `;
+                        e.target.parentNode.appendChild(fallbackDiv);
+                      }}
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-full bg-gray-100 text-gray-500 text-sm">
                       No media available
