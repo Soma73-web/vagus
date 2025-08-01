@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import Slider from "react-slick";
 import api from "../api";
 import { NextArrow, PrevArrow } from "./BlueArrows";
@@ -6,6 +6,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -15,12 +16,13 @@ const Results = () => {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchResults = useCallback(async () => {
+  const fetchResults = useCallback(async (refreshType = 'initial') => {
     try {
+      console.log(`Fetching results (${refreshType})...`);
       const res = await api.get("/api/results");
       const data = res.data.map((r) => ({
         ...r,
-        photoUrl: `${API_BASE}/api/results/${r.id}/image`,
+        photoUrl: `${API_BASE}/api/results/${r.id}/image?t=${Date.now()}`, // Add cache busting
       }));
       setItems(data);
 
@@ -34,9 +36,8 @@ const Results = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchResults();
-  }, [fetchResults]);
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchResults, [], 30000); // Refresh every 30 seconds
 
   const filtered = selected ? items.filter((i) => i.year === selected) : [];
 

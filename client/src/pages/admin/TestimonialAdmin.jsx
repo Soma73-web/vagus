@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import api from '../../api';
+import { notifyContentUpdate } from '../../hooks/useAutoRefresh';
 
 const TestimonialAdmin = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -11,10 +12,6 @@ const TestimonialAdmin = () => {
     video_link: '', // FIXED key name to match backend
   });
 
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
-
   const fetchTestimonials = async () => {
     try {
       const res = await api.get('/api/testimonials');
@@ -24,6 +21,9 @@ const TestimonialAdmin = () => {
       alert('Could not load testimonials.');
     }
   };
+
+  // Initial fetch
+  fetchTestimonials();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,6 +40,9 @@ const TestimonialAdmin = () => {
       }
       fetchTestimonials();
       resetForm();
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
       
       // Reset form inputs
       const formElement = document.querySelector("form");
@@ -69,6 +72,10 @@ const TestimonialAdmin = () => {
         setTestimonials(updatedTestimonials);
 
         await api.delete(`/api/testimonials/${id}`);
+        
+        // Trigger frontend refresh across all pages
+        notifyContentUpdate('content-updated');
+        
         // Don't call fetchTestimonials() here - the optimistic update is already applied
       } catch (err) {
         console.error('Error deleting testimonial:', err);

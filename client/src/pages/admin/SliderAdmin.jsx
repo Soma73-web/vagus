@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../api"; // Axios instance
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { showSuccess, showError } from "../../utils/notifications";
+import { notifyContentUpdate } from "../../hooks/useAutoRefresh";
 
 const SliderAdmin = () => {
   const [images, setImages] = useState([]);
@@ -59,6 +60,9 @@ const SliderAdmin = () => {
       showSuccess("Image uploaded successfully!");
       await fetchImages();
       
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('slider-updated');
+      
       // Reset form
       const formElement = document.querySelector("form");
       if (formElement) formElement.reset();
@@ -84,6 +88,10 @@ const SliderAdmin = () => {
 
       await api.delete(`/api/slider/${id}`);
       showSuccess("Image deleted successfully!");
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('slider-updated');
+      
       // Don't call fetchImages() here - the optimistic update is already applied
     } catch (err) {
       console.error("Delete failed:", err);

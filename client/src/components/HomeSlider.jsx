@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Slider from "react-slick";
 import axios from "axios";
 import { NextArrow, PrevArrow } from "./BlueArrows";
@@ -6,6 +6,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import EmptyState from "./EmptyState";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -13,8 +14,9 @@ const HomeSlider = () => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchImages = useCallback(async () => {
+  const fetchImages = useCallback(async (refreshType = 'initial') => {
     try {
+      console.log(`Fetching slider images (${refreshType})...`);
       const response = await axios.get(`${API_BASE}/api/slider`);
       console.log("Slider API response:", response.data);
       
@@ -23,7 +25,7 @@ const HomeSlider = () => {
         .filter((img, index, self) => self.findIndex(t => t.id === img.id) === index) // Remove duplicates
         .map((img) => ({
           ...img,
-          imageUrl: `${API_BASE}/api/slider/image/${img.id}`,
+          imageUrl: `${API_BASE}/api/slider/image/${img.id}?t=${Date.now()}`, // Add cache busting
         }));
       
       console.log("Processed slider images:", data);
@@ -36,9 +38,8 @@ const HomeSlider = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchImages();
-  }, [fetchImages]);
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchImages, [], 30000); // Refresh every 30 seconds
 
   const settings = {
     dots: images.length > 1,

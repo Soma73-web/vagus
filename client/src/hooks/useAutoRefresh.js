@@ -1,54 +1,52 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import autoRefreshManager from '../utils/autoRefresh';
+import { useEffect, useCallback } from 'react';
 
-export const useAutoRefresh = (fetchFunction, componentId, intervalMs = 180000) => {
-  const [data, setData] = useState([]); // Default to empty array instead of null
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  
-  // Use ref to store the latest fetchFunction to avoid dependency issues
-  const fetchFunctionRef = useRef(fetchFunction);
-  fetchFunctionRef.current = fetchFunction;
+// Global refresh trigger
+let refreshCallbacks = new Set();
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await fetchFunctionRef.current();
-      setData(result || []); // Ensure result is never null
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error(`Error fetching data for ${componentId}:`, err);
-      setError(err.message || 'Failed to fetch data');
-      setData([]); // Set empty array on error
-    } finally {
-      setLoading(false);
-    }
-  }, [componentId]);
+// Function to trigger refresh across all components
+export const triggerGlobalRefresh = (type = 'general') => {
+  console.log(`Triggering global refresh: ${type}`);
+  refreshCallbacks.forEach(callback => callback(type));
+};
 
-  // Initial fetch
+// Custom hook for auto-refresh functionality
+export const useAutoRefresh = (callback, dependencies = [], refreshInterval = 30000) => {
+  const memoizedCallback = useCallback(callback, dependencies);
+
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    // Add callback to global set
+    refreshCallbacks.add(memoizedCallback);
 
-  // Setup auto-refresh
-  useEffect(() => {
-    const cleanup = autoRefreshManager.startAutoRefresh(componentId, fetchData, intervalMs);
-    
-    return cleanup;
-  }, [componentId, fetchData, intervalMs]);
+    // Initial call
+    memoizedCallback('initial');
 
-  // Manual refresh function
-  const refresh = useCallback(() => {
-    fetchData();
-  }, [fetchData]);
+    // Set up interval for auto-refresh
+    const interval = setInterval(() => {
+      console.log('Auto-refresh triggered');
+      memoizedCallback('interval');
+    }, refreshInterval);
 
-  return {
-    data,
-    loading,
-    error,
-    lastUpdated,
-    refresh
-  };
+    // Listen for storage events (when admin makes changes)
+    const handleStorageChange = (e) => {
+      if (e.key === 'slider-updated' || e.key === 'content-updated') {
+        console.log(`Content update detected: ${e.key}, refreshing...`);
+        memoizedCallback('storage');
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Cleanup
+    return () => {
+      refreshCallbacks.delete(memoizedCallback);
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [memoizedCallback, refreshInterval]);
+};
+
+// Function to trigger refresh from admin panel
+export const notifyContentUpdate = (type = 'content-updated') => {
+  localStorage.setItem(type, Date.now().toString());
+  triggerGlobalRefresh(type);
 }; 

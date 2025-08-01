@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -10,23 +11,24 @@ const Events = () => {
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${API_BASE}/api/events`);
-        // Filter events that have images only
-        const eventsWithImages = response.data.filter(
-          (event) => event.imageUrl,
-        );
-        setEvents(eventsWithImages);
-      } catch (error) {
-        console.error("Failed to load events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEvents();
+  const fetchEvents = useCallback(async (refreshType = 'initial') => {
+    try {
+      console.log(`Fetching events (${refreshType})...`);
+      const response = await axios.get(`${API_BASE}/api/events`);
+      // Filter events that have images only
+      const eventsWithImages = response.data.filter(
+        (event) => event.imageUrl,
+      );
+      setEvents(eventsWithImages);
+    } catch (error) {
+      console.error("Failed to load events:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchEvents, [], 30000);
 
   // Manual slide navigation
   const goToSlide = useCallback((index) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import DataStatusBar from "../../components/DataStatusBar";
+import { notifyContentUpdate } from "../../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -85,6 +86,9 @@ const GalleryAdmin = () => {
       toast.success("Image uploaded successfully");
       resetForm();
       refresh(); // Refresh data immediately
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error("Failed to upload image");
@@ -109,6 +113,10 @@ const GalleryAdmin = () => {
       });
 
       toast.success("Image deleted successfully");
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
+      
       // Don't call refresh() here - the optimistic update is already applied
     } catch (error) {
       console.error("Failed to delete image:", error);

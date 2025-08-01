@@ -1,7 +1,8 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import api from '../api';
 import { FaFileAlt, FaDownload, FaSpinner } from 'react-icons/fa';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -9,20 +10,20 @@ const DownloadSection = () => {
   const [downloads, setDownloads] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDownloads = async () => {
-      try {
-        const res = await api.get('/api/downloads');
-        setDownloads(res.data || []);
-      } catch (err) {
-        console.error('Error fetching downloads:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDownloads();
+  const fetchDownloads = useCallback(async (refreshType = 'initial') => {
+    try {
+      console.log(`Fetching downloads (${refreshType})...`);
+      const res = await api.get('/api/downloads');
+      setDownloads(res.data || []);
+    } catch (err) {
+      console.error('Error fetching downloads:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchDownloads, [], 30000);
 
   if (!API_BASE_URL) {
     return (

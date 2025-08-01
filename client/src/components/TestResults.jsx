@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -10,20 +11,23 @@ const TestResults = ({ studentId }) => {
   const [selectedTest, setSelectedTest] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Use the auto-refresh hook for available tests
+  useAutoRefresh(() => {
     fetchAvailableTests();
-  }, [studentId]);
+  }, [studentId], 30000);
 
-  useEffect(() => {
+  // Use the auto-refresh hook for test results
+  useAutoRefresh(() => {
     if (selectedTest) {
       fetchTestResults();
     } else {
       fetchAllTestResults();
     }
-  }, [selectedTest, studentId]);
+  }, [selectedTest, studentId], 30000);
 
-  const fetchAvailableTests = async () => {
+  const fetchAvailableTests = useCallback(async (refreshType = 'initial') => {
     try {
+      console.log(`Fetching available tests (${refreshType})...`);
       const token = localStorage.getItem("studentToken");
       const response = await axios.get(
         `${API_BASE}/api/students/${studentId}/available-tests`,
@@ -36,11 +40,12 @@ const TestResults = ({ studentId }) => {
       console.error("Failed to fetch available tests:", error);
       toast.error("Failed to load test information");
     }
-  };
+  }, [studentId]);
 
-  const fetchTestResults = async () => {
+  const fetchTestResults = useCallback(async (refreshType = 'initial') => {
     setLoading(true);
     try {
+      console.log(`Fetching test results (${refreshType})...`);
       const token = localStorage.getItem("studentToken");
       const url = selectedTest
         ? `${API_BASE}/api/students/${studentId}/test-results?testNumber=${selectedTest}`
@@ -57,9 +62,9 @@ const TestResults = ({ studentId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTest, studentId]);
 
-  const fetchAllTestResults = async () => {
+  const fetchAllTestResults = useCallback(async (refreshType = 'initial') => {
     setLoading(true);
     try {
       const token = localStorage.getItem("studentToken");

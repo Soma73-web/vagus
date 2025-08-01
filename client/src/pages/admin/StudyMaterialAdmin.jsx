@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../api";
+import { notifyContentUpdate } from "../../hooks/useAutoRefresh";
 
 const StudyMaterialAdmin = () => {
   const [materials, setMaterials] = useState([]);
@@ -90,6 +91,10 @@ const StudyMaterialAdmin = () => {
 
       resetForm();
       await fetchMaterials();
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
+      
       alert("Study material saved successfully!");
     } catch (error) {
       console.error("Error saving study material:", error);
@@ -124,6 +129,10 @@ const StudyMaterialAdmin = () => {
       setMaterials(updatedMaterials);
 
       await api.delete(`/api/study-materials/${id}`);
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
+      
       // Don't call fetchMaterials() here - the optimistic update is already applied
     } catch (error) {
       console.error("Error deleting study material:", error);

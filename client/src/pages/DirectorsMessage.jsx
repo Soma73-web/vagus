@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FaUserTie } from 'react-icons/fa';
 import api from '../api';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -9,21 +10,22 @@ const DirectorsMessage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchFaculty = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await api.get('/api/faculty');
-        setFaculty(res.data || []);
-      } catch (err) {
-        setError('Failed to load faculty');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFaculty();
+  const fetchFaculty = useCallback(async (refreshType = 'initial') => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log(`Fetching faculty (${refreshType})...`);
+      const res = await api.get('/api/faculty');
+      setFaculty(res.data || []);
+    } catch (err) {
+      setError('Failed to load faculty');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchFaculty, [], 30000);
 
   const getPhotoUrl = (photo, name, id) => {
     if (photo && photo.startsWith('data:')) return photo;

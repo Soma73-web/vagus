@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api'; // Axios instance with baseURL
+import { notifyContentUpdate } from '../../hooks/useAutoRefresh';
 
 const ResultAdmin = () => {
   const [results, setResults] = useState([]);
@@ -76,6 +77,9 @@ const ResultAdmin = () => {
       }
       fetchResults();
       resetForm();
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
     } catch (err) {
       console.error('Error saving result:', err);
       alert('Failed to save result.');
@@ -125,6 +129,10 @@ const ResultAdmin = () => {
       setResults(updatedResults);
 
       await api.delete(`/api/results/${id}`);
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
+      
       // Don't call fetchResults() here - the optimistic update is already applied
     } catch (err) {
       console.error('Error deleting result:', err);

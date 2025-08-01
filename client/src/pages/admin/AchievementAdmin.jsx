@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api";
+import { notifyContentUpdate } from "../../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -57,6 +58,10 @@ const AchievementAdmin = () => {
       setAchievements(updatedAchievements);
 
       await api.delete(`/api/achievements/${id}`);
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
+      
       // Don't call fetchAchievements() here - the optimistic update is already applied
     } catch {
       alert("Failed to delete achievement");
@@ -82,6 +87,9 @@ const AchievementAdmin = () => {
       setPreview(null);
       setEditing(false);
       fetchAchievements();
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
     } catch {
       alert("Failed to save achievement");
     } finally {

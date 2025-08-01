@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
@@ -10,13 +11,10 @@ const AttendanceCalendar = ({ studentId }) => {
   const [loading, setLoading] = useState(true);
   const [hoveredDate, setHoveredDate] = useState(null);
 
-  useEffect(() => {
-    fetchAttendance();
-  }, [currentDate, studentId]);
-
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async (refreshType = 'initial') => {
     setLoading(true);
     try {
+      console.log(`Fetching attendance (${refreshType})...`);
       const token = localStorage.getItem("studentToken");
       const month = currentDate.getMonth() + 1;
       const year = currentDate.getFullYear();
@@ -35,7 +33,10 @@ const AttendanceCalendar = ({ studentId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentDate, studentId]);
+
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchAttendance, [currentDate, studentId], 30000);
 
   const getDaysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();

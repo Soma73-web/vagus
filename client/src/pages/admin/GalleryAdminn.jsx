@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../api'; // Axios instance configured with base URL
 import { toast } from 'react-toastify';
+import { notifyContentUpdate } from '../../hooks/useAutoRefresh';
 
 const GalleryAdminn = () => {
   const [categories, setCategories] = useState([]);
@@ -51,6 +52,9 @@ const GalleryAdminn = () => {
       // Refresh categories after upload to show new image
       const res = await api.get('/api/image-gallery/categorized');
       setCategories(res.data);
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
     } catch (err) {
       console.error(err);
       toast.error('Image upload failed');
@@ -67,6 +71,9 @@ const GalleryAdminn = () => {
       // Refresh categories after deletion
       const res = await api.get('/api/image-gallery/categorized');
       setCategories(res.data);
+      
+      // Trigger frontend refresh across all pages
+      notifyContentUpdate('content-updated');
     } catch (err) {
       console.error(err);
       toast.error('Failed to delete image');

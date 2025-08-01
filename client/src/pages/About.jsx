@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   FaChartLine,
   FaLightbulb,
@@ -10,6 +10,7 @@ import {
   FaChalkboardTeacher,
 } from "react-icons/fa";
 import api from '../api';
+import { useAutoRefresh } from '../hooks/useAutoRefresh';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -18,21 +19,22 @@ const About = () => {
   const [achLoading, setAchLoading] = useState(true);
   const [achError, setAchError] = useState(null);
 
-  useEffect(() => {
-    const fetchAchievements = async () => {
-      setAchLoading(true);
-      setAchError(null);
-      try {
-        const res = await api.get('/api/achievements');
-        setAchievements(res.data || []);
-      } catch (err) {
-        setAchError('Failed to load achievements');
-      } finally {
-        setAchLoading(false);
-      }
-    };
-    fetchAchievements();
+  const fetchAchievements = useCallback(async (refreshType = 'initial') => {
+    setAchLoading(true);
+    setAchError(null);
+    try {
+      console.log(`Fetching achievements (${refreshType})...`);
+      const res = await api.get('/api/achievements');
+      setAchievements(res.data || []);
+    } catch (err) {
+      setAchError('Failed to load achievements');
+    } finally {
+      setAchLoading(false);
+    }
   }, []);
+
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchAchievements, [], 30000);
 
   const getImageUrl = (image, id) => {
     if (image && image.startsWith('data:')) return image;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Slider from "react-slick";
 import api from "../api";
 import { NextArrow, PrevArrow } from "./BlueArrows";
@@ -6,6 +6,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -14,13 +15,14 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const fetchGallery = useCallback(async () => {
+  const fetchGallery = useCallback(async (refreshType = 'initial') => {
     try {
+      console.log(`Fetching gallery (${refreshType})...`);
       setLoading(true);
       const response = await api.get(`${API_BASE}/api/gallery`);
       const data = response.data.map((img) => ({
         ...img,
-        imageUrl: `${API_BASE}/api/gallery/image/${img.id}`,
+        imageUrl: `${API_BASE}/api/gallery/image/${img.id}?t=${Date.now()}`, // Add cache busting
       }));
       setImages(data || []);
     } catch (error) {
@@ -31,9 +33,8 @@ const Gallery = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchGallery();
-  }, [fetchGallery]);
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchGallery, [], 30000); // Refresh every 30 seconds
 
   const handleImageClick = useCallback((image) => {
     setSelectedImage(image);

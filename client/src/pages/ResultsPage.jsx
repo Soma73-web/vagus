@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import api from "../api";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -9,27 +10,28 @@ const ResultPage = () => {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  useEffect(() => {
-    const fetchResults = async () => {
-      try {
-        const res = await api.get("/api/results");
-        const data = res.data.map((r) => ({
-          ...r,
-          photoUrl: `${API_BASE}/api/results/${r.id}/image`,
-        }));
-        setItems(data);
+  const fetchResults = useCallback(async (refreshType = 'initial') => {
+    try {
+      console.log(`Fetching results (${refreshType})...`);
+      const res = await api.get("/api/results");
+      const data = res.data.map((r) => ({
+        ...r,
+        photoUrl: `${API_BASE}/api/results/${r.id}/image?t=${Date.now()}`, // Add cache busting
+      }));
+      setItems(data);
 
-        const ys = [...new Set(data.map((r) => r.year))].sort((a, b) => b - a);
-        setYears(ys);
-        setSelected(ys[0] ?? null);
-      } catch (err) {
-        console.error("Failed to load results:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchResults();
+      const ys = [...new Set(data.map((r) => r.year))].sort((a, b) => b - a);
+      setYears(ys);
+      setSelected(ys[0] ?? null);
+    } catch (err) {
+      console.error("Failed to load results:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchResults, [], 30000);
 
   const filtered = selected
     ? items.filter((i) => String(i.year) === String(selected))

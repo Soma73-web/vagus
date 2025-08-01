@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -18,8 +19,9 @@ const StudyMaterials = () => {
     { name: "Mathematics", icon: "📐", color: "bg-red-500" },
   ];
 
-  const fetchSubjectsCount = useCallback(async () => {
+  const fetchSubjectsCount = useCallback(async (refreshType = 'initial') => {
     try {
+      console.log(`Fetching subjects count (${refreshType})...`);
       const response = await axios.get(
         `${API_BASE}/api/study-materials/subjects`,
       );
@@ -29,8 +31,9 @@ const StudyMaterials = () => {
     }
   }, []);
 
-  const fetchMaterials = useCallback(async (subject) => {
+  const fetchMaterials = useCallback(async (subject, refreshType = 'initial') => {
     try {
+      console.log(`Fetching materials for ${subject} (${refreshType})...`);
       setLoading(true);
       const response = await axios.get(
         `${API_BASE}/api/study-materials/subject/${subject}`,
@@ -44,15 +47,15 @@ const StudyMaterials = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchSubjectsCount();
-  }, [fetchSubjectsCount]);
+  // Use the auto-refresh hook for subjects count
+  useAutoRefresh(fetchSubjectsCount, [], 30000);
 
-  useEffect(() => {
+  // Use the auto-refresh hook for materials
+  useAutoRefresh(() => {
     if (selectedSubject) {
       fetchMaterials(selectedSubject);
     }
-  }, [selectedSubject, fetchMaterials]);
+  }, [selectedSubject, fetchMaterials], 30000);
 
   const handleSubjectSelect = useCallback((subject) => {
     setSelectedSubject(subject);

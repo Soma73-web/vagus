@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import Slider from "react-slick";
 import api from "../api";
 import { NextArrow, PrevArrow } from "./BlueArrows";
@@ -6,6 +6,7 @@ import LoadingSpinner from "./LoadingSpinner";
 import EmptyState from "./EmptyState";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL;
 
@@ -29,23 +30,24 @@ const Testimonials = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchTestimonials = async () => {
-      try {
-        const res = await api.get("/api/testimonials");
-        const data = res.data.map((t) => ({
-          ...t,
-          embedUrl: convertToEmbed(t.video_link),
-        }));
-        setTestimonials(data);
-      } catch (err) {
-        console.error("Failed to load testimonials:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTestimonials();
+  const fetchTestimonials = useCallback(async (refreshType = 'initial') => {
+    try {
+      console.log(`Fetching testimonials (${refreshType})...`);
+      const res = await api.get("/api/testimonials");
+      const data = res.data.map((t) => ({
+        ...t,
+        embedUrl: convertToEmbed(t.video_link),
+      }));
+      setTestimonials(data);
+    } catch (err) {
+      console.error("Failed to load testimonials:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [convertToEmbed]);
+
+  // Use the auto-refresh hook
+  useAutoRefresh(fetchTestimonials, [convertToEmbed], 30000); // Refresh every 30 seconds
 
   const settings = {
     dots: true,
