@@ -14,13 +14,13 @@ exports.getAllTestimonials = async (req, res) => {
 // POST create a new testimonial
 exports.createTestimonial = async (req, res) => {
   try {
-    const { name, message, video_link } = req.body;
+    const { name, message, video_link, instagram_link } = req.body;
 
     if (!name || !message) {
       return res.status(400).json({ error: 'Name and message are required' });
     }
 
-    await Testimonial.create({ name, message, video_link });
+    await Testimonial.create({ name, message, video_link, instagram_link });
     res.status(201).json({ message: 'Testimonial created successfully' });
   } catch (err) {
     console.error('Error creating testimonial:', err);
@@ -32,7 +32,7 @@ exports.createTestimonial = async (req, res) => {
 exports.updateTestimonial = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, message, video_link } = req.body;
+    const { name, message, video_link, instagram_link } = req.body;
 
     const testimonial = await Testimonial.findByPk(id);
     if (!testimonial) {
@@ -42,6 +42,7 @@ exports.updateTestimonial = async (req, res) => {
     testimonial.name = name;
     testimonial.message = message;
     testimonial.video_link = video_link;
+    testimonial.instagram_link = instagram_link;
 
     await testimonial.save();
     res.json({ message: 'Testimonial updated successfully' });

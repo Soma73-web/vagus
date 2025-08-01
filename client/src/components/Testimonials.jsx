@@ -15,19 +15,37 @@ const Testimonials = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const convertToEmbed = useCallback((url) => {
+  const convertToEmbed = useCallback((url, type = 'youtube') => {
     if (!url || typeof url !== "string") return "";
     const trimmed = url.trim();
-    try {
-      const u = new URL(trimmed);
-      if (u.hostname === "youtu.be")
-        return `https://www.youtube.com/embed${u.pathname}`;
-      if (u.pathname.startsWith("/shorts/"))
-        return `https://www.youtube.com/embed${u.pathname.replace("/shorts", "")}`;
-      const id = u.searchParams.get("v");
-      return id ? `https://www.youtube.com/embed/${id}` : trimmed;
-    } catch {
-      return "";
+    
+    if (type === 'instagram') {
+      // Handle Instagram links
+      try {
+        const u = new URL(trimmed);
+        if (u.hostname === "www.instagram.com" || u.hostname === "instagram.com") {
+          // Convert Instagram post URL to embed URL
+          const pathParts = u.pathname.split('/');
+          const postId = pathParts[pathParts.length - 2]; // Get the post ID
+          return `https://www.instagram.com/p/${postId}/embed/`;
+        }
+      } catch {
+        return "";
+      }
+      return trimmed;
+    } else {
+      // Handle YouTube links
+      try {
+        const u = new URL(trimmed);
+        if (u.hostname === "youtu.be")
+          return `https://www.youtube.com/embed${u.pathname}`;
+        if (u.pathname.startsWith("/shorts/"))
+          return `https://www.youtube.com/embed${u.pathname.replace("/shorts", "")}`;
+        const id = u.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}` : trimmed;
+      } catch {
+        return "";
+      }
     }
   }, []);
 
@@ -37,7 +55,10 @@ const Testimonials = () => {
       const res = await api.get("/api/testimonials");
       const data = res.data.map((t) => ({
         ...t,
-        embedUrl: convertToEmbed(t.video_link),
+        youtubeEmbedUrl: convertToEmbed(t.video_link, 'youtube'),
+        instagramEmbedUrl: convertToEmbed(t.instagram_link, 'instagram'),
+        hasVideo: !!t.video_link,
+        hasInstagram: !!t.instagram_link,
       }));
       setTestimonials(data);
     } catch (err) {
@@ -110,9 +131,9 @@ const Testimonials = () => {
             <div key={t.id} className="px-2">
               <div className="flex flex-col md:flex-row bg-white rounded-2xl shadow-md hover:shadow-lg transition duration-300 overflow-hidden h-[400px]">
                 <div className="md:w-1/2 h-64 md:h-full bg-black">
-                  {t.embedUrl ? (
+                  {t.hasVideo ? (
                     <iframe
-                      src={t.embedUrl}
+                      src={t.youtubeEmbedUrl}
                       title={`${t.name} testimonial`}
                       className="w-full h-full"
                       frameBorder="0"
@@ -120,9 +141,18 @@ const Testimonials = () => {
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
+                  ) : t.hasInstagram ? (
+                    <iframe
+                      src={t.instagramEmbedUrl}
+                      title={`${t.name} Instagram testimonial`}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      loading="lazy"
+                      allow="encrypted-media"
+                    />
                   ) : (
                     <div className="flex items-center justify-center h-full bg-gray-100 text-gray-500 text-sm">
-                      No video available
+                      No media available
                     </div>
                   )}
                 </div>

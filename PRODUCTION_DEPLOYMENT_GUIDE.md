@@ -27,7 +27,8 @@ HUGGINGFACE_API_KEY=your-huggingface-key
 ### ✅ Database Setup
 1. Create production database
 2. Run migrations: `npm run migrate`
-3. Create admin user: `npm run create-admin`
+3. Add Instagram link column: `npm run migrate`
+4. Create admin user: `npm run create-admin`
 
 ### ✅ SSL Certificate
 Ensure SSL certificate is properly configured for HTTPS

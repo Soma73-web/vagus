@@ -9,7 +9,8 @@ const TestimonialAdmin = () => {
     name: '',
     college: '',
     message: '',
-    video_link: '', // FIXED key name to match backend
+    video_link: '', // YouTube link
+    instagram_link: '', // Instagram link
   });
 
   const fetchTestimonials = async () => {
@@ -54,7 +55,7 @@ const TestimonialAdmin = () => {
   };
 
   const resetForm = () => {
-    setForm({ id: null, name: '', college: '', message: '', video_link: '' });
+    setForm({ id: null, name: '', college: '', message: '', video_link: '', instagram_link: '' });
   };
 
   const handleEdit = (item) => {
@@ -116,10 +117,17 @@ const TestimonialAdmin = () => {
           className="border px-4 py-2 rounded col-span-1 md:col-span-2"
         />
         <input
-          name="video_link" // FIXED key name to match backend
+          name="video_link"
           value={form.video_link}
           onChange={handleChange}
           placeholder="YouTube Video URL"
+          className="border px-4 py-2 rounded col-span-1 md:col-span-2"
+        />
+        <input
+          name="instagram_link"
+          value={form.instagram_link}
+          onChange={handleChange}
+          placeholder="Instagram Post URL"
           className="border px-4 py-2 rounded col-span-1 md:col-span-2"
         />
         <button
@@ -137,13 +145,26 @@ const TestimonialAdmin = () => {
           {testimonials.map((item) => (
             <div key={item.id} className="border rounded p-3 shadow text-sm bg-gray-50">
               <div className="aspect-video mb-2">
-                <iframe
-                  src={item.video_link || ''}
-                  title={item.name}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full rounded"
-                />
+                {item.video_link ? (
+                  <iframe
+                    src={item.video_link}
+                    title={item.name}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full rounded"
+                  />
+                ) : item.instagram_link ? (
+                  <iframe
+                    src={item.instagram_link}
+                    title={item.name}
+                    allow="encrypted-media"
+                    className="w-full h-full rounded"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center text-gray-500">
+                    No media
+                  </div>
+                )}
               </div>
               <h4 className="font-semibold">{item.name} – {item.college}</h4>
               <p className="text-gray-600 mt-1">{item.message}</p>
