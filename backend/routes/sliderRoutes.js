@@ -23,5 +23,6 @@ router.post('/', upload.single('photo'), sliderController.uploadImage);
 router.get('/', sliderController.getAllImageIds);
 router.get('/image/:id', sliderController.getImageById);
 router.delete('/:id', sliderController.deleteImageById);
+router.get('/debug', sliderController.debugSliderData);
 
 module.exports = router;

@@ -19,7 +19,7 @@ exports.uploadImage = async (req, res) => {
   }
 };
 
-// Get all slider image IDs
+// Get all slider images
 exports.getAllImageIds = async (req, res) => {
   try {
     const sliders = await Slider.findAll({
@@ -28,7 +28,7 @@ exports.getAllImageIds = async (req, res) => {
     });
     res.json(sliders);
   } catch (error) {
-    console.error('Fetch slider IDs error:', error);
+    console.error('Fetch slider images error:', error);
     res.status(500).json({ error: 'Failed to fetch images' });
   }
 };
@@ -60,5 +60,26 @@ exports.deleteImageById = async (req, res) => {
   } catch (error) {
     console.error('Delete image error:', error);
     res.status(500).json({ error: 'Failed to delete image' });
+  }
+};
+
+// Debug endpoint to check slider data
+exports.debugSliderData = async (req, res) => {
+  try {
+    const sliders = await Slider.findAll({
+      attributes: ['id'],
+      order: [['id', 'ASC']],
+    });
+    
+    console.log('Debug: Found sliders:', sliders);
+    
+    res.json({
+      count: sliders.length,
+      sliders: sliders,
+      message: `Found ${sliders.length} slider images`
+    });
+  } catch (error) {
+    console.error('Debug slider error:', error);
+    res.status(500).json({ error: 'Failed to debug slider data' });
   }
 };

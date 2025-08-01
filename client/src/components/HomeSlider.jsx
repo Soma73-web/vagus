@@ -16,10 +16,17 @@ const HomeSlider = () => {
   const fetchImages = useCallback(async () => {
     try {
       const response = await axios.get(`${API_BASE}/api/slider`);
-      const data = response.data.map((img) => ({
-        ...img,
-        imageUrl: `${API_BASE}/api/slider/image/${img.id}`,
-      }));
+      console.log("Slider API response:", response.data);
+      
+      // Ensure we have unique images and proper data structure
+      const data = response.data
+        .filter((img, index, self) => self.findIndex(t => t.id === img.id) === index) // Remove duplicates
+        .map((img) => ({
+          ...img,
+          imageUrl: `${API_BASE}/api/slider/image/${img.id}`,
+        }));
+      
+      console.log("Processed slider images:", data);
       setImages(data || []);
     } catch (error) {
       console.error("Error fetching slider images:", error);
@@ -34,14 +41,16 @@ const HomeSlider = () => {
   }, [fetchImages]);
 
   const settings = {
-    dots: true,
-    arrows: false,
-    infinite: true,
+    dots: images.length > 1,
+    arrows: images.length > 1,
+    infinite: images.length > 1,
     speed: 800,
-    autoplay: true,
+    autoplay: images.length > 1,
     autoplaySpeed: 3000,
     slidesToShow: 1,
     slidesToScroll: 1,
+    adaptiveHeight: true,
+    fade: true,
   };
 
   return (
@@ -57,13 +66,18 @@ const HomeSlider = () => {
       ) : (
         <div className="w-full max-w-screen-2xl mx-auto overflow-hidden">
           <Slider {...settings}>
-            {images.map((img) => (
-              <div key={img.id}>
+            {images.map((img, index) => (
+              <div key={`${img.id}-${index}`}>
                 <img
                   src={img.imageUrl}
-                  alt={`Slide ${img.id}`}
+                  alt={`Slide ${index + 1}`}
                   className="w-full h-[230px] object-cover"
-                  onError={e => { e.target.onerror = null; e.target.src = '/fallback.png'; }}
+                  onError={(e) => { 
+                    console.error(`Failed to load image ${img.id}:`, e);
+                    e.target.onerror = null; 
+                    e.target.src = '/fallback.png'; 
+                  }}
+                  onLoad={() => console.log(`Image ${img.id} loaded successfully`)}
                 />
               </div>
             ))}
