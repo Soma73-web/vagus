@@ -162,13 +162,13 @@ const Testimonials = () => {
                          loading="lazy"
                          allow="encrypted-media"
                          style={{
-                           // Hide Instagram UI elements by scaling and positioning
-                           transform: 'scale(1.15)',
+                           // Subtle scaling to hide only "View more on Instagram" text
+                           transform: 'scale(1.05)',
                            transformOrigin: 'center center',
-                           marginTop: '-10px',
-                           marginLeft: '-10px',
-                           width: 'calc(100% + 20px)',
-                           height: 'calc(100% + 20px)'
+                           marginTop: '-5px',
+                           marginLeft: '-5px',
+                           width: 'calc(100% + 10px)',
+                           height: 'calc(100% + 10px)'
                          }}
                          onError={(e) => {
                            console.warn('Instagram embed failed to load:', e);
